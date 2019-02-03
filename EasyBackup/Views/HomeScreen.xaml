@@ -9,11 +9,30 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <Label Content="WPFTemplate" HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0 5 0 0"/>
-        <StackPanel Orientation="Vertical" Grid.Row="1">
-            <Button Content="Move to another screen" Width="200" Margin="0 0 0 10" Command="{Binding MoveToAnotherScreen}"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Content="Easy Backup" HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0,0,0,0"/>
+        <DataGrid Grid.Column="0" Grid.Row="1"
+                  IsReadOnly="True" CanUserAddRows="False" AutoGenerateColumns="False" CanUserDeleteRows="False"
+                  SelectionUnit="FullRow" SelectedIndex="{Binding SelectedIndex}" SelectedItem="{Binding SelectedItem}"
+                  SelectionMode="Single" GridLinesVisibility="All" 
+                  RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" SortDirection="Ascending"/>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="5">
+            <Button Content="Add File/Folder" Margin="0,5,0,5"/>
+            <Button Content="Remove File/Folder" Margin="0,5,0,5"/>
+            <Button Content="Save Backup Template" Margin="0,5,0,5"/>
+            <Button Content="Load Backup Template" Margin="0,5,0,5"/>
+            <Button Content="Settings" Margin="0,5,0,5"/>
         </StackPanel>
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Run Backup" Width="100"/>
     </Grid>
 </UserControl>
