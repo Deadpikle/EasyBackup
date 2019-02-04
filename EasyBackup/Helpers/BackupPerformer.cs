@@ -174,7 +174,10 @@ namespace EasyBackup.Helpers
                             File.Copy(item.Path, outputPath);
                         }
                     }
-                    FinishedCopyingItem?.Invoke(item);
+                    if (!HasBeenCanceled)
+                    {
+                        FinishedCopyingItem?.Invoke(item);
+                    }
                 }
             }
             else
