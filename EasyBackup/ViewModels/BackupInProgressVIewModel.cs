@@ -69,13 +69,13 @@ namespace EasyBackup.ViewModels
                 _backupPerformer.PerformBackup(Items, BackupLocation);
                 if (_backupPerformer.HasBeenCanceled)
                 {
-                    Status = "CANCELED!";
+                    Status = "Backup was canceled";
                 }
                 else
                 {
-                    Status = "FINISHED!";
+                    Status = "Backup successfully finished";
                 }
-                FinishButtonTitle = "Finish Backup";
+                FinishButtonTitle = "End Backup";
             });
         }
 
@@ -110,6 +110,7 @@ namespace EasyBackup.ViewModels
         private void _backupPerformer_BackupFailed(Exception e)
         {
             Status = "Backup failed. Error: " + e.Message;
+            FinishButtonTitle = "End Backup";
         }
 
         public ICommand CancelBackup
