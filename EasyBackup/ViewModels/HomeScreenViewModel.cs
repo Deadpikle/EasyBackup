@@ -18,11 +18,11 @@ namespace EasyBackup.ViewModels
     {
         private ObservableCollection<FolderFileItem> _items;
         private FolderFileItem _selectedItem;
-        private bool _isItemSelected;
 
         public HomeScreenViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
             Items = new ObservableCollection<FolderFileItem>();
+            LoadItemsFromPath(Properties.Settings.Default.LastUsedBackupTemplatePath);
         }
 
         public ObservableCollection<FolderFileItem> Items
@@ -123,6 +123,7 @@ namespace EasyBackup.ViewModels
             {
                 var json = Newtonsoft.Json.JsonConvert.SerializeObject(Items);
                 File.WriteAllText(saveFileDialog.FileName, json);
+                UpdateLastUsedBackupPath(saveFileDialog.FileName);
             }
         }
 
@@ -140,7 +141,22 @@ namespace EasyBackup.ViewModels
             saveFileDialog.Title = "Choose Easy Backup File";
             if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
-                var json = File.ReadAllText(saveFileDialog.FileName);
+                LoadItemsFromPath(saveFileDialog.FileName);
+                UpdateLastUsedBackupPath(saveFileDialog.FileName);
+            }
+        }
+
+        private void UpdateLastUsedBackupPath(string path)
+        {
+            Properties.Settings.Default.LastUsedBackupTemplatePath = path;
+            Properties.Settings.Default.Save();
+        }
+
+        private void LoadItemsFromPath(string path)
+        {
+            if (File.Exists(path))
+            {
+                var json = File.ReadAllText(path);
                 Items = new ObservableCollection<FolderFileItem>(Newtonsoft.Json.JsonConvert.DeserializeObject<List<FolderFileItem>>(json));
             }
         }
