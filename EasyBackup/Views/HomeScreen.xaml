@@ -34,7 +34,7 @@
                   SelectedItem="{Binding SelectedItem}"
                   d:DataContext="{d:DesignInstance Type={x:Type models:FolderFileItem}}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Location" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"
+                <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"
                                     CanUserReorder="False"/>
                 <DataGridTemplateColumn Header="Directory?" CanUserResize="False" CanUserReorder="False">
                     <DataGridTemplateColumn.CellTemplate>
@@ -61,7 +61,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="*" CanUserResize="False"/>
+                <DataGridTemplateColumn Width="*" CanUserResize="True"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="5">
