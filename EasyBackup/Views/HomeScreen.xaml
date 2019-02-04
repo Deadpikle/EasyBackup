@@ -39,14 +39,14 @@
                 <DataGridTemplateColumn Header="Recursive Copy?">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding IsRecursive}" IsEnabled="{Binding IsDirectory}"/>
+                            <CheckBox IsChecked="{Binding IsRecursive, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsDirectory}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridTemplateColumn Header="Only Copy Latest File">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <CheckBox IsChecked="{Binding OnlyCopiesLatestFile}" IsEnabled="{Binding IsDirectory}"/>
+                            <CheckBox IsChecked="{Binding OnlyCopiesLatestFile, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding IsDirectory}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
