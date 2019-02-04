@@ -30,7 +30,7 @@
                             <ColumnDefinition Width="100" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Path}" />
-                        <Label Grid.Column="1" Content="{Binding BytesCopied}"/>
+                        <Label Grid.Column="1" Content="{Binding UserReadableBytesCopied}"/>
                         <Label Grid.Column="2" Content="{Binding IsFinishedCopying}"/>
                     </Grid>
                 </DataTemplate>

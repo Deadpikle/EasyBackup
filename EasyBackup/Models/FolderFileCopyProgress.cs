@@ -1,4 +1,5 @@
-﻿using EasyBackup.Helpers;
+﻿using ByteSizeLib;
+using EasyBackup.Helpers;
 
 namespace EasyBackup.Models
 {
@@ -38,7 +39,16 @@ namespace EasyBackup.Models
         public long BytesCopied
         {
             get { return _bytesCopied; }
-            set { _bytesCopied = value; NotifyPropertyChanged(); }
+            set { _bytesCopied = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesCopied)); }
+        }
+
+        public string UserReadableBytesCopied
+        {
+            get
+            {
+                var byteSize = ByteSize.FromBytes(BytesCopied);
+                return byteSize.ToString();
+            }
         }
     }
 }
