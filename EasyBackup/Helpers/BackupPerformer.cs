@@ -210,7 +210,7 @@ namespace EasyBackup.Helpers
                 }
                 else
                 {
-                    // todo: error
+                    throw new Exception("Backup directory doesn't exist");
                 }
                 IsRunning = false;
             }
