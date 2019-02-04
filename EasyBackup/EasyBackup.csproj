@@ -80,6 +80,7 @@
     </ApplicationDefinition>
     <Compile Include="Helpers\RelayCommand.cs" />
     <Compile Include="Interfaces\IChangeViewModel.cs" />
+    <Compile Include="Helpers\BackupPerformer.cs" />
     <Compile Include="Models\BackupTemplate.cs" />
     <Compile Include="Models\FolderFileItem.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />

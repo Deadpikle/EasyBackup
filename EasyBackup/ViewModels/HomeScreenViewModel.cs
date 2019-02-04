@@ -196,6 +196,16 @@ namespace EasyBackup.ViewModels
             }
         }
 
+        public ICommand PerformBackup
+        {
+            get { return new RelayCommand(StartBackup); }
+        }
+
+        private void StartBackup()
+        {
+            BackupPerformer.PerformBackup(Items.ToList(), BackupLocation);
+        }
+
         #region IDropTarget
 
         public void DragOver(IDropInfo dropInfo)
