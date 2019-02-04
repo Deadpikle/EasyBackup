@@ -29,7 +29,17 @@ namespace EasyBackup.Models
         public bool IsRecursive
         {
             get { return _isRecursive; }
-            set { _isRecursive = value; NotifyPropertyChanged(); }
+            set
+            {
+                _isRecursive = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(CanEnableOnlyCopiesLatestFile));
+            }
+        }
+
+        public bool CanEnableOnlyCopiesLatestFile
+        {
+            get { return _isDirectory && !IsRecursive; }
         }
 
         public bool OnlyCopiesLatestFile

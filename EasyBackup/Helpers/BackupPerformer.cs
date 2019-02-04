@@ -80,9 +80,9 @@ namespace EasyBackup.Helpers
                         var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
                         if (Directory.Exists(item.Path))
                         {
-                            if (item.OnlyCopiesLatestFile)
+                            if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
                             {
-
+                                // scan directory and copy only the latest file out of it
                             }
                             else
                             {
