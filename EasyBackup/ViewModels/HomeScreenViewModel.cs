@@ -101,7 +101,7 @@ namespace EasyBackup.ViewModels
                 for (int i = 0; i < selection.Count(); i++)
                 {
                     Items.Remove(selection.ElementAt(i));
-                    i--;
+                    i--; // have to do this as selection array is modified when we do the remove O_o
                 }
             }
             // SelectedItem = null;
