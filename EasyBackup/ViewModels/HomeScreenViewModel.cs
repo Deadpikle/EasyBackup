@@ -5,6 +5,7 @@ using GongSolutions.Wpf.DragDrop;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,12 +68,23 @@ namespace EasyBackup.ViewModels
 
         public void DragOver(IDropInfo dropInfo)
         {
-            dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-            dropInfo.Effects = DragDropEffects.Copy;
+            if (dropInfo.Data is DataObject && (dropInfo.Data as DataObject).GetFileDropList().Count > 0)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
+                dropInfo.Effects = DragDropEffects.Copy;
+            }
         }
 
         public void Drop(IDropInfo dropInfo)
         {
+            if (dropInfo.Data is DataObject)
+            {
+                var stringCollection = (dropInfo.Data as DataObject).GetFileDropList();
+                foreach (string path in stringCollection)
+                {
+                    Items.Add(new FolderFileItem() { Path = path, IsDirectory = Directory.Exists(path) });
+                }
+            }
         }
 
         #endregion
