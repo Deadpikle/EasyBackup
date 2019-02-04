@@ -149,15 +149,15 @@ namespace EasyBackup.ViewModels
 
         private void LoadItemsFromDisk()
         {
-            var saveFileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-            saveFileDialog.AddExtension = true;
-            saveFileDialog.Filter = "Easy Backup Files | *.ebf";
-            saveFileDialog.DefaultExt = "ebf";
-            saveFileDialog.Title = "Choose Easy Backup File";
-            if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
+            var openFileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+            openFileDialog.AddExtension = true;
+            openFileDialog.Filter = "Easy Backup Files | *.ebf";
+            openFileDialog.DefaultExt = "ebf";
+            openFileDialog.Title = "Choose Easy Backup File";
+            if (openFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
-                LoadBackupTemplate(saveFileDialog.FileName);
-                UpdateLastUsedBackupPath(saveFileDialog.FileName);
+                LoadBackupTemplate(openFileDialog.FileName);
+                UpdateLastUsedBackupPath(openFileDialog.FileName);
             }
         }
 
@@ -178,6 +178,21 @@ namespace EasyBackup.ViewModels
                     Items = new ObservableCollection<FolderFileItem>(backupTemplate.Paths);
                     BackupLocation = backupTemplate.BackupLocation;
                 }
+            }
+        }
+
+        public ICommand ChooseBackupLocation
+        {
+            get { return new RelayCommand(PickBackupFolder); }
+        }
+
+        private void PickBackupFolder()
+        {
+            var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+            dialog.ShowNewFolderButton = true;
+            if (dialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
+            {
+                BackupLocation = dialog.SelectedPath;
             }
         }
 

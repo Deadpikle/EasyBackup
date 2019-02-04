@@ -63,7 +63,7 @@
             <Button Content="Settings" Margin="0,5,0,5"/>
         </StackPanel>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Choose Backup Location" Width="150" Command="{Binding ChooseBackupLocation}"/>
-        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="Current backup location"/>
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding BackupLocation}"/>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Run Backup" Width="100"/>
     </Grid>
 </UserControl>
