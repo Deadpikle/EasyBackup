@@ -15,6 +15,7 @@ namespace EasyBackup.ViewModels
         private BackupPerformer _backupPerformer;
         private string _status;
         private List<FolderFileCopyProgress> _itemProgressData;
+        private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
@@ -23,10 +24,16 @@ namespace EasyBackup.ViewModels
             _backupPerformer = new BackupPerformer();
             Status = "Running backup";
             ItemProgressData = new List<FolderFileCopyProgress>();
+            _copyDataToProgressMap = new Dictionary<FolderFileItem, FolderFileCopyProgress>();
             foreach (FolderFileItem item in Items)
             {
-                ItemProgressData.Add(new FolderFileCopyProgress(item.Path));
+                var progress = new FolderFileCopyProgress(item.Path);
+                _copyDataToProgressMap.Add(item, progress);
+                ItemProgressData.Add(progress);
             }
+            _backupPerformer.StartedCopyingItem += _backupPerformer_StartedCopyingItem;
+            _backupPerformer.FinishedCopyingItem += _backupPerformer_FinishedCopyingItem;
+            _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
             RunBackup();
         }
 
@@ -69,6 +76,34 @@ namespace EasyBackup.ViewModels
                     Status = "Backup failed. Error: " + e.Message;
                 }
             });
+        }
+
+        private void _backupPerformer_StartedCopyingItem(FolderFileItem item)
+        {
+            if (_copyDataToProgressMap.ContainsKey(item))
+            {
+                var progressInfo = _copyDataToProgressMap[item];
+                progressInfo.IsCopyInProgress = true;
+            }
+        }
+
+        private void _backupPerformer_FinishedCopyingItem(FolderFileItem item)
+        {
+            if (_copyDataToProgressMap.ContainsKey(item))
+            {
+                var progressInfo = _copyDataToProgressMap[item];
+                progressInfo.IsCopyInProgress = false;
+                progressInfo.IsFinishedCopying = true;
+            }
+        }
+
+        private void _backupPerformer_CopiedBytesOfItem(FolderFileItem item, long bytes)
+        {
+            if (_copyDataToProgressMap.ContainsKey(item))
+            {
+                var progressInfo = _copyDataToProgressMap[item];
+                progressInfo.BytesCopied += bytes;
+            }
         }
 
         public ICommand CancelBackup

@@ -23,7 +23,7 @@
         <ItemsControl Grid.Row="2" ItemsSource="{Binding ItemProgressData}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Grid Margin="5">
+                    <Grid Margin="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="100" />

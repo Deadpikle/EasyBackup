@@ -10,6 +10,17 @@ namespace EasyBackup.Helpers
 {
     class BackupPerformer
     {
+        // // // Events and Delegates // // //
+
+        public delegate void StartedFinishedCopyingItemHandler(FolderFileItem item);
+        public event StartedFinishedCopyingItemHandler StartedCopyingItem;
+        public event StartedFinishedCopyingItemHandler FinishedCopyingItem;
+
+        public delegate void CopiedBytesOfItemHandler(FolderFileItem item, long bytes);
+        public event CopiedBytesOfItemHandler CopiedBytesOfItem;
+
+        // // // // // // // // // // // // //
+
         public bool IsRunning { get; set; }
         public bool HasBeenCanceled { get; set; }
 
@@ -115,6 +126,7 @@ namespace EasyBackup.Helpers
                     {
                         Directory.CreateDirectory(outputDirectoryPath);
                     }
+                    StartedCopyingItem?.Invoke(item);
                     if (item.IsDirectory)
                     {
                         if (Directory.Exists(item.Path))
@@ -162,6 +174,7 @@ namespace EasyBackup.Helpers
                             File.Copy(item.Path, outputPath);
                         }
                     }
+                    FinishedCopyingItem?.Invoke(item);
                 }
             }
             else
