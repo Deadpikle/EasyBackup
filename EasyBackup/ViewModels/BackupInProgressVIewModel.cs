@@ -14,6 +14,7 @@ namespace EasyBackup.ViewModels
     {
         private BackupPerformer _backupPerformer;
         private string _status;
+        private string _finishButtonTitle;
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
 
@@ -53,6 +54,12 @@ namespace EasyBackup.ViewModels
             set { _itemProgressData = value; NotifyPropertyChanged(); }
         }
 
+        public string FinishButtonTitle
+        {
+            get { return _finishButtonTitle; }
+            set { _finishButtonTitle = value; NotifyPropertyChanged(); }
+        }
+
         private void RunBackup()
         {
             // TODO: show progress!
@@ -61,6 +68,7 @@ namespace EasyBackup.ViewModels
                 // setup ItemProgressData
                 try
                 {
+                    FinishButtonTitle = "Cancel Backup";
                     _backupPerformer.PerformBackup(Items, BackupLocation);
                     if (_backupPerformer.HasBeenCanceled)
                     {
@@ -76,6 +84,7 @@ namespace EasyBackup.ViewModels
                     Status = "Backup failed. Error: " + e.Message;
                     _backupPerformer.IsRunning = false; // TODO: the backup performer should be the one handling exceptions and errors
                 }
+                FinishButtonTitle = "Finish Backup";
             });
         }
 

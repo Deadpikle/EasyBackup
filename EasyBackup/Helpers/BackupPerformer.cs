@@ -44,9 +44,6 @@ namespace EasyBackup.Helpers
             }
         }
 
-        // TODO: copy this stuff async and report progress and stuff
-        // see: https://stackoverflow.com/questions/33726729/wpf-showing-progress-bar-during-async-file-copy
-
         // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
 
         // Modified from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
