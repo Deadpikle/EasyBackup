@@ -35,6 +35,7 @@ namespace EasyBackup.ViewModels
             _backupPerformer.StartedCopyingItem += _backupPerformer_StartedCopyingItem;
             _backupPerformer.FinishedCopyingItem += _backupPerformer_FinishedCopyingItem;
             _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
+            _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
             RunBackup();
         }
 
@@ -62,27 +63,17 @@ namespace EasyBackup.ViewModels
 
         private void RunBackup()
         {
-            // TODO: show progress!
             Task.Run(() =>
             {
-                // setup ItemProgressData
-                try
+                FinishButtonTitle = "Cancel Backup";
+                _backupPerformer.PerformBackup(Items, BackupLocation);
+                if (_backupPerformer.HasBeenCanceled)
                 {
-                    FinishButtonTitle = "Cancel Backup";
-                    _backupPerformer.PerformBackup(Items, BackupLocation);
-                    if (_backupPerformer.HasBeenCanceled)
-                    {
-                        Status = "CANCELED!";
-                    }
-                    else
-                    {
-                        Status = "FINISHED!";
-                    }
+                    Status = "CANCELED!";
                 }
-                catch (Exception e)
+                else
                 {
-                    Status = "Backup failed. Error: " + e.Message;
-                    _backupPerformer.IsRunning = false; // TODO: the backup performer should be the one handling exceptions and errors
+                    Status = "FINISHED!";
                 }
                 FinishButtonTitle = "Finish Backup";
             });
@@ -114,6 +105,11 @@ namespace EasyBackup.ViewModels
                 var progressInfo = _copyDataToProgressMap[item];
                 progressInfo.BytesCopied += bytes;
             }
+        }
+
+        private void _backupPerformer_BackupFailed(Exception e)
+        {
+            Status = "Backup failed. Error: " + e.Message;
         }
 
         public ICommand CancelBackup

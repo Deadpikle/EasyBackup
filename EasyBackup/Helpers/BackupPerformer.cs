@@ -19,6 +19,9 @@ namespace EasyBackup.Helpers
         public delegate void CopiedBytesOfItemHandler(FolderFileItem item, long bytes);
         public event CopiedBytesOfItemHandler CopiedBytesOfItem;
 
+        public delegate void BackupFailedHandler(Exception e);
+        public event BackupFailedHandler BackupFailed;
+
         // // // // // // // // // // // // //
 
         public bool IsRunning { get; set; }
@@ -131,83 +134,94 @@ namespace EasyBackup.Helpers
 
         public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
         {
-            IsRunning = true;
-            if (Directory.Exists(backupDirectory))
+            try
             {
-                backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
-                if (!Directory.Exists(backupDirectory))
+                IsRunning = true;
+                if (Directory.Exists(backupDirectory))
                 {
-                    Directory.CreateDirectory(backupDirectory);
-                }
-                // ok, start copying the files!
-                foreach (FolderFileItem item in paths)
-                {
-                    if (HasBeenCanceled)
+                    backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
+                    if (!Directory.Exists(backupDirectory))
                     {
-                        break;
+                        Directory.CreateDirectory(backupDirectory);
                     }
-                    var directoryName = Path.GetDirectoryName(item.Path);
-                    var pathRoot = Path.GetPathRoot(item.Path);
-                    directoryName = directoryName.Replace(pathRoot, "");
-                    directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
-                    var outputDirectoryPath = Path.Combine(backupDirectory, directoryName);
-                    if (!Directory.Exists(outputDirectoryPath))
+                    // ok, start copying the files!
+                    foreach (FolderFileItem item in paths)
                     {
-                        Directory.CreateDirectory(outputDirectoryPath);
-                    }
-                    StartedCopyingItem?.Invoke(item);
-                    if (item.IsDirectory)
-                    {
-                        if (Directory.Exists(item.Path))
+                        if (HasBeenCanceled)
                         {
-                            if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
+                            break;
+                        }
+                        var directoryName = Path.GetDirectoryName(item.Path);
+                        var pathRoot = Path.GetPathRoot(item.Path);
+                        directoryName = directoryName.Replace(pathRoot, "");
+                        directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
+                        var outputDirectoryPath = Path.Combine(backupDirectory, directoryName);
+                        if (!Directory.Exists(outputDirectoryPath))
+                        {
+                            Directory.CreateDirectory(outputDirectoryPath);
+                        }
+                        StartedCopyingItem?.Invoke(item);
+                        if (item.IsDirectory)
+                        {
+                            if (Directory.Exists(item.Path))
                             {
-                                // scan directory and copy only the latest file out of it
-                                var directoryInfo = new DirectoryInfo(item.Path);
-                                var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
-                                if (latestFile != null)
+                                if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
                                 {
-                                    var outputBackupDirectory = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                    // create directory if needed in backup path
-                                    if (!Directory.Exists(outputBackupDirectory))
+                                    // scan directory and copy only the latest file out of it
+                                    var directoryInfo = new DirectoryInfo(item.Path);
+                                    var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+                                    if (latestFile != null)
                                     {
-                                        Directory.CreateDirectory(outputBackupDirectory);
+                                        var outputBackupDirectory = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                        // create directory if needed in backup path
+                                        if (!Directory.Exists(outputBackupDirectory))
+                                        {
+                                            Directory.CreateDirectory(outputBackupDirectory);
+                                        }
+                                        var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                        if (HasBeenCanceled)
+                                        {
+                                            break;
+                                        }
+                                        CopySingleFile(item, latestFile.FullName, outputPath);
                                     }
-                                    var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                }
+                                else
+                                {
+                                    var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
                                     if (HasBeenCanceled)
                                     {
                                         break;
                                     }
-                                    CopySingleFile(item, latestFile.FullName, outputPath);
+                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
                                 }
-                            }
-                            else
-                            {
-                                var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                if (HasBeenCanceled)
-                                {
-                                    break;
-                                }
-                                CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
                             }
                         }
-                    }
-                    else
-                    {
-                        var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                        CopySingleFile(item, item.Path, outputPath);
-                    }
-                    if (!HasBeenCanceled)
-                    {
-                        FinishedCopyingItem?.Invoke(item);
+                        else
+                        {
+                            var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                            CopySingleFile(item, item.Path, outputPath);
+                        }
+                        if (!HasBeenCanceled)
+                        {
+                            FinishedCopyingItem?.Invoke(item);
+                        }
                     }
                 }
+                else
+                {
+                    // todo: error
+                }
+                IsRunning = false;
             }
-            else
+            catch (Exception e)
             {
-                // todo: error
+                BackupFailed?.Invoke(e);
             }
-            IsRunning = false;
+            finally
+            {
+                IsRunning = false;
+            }
         }
     }
 }
