@@ -56,8 +56,8 @@
             <Button Content="Add Folder" Margin="0,5,0,5" Command="{Binding AddFolder}"/>
             <Button Content="Remove File/Folder" Margin="0,5,0,5" CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}" 
                     Command="{Binding RemoveItem}" IsEnabled="{Binding IsItemSelected}"/>
-            <Button Content="Save Backup Template" Margin="0,5,0,5"/>
-            <Button Content="Load Backup Template" Margin="0,5,0,5"/>
+            <Button Content="Save Backup Template" Margin="0,5,0,5" Command="{Binding SaveTemplate}"/>
+            <Button Content="Load Backup Template" Margin="0,5,0,5" Command="{Binding LoadTemplate}"/>
             <Button Content="Settings" Margin="0,5,0,5"/>
         </StackPanel>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Run Backup" Width="100"/>

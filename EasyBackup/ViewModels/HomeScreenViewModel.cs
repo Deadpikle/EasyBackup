@@ -104,7 +104,45 @@ namespace EasyBackup.ViewModels
                     i--; // have to do this as selection array is modified when we do the remove O_o
                 }
             }
-            // SelectedItem = null;
+        }
+
+        public ICommand SaveTemplate
+        {
+            get { return new RelayCommand(SaveItemsToDisk); }
+        }
+
+        private void SaveItemsToDisk()
+        {
+            var saveFileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
+            saveFileDialog.AddExtension = true;
+            saveFileDialog.Filter = "Easy Backup Files | *.ebf";
+            saveFileDialog.DefaultExt = "ebf";
+            saveFileDialog.OverwritePrompt = true;
+            saveFileDialog.Title = "Choose save location";
+            if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
+            {
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(Items);
+                File.WriteAllText(saveFileDialog.FileName, json);
+            }
+        }
+
+        public ICommand LoadTemplate
+        {
+            get { return new RelayCommand(LoadItemsFromDisk); }
+        }
+
+        private void LoadItemsFromDisk()
+        {
+            var saveFileDialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
+            saveFileDialog.AddExtension = true;
+            saveFileDialog.Filter = "Easy Backup Files | *.ebf";
+            saveFileDialog.DefaultExt = "ebf";
+            saveFileDialog.Title = "Choose Easy Backup File";
+            if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
+            {
+                var json = File.ReadAllText(saveFileDialog.FileName);
+                Items = new ObservableCollection<FolderFileItem>(Newtonsoft.Json.JsonConvert.DeserializeObject<List<FolderFileItem>>(json));
+            }
         }
 
         #region IDropTarget
