@@ -18,11 +18,19 @@ namespace EasyBackup.ViewModels
     {
         private ObservableCollection<FolderFileItem> _items;
         private FolderFileItem _selectedItem;
+        private string _backupLocation;
 
         public HomeScreenViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
             Items = new ObservableCollection<FolderFileItem>();
-            LoadItemsFromPath(Properties.Settings.Default.LastUsedBackupTemplatePath);
+            // upgrading settings: https://stackoverflow.com/a/534335
+            if (Properties.Settings.Default.UpgradeRequired)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.UpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
+            LoadBackupTemplate(Properties.Settings.Default.LastUsedBackupTemplatePath);
         }
 
         public ObservableCollection<FolderFileItem> Items
@@ -40,6 +48,12 @@ namespace EasyBackup.ViewModels
         public bool IsItemSelected
         {
             get { return _selectedItem != null; }
+        }
+
+        public string BackupLocation
+        {
+            get { return _backupLocation; }
+            set { _backupLocation = value; NotifyPropertyChanged(); }
         }
 
         public ICommand AddFolder
@@ -121,7 +135,8 @@ namespace EasyBackup.ViewModels
             saveFileDialog.Title = "Choose save location";
             if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
-                var json = Newtonsoft.Json.JsonConvert.SerializeObject(Items);
+                var backupTemplate = new BackupTemplate() { Paths = Items.ToList(), BackupLocation = BackupLocation };
+                var json = Newtonsoft.Json.JsonConvert.SerializeObject(backupTemplate);
                 File.WriteAllText(saveFileDialog.FileName, json);
                 UpdateLastUsedBackupPath(saveFileDialog.FileName);
             }
@@ -141,7 +156,7 @@ namespace EasyBackup.ViewModels
             saveFileDialog.Title = "Choose Easy Backup File";
             if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
-                LoadItemsFromPath(saveFileDialog.FileName);
+                LoadBackupTemplate(saveFileDialog.FileName);
                 UpdateLastUsedBackupPath(saveFileDialog.FileName);
             }
         }
@@ -152,12 +167,17 @@ namespace EasyBackup.ViewModels
             Properties.Settings.Default.Save();
         }
 
-        private void LoadItemsFromPath(string path)
+        private void LoadBackupTemplate(string path)
         {
             if (File.Exists(path))
             {
                 var json = File.ReadAllText(path);
-                Items = new ObservableCollection<FolderFileItem>(Newtonsoft.Json.JsonConvert.DeserializeObject<List<FolderFileItem>>(json));
+                var backupTemplate = Newtonsoft.Json.JsonConvert.DeserializeObject<BackupTemplate>(json);
+                if (backupTemplate != null)
+                {
+                    Items = new ObservableCollection<FolderFileItem>(backupTemplate.Paths);
+                    BackupLocation = backupTemplate.BackupLocation;
+                }
             }
         }
 
