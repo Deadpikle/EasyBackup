@@ -83,10 +83,14 @@
     <Compile Include="Helpers\BackupPerformer.cs" />
     <Compile Include="Models\BackupTemplate.cs" />
     <Compile Include="Models\FolderFileItem.cs" />
+    <Compile Include="ViewModels\BackupInProgressViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="Helpers\ChangeNotifier.cs" />
     <Compile Include="ViewModels\HomeScreenViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="Views\BackupInProgress.xaml.cs">
+      <DependentUpon>BackupInProgress.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\HomeScreen.xaml.cs">
       <DependentUpon>HomeScreen.xaml</DependentUpon>
     </Compile>
@@ -102,6 +106,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\BackupInProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\HomeScreen.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

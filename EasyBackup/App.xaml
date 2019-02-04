@@ -9,5 +9,8 @@
         <DataTemplate DataType="{x:Type viewModels:HomeScreenViewModel}">
             <views:HomeScreen/>
         </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:BackupInProgressViewModel}">
+            <views:BackupInProgress/>
+        </DataTemplate>
     </Application.Resources>
 </Application>

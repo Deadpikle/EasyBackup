@@ -203,7 +203,7 @@ namespace EasyBackup.ViewModels
 
         private void StartBackup()
         {
-            BackupPerformer.PerformBackup(Items.ToList(), BackupLocation);
+            PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation));
         }
 
         #region IDropTarget

@@ -10,14 +10,27 @@ namespace EasyBackup.Helpers
 {
     class BackupPerformer
     {
+        public bool IsRunning { get; set; }
+        public bool HasBeenCanceled { get; set; }
+
+        public BackupPerformer()
+        {
+            IsRunning = false;
+            HasBeenCanceled = false;
+        }
+        
         // TODO: copy this stuff async and report progress and stuff
         // see: https://stackoverflow.com/questions/33726729/wpf-showing-progress-bar-during-async-file-copy
 
         // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
 
         // from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
-        private static void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs)
+        private void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs)
         {
+            if (HasBeenCanceled)
+            {
+                return;
+            }
             // Get the subdirectories for the specified directory.
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
@@ -39,6 +52,10 @@ namespace EasyBackup.Helpers
             FileInfo[] files = dir.GetFiles();
             foreach (FileInfo file in files)
             {
+                if (HasBeenCanceled)
+                {
+                    return;
+                }
                 string temppath = Path.Combine(destDirName, file.Name);
                 file.CopyTo(temppath, false);
             }
@@ -48,14 +65,33 @@ namespace EasyBackup.Helpers
             {
                 foreach (DirectoryInfo subdir in dirs)
                 {
+                    if (HasBeenCanceled)
+                    {
+                        return;
+                    }
                     string temppath = Path.Combine(destDirName, subdir.Name);
                     CopyDirectory(subdir.FullName, temppath, copySubDirs);
                 }
             }
         }
 
-        public static void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
+        public void Cancel()
         {
+            HasBeenCanceled = true;
+        }
+
+        public async Task CancelAsync()
+        {
+            HasBeenCanceled = true;
+            while (IsRunning)
+            {
+                await Task.Delay(100); // wait for cancel to finish
+            }
+        }
+
+        public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
+        {
+            IsRunning = true;
             if (Directory.Exists(backupDirectory))
             {
                 backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
@@ -66,6 +102,10 @@ namespace EasyBackup.Helpers
                 // ok, start copying the files!
                 foreach (FolderFileItem item in paths)
                 {
+                    if (HasBeenCanceled)
+                    {
+                        break;
+                    }
                     var directoryName = Path.GetDirectoryName(item.Path);
                     var pathRoot = Path.GetPathRoot(item.Path);
                     directoryName = directoryName.Replace(pathRoot, "");
@@ -95,6 +135,10 @@ namespace EasyBackup.Helpers
                                     var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
                                     if (File.Exists(latestFile.FullName))
                                     {
+                                        if (HasBeenCanceled)
+                                        {
+                                            break;
+                                        }
                                         File.Copy(latestFile.FullName, outputPath);
                                     }
                                 }
@@ -102,6 +146,10 @@ namespace EasyBackup.Helpers
                             else
                             {
                                 var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                if (HasBeenCanceled)
+                                {
+                                    break;
+                                }
                                 CopyDirectory(item.Path, outputPath, item.IsRecursive);
                             }
                         }
@@ -120,6 +168,7 @@ namespace EasyBackup.Helpers
             {
                 // todo: error
             }
+            IsRunning = false;
         }
     }
 }
