@@ -77,15 +77,31 @@ namespace EasyBackup.Helpers
                     }
                     if (item.IsDirectory)
                     {
-                        var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
                         if (Directory.Exists(item.Path))
                         {
                             if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
                             {
                                 // scan directory and copy only the latest file out of it
+                                var directoryInfo = new DirectoryInfo(item.Path);
+                                var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+                                if (latestFile != null)
+                                {
+                                    var outputBackupDirectory = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                    // create directory if needed in backup path
+                                    if (!Directory.Exists(outputBackupDirectory))
+                                    {
+                                        Directory.CreateDirectory(outputBackupDirectory);
+                                    }
+                                    var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                    if (File.Exists(latestFile.FullName))
+                                    {
+                                        File.Copy(latestFile.FullName, outputPath);
+                                    }
+                                }
                             }
                             else
                             {
+                                var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
                                 CopyDirectory(item.Path, outputPath, item.IsRecursive);
                             }
                         }
