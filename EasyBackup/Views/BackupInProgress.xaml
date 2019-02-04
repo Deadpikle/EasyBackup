@@ -26,10 +26,12 @@
                     <Grid Margin="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="150" />
                             <ColumnDefinition Width="100" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Text="{Binding Path}" />
-                        <Label Grid.Column="1" Content="{Binding IsFinishedCopying}"/>
+                        <Label Grid.Column="1" Content="{Binding BytesCopied}"/>
+                        <Label Grid.Column="2" Content="{Binding IsFinishedCopying}"/>
                     </Grid>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>

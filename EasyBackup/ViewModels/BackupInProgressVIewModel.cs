@@ -74,6 +74,7 @@ namespace EasyBackup.ViewModels
                 catch (Exception e)
                 {
                     Status = "Backup failed. Error: " + e.Message;
+                    _backupPerformer.IsRunning = false; // TODO: the backup performer should be the one handling exceptions and errors
                 }
             });
         }

@@ -29,14 +29,28 @@ namespace EasyBackup.Helpers
             IsRunning = false;
             HasBeenCanceled = false;
         }
-        
+
+        public void Cancel()
+        {
+            HasBeenCanceled = true;
+        }
+
+        public async Task CancelAsync()
+        {
+            HasBeenCanceled = true;
+            while (IsRunning)
+            {
+                await Task.Delay(100); // wait for cancel to finish
+            }
+        }
+
         // TODO: copy this stuff async and report progress and stuff
         // see: https://stackoverflow.com/questions/33726729/wpf-showing-progress-bar-during-async-file-copy
 
         // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
 
-        // from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
-        private void CopyDirectory(string sourceDirName, string destDirName, bool copySubDirs)
+        // Modified from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
+        private void CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs)
         {
             if (HasBeenCanceled)
             {
@@ -67,40 +81,27 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, true);
+                string tempPath = Path.Combine(destDirName, file.Name);
+                CopySingleFile(itemBeingCopied, file.FullName, tempPath);
             }
 
             // If copying subdirectories, copy them and their contents to new location.
             if (copySubDirs)
             {
-                foreach (DirectoryInfo subdir in dirs)
+                foreach (DirectoryInfo subDir in dirs)
                 {
                     if (HasBeenCanceled)
                     {
                         return;
                     }
-                    string temppath = Path.Combine(destDirName, subdir.Name);
-                    CopyDirectory(subdir.FullName, temppath, copySubDirs);
+                    string temppath = Path.Combine(destDirName, subDir.Name);
+                    CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
                 }
             }
         }
 
-        public void Cancel()
-        {
-            HasBeenCanceled = true;
-        }
-
-        public async Task CancelAsync()
-        {
-            HasBeenCanceled = true;
-            while (IsRunning)
-            {
-                await Task.Delay(100); // wait for cancel to finish
-            }
-        }
-
-        private void CopyFile(string source, string destination)
+        // Modified from https://stackoverflow.com/a/33726939/3938401
+        private void CopySingleFile(FolderFileItem itemBeingCopied, string source, string destination)
         {
             if (File.Exists(source))
             {
@@ -108,7 +109,26 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                File.Copy(source, destination, true);
+                using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                {
+                    using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
+                    {
+                        int buffer_size = 10240;
+                        byte[] buffer = new byte[buffer_size];
+                        long total_read = 0;
+                        while (total_read < inStream.Length)
+                        {
+                            if (HasBeenCanceled)
+                            {
+                                break;
+                            }
+                            int read = inStream.Read(buffer, 0, buffer_size);
+                            outStream.Write(buffer, 0, read);
+                            CopiedBytesOfItem(itemBeingCopied, read);
+                            total_read += read;
+                        }
+                    }
+                }
             }
         }
 
@@ -161,7 +181,7 @@ namespace EasyBackup.Helpers
                                     {
                                         break;
                                     }
-                                    CopyFile(latestFile.FullName, outputPath);
+                                    CopySingleFile(item, latestFile.FullName, outputPath);
                                 }
                             }
                             else
@@ -171,14 +191,14 @@ namespace EasyBackup.Helpers
                                 {
                                     break;
                                 }
-                                CopyDirectory(item.Path, outputPath, item.IsRecursive);
+                                CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
                             }
                         }
                     }
                     else
                     {
                         var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                        CopyFile(item.Path, outputPath);
+                        CopySingleFile(item, item.Path, outputPath);
                     }
                     if (!HasBeenCanceled)
                     {
