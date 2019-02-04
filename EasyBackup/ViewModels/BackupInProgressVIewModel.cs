@@ -14,6 +14,7 @@ namespace EasyBackup.ViewModels
     {
         private BackupPerformer _backupPerformer;
         private string _status;
+        private List<FolderFileCopyProgress> _itemProgressData;
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
@@ -21,6 +22,11 @@ namespace EasyBackup.ViewModels
             BackupLocation = backupLocation;
             _backupPerformer = new BackupPerformer();
             Status = "Running backup";
+            ItemProgressData = new List<FolderFileCopyProgress>();
+            foreach (FolderFileItem item in Items)
+            {
+                ItemProgressData.Add(new FolderFileCopyProgress(item.Path));
+            }
             RunBackup();
         }
 
@@ -34,19 +40,33 @@ namespace EasyBackup.ViewModels
             set { _status = value; NotifyPropertyChanged(); }
         }
 
+        public List<FolderFileCopyProgress> ItemProgressData
+        {
+            get { return _itemProgressData; }
+            set { _itemProgressData = value; NotifyPropertyChanged(); }
+        }
+
         private void RunBackup()
         {
             // TODO: show progress!
             Task.Run(() =>
             {
-                _backupPerformer.PerformBackup(Items, BackupLocation);
-                if (_backupPerformer.HasBeenCanceled)
+                // setup ItemProgressData
+                try
                 {
-                    Status = "CANCELED!";
+                    _backupPerformer.PerformBackup(Items, BackupLocation);
+                    if (_backupPerformer.HasBeenCanceled)
+                    {
+                        Status = "CANCELED!";
+                    }
+                    else
+                    {
+                        Status = "FINISHED!";
+                    }
                 }
-                else
+                catch (Exception e)
                 {
-                    Status = "FINISHED!";
+                    Status = "Backup failed. Error: " + e.Message;
                 }
             });
         }

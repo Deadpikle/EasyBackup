@@ -82,6 +82,7 @@
     <Compile Include="Interfaces\IChangeViewModel.cs" />
     <Compile Include="Helpers\BackupPerformer.cs" />
     <Compile Include="Models\BackupTemplate.cs" />
+    <Compile Include="Models\FolderFileCopyProgress.cs" />
     <Compile Include="Models\FolderFileItem.cs" />
     <Compile Include="ViewModels\BackupInProgressViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
