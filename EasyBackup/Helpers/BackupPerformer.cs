@@ -68,7 +68,7 @@ namespace EasyBackup.Helpers
                     return;
                 }
                 string temppath = Path.Combine(destDirName, file.Name);
-                file.CopyTo(temppath, false);
+                file.CopyTo(temppath, true);
             }
 
             // If copying subdirectories, copy them and their contents to new location.
@@ -97,6 +97,18 @@ namespace EasyBackup.Helpers
             while (IsRunning)
             {
                 await Task.Delay(100); // wait for cancel to finish
+            }
+        }
+
+        private void CopyFile(string source, string destination)
+        {
+            if (File.Exists(source))
+            {
+                if (HasBeenCanceled)
+                {
+                    return;
+                }
+                File.Copy(source, destination, true);
             }
         }
 
@@ -145,14 +157,11 @@ namespace EasyBackup.Helpers
                                         Directory.CreateDirectory(outputBackupDirectory);
                                     }
                                     var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
-                                    if (File.Exists(latestFile.FullName))
+                                    if (HasBeenCanceled)
                                     {
-                                        if (HasBeenCanceled)
-                                        {
-                                            break;
-                                        }
-                                        File.Copy(latestFile.FullName, outputPath);
+                                        break;
                                     }
+                                    CopyFile(latestFile.FullName, outputPath);
                                 }
                             }
                             else
@@ -169,10 +178,7 @@ namespace EasyBackup.Helpers
                     else
                     {
                         var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                        if (File.Exists(item.Path))
-                        {
-                            File.Copy(item.Path, outputPath);
-                        }
+                        CopyFile(item.Path, outputPath);
                     }
                     if (!HasBeenCanceled)
                     {
