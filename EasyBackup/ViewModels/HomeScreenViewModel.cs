@@ -17,6 +17,8 @@ namespace EasyBackup.ViewModels
     class HomeScreenViewModel : BaseViewModel, IDropTarget
     {
         private ObservableCollection<FolderFileItem> _items;
+        private FolderFileItem _selectedItem;
+        private bool _isItemSelected;
 
         public HomeScreenViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
@@ -27,6 +29,17 @@ namespace EasyBackup.ViewModels
         {
             get { return _items; }
             set { _items = value; NotifyPropertyChanged(); }
+        }
+
+        public FolderFileItem SelectedItem
+        {
+            get { return _selectedItem; }
+            set { _selectedItem = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(IsItemSelected)); }
+        }
+
+        public bool IsItemSelected
+        {
+            get { return _selectedItem != null; }
         }
 
         public ICommand AddFolder
@@ -72,6 +85,26 @@ namespace EasyBackup.ViewModels
             {
                 Items.Add(new FolderFileItem() { Path = path, IsDirectory = isDirectory, IsRecursive = isDirectory });
             }
+        }
+
+        public ICommand RemoveItem
+        {
+            get { return new RelayCommand<object>(list => RemoveItemFromList(list)); }
+        }
+
+        private void RemoveItemFromList(object items)
+        {
+            if (items != null)
+            {
+                System.Collections.IList list = (System.Collections.IList)items;
+                var selection = list?.Cast<FolderFileItem>();
+                for (int i = 0; i < selection.Count(); i++)
+                {
+                    Items.Remove(selection.ElementAt(i));
+                    i--;
+                }
+            }
+            // SelectedItem = null;
         }
 
         #region IDropTarget
