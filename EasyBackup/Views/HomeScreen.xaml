@@ -20,7 +20,6 @@
         </Grid.ColumnDefinitions>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Content="Easy Backup" HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0,0,0,0"/>
         <DataGrid Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Items}"
-                  IsReadOnly="True"
                   CanUserAddRows="False"
                   AutoGenerateColumns="False" CanUserDeleteRows="False"
                   SelectionUnit="FullRow"
@@ -30,7 +29,30 @@
                   RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
                   d:DataContext="{d:DesignInstance Type={x:Type models:FolderFileItem}}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Location" Binding="{Binding Path}" SortDirection="Ascending"/>
+                <DataGridTextColumn Header="Location" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"/>
+                <!--<DataGridTemplateColumn Header="" CanUserResize="False" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Label Content="{Binding Path}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>-->
+                <DataGridCheckBoxColumn Header="Directory?" Binding="{Binding IsDirectory}" IsReadOnly="True"/>
+                <DataGridTemplateColumn Header="Recursive Copy?">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsRecursive}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Only Copy Latest File">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding OnlyCopiesLatestFile}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Width="*"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="5">

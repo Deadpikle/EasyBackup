@@ -40,7 +40,7 @@ namespace EasyBackup.ViewModels
             dialog.ShowNewFolderButton = true;
             if (dialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
-                Items.Add(new FolderFileItem() { Path = dialog.SelectedPath, IsRecursive = true });
+                AddPath(dialog.SelectedPath);
             }
         }
 
@@ -59,8 +59,18 @@ namespace EasyBackup.ViewModels
             {
                 foreach (string fileName in dialog.FileNames)
                 {
-                    Items.Add(new FolderFileItem() { Path = fileName });
+                    AddPath(fileName);
                 }
+            }
+        }
+
+        private void AddPath(string path)
+        {
+            var isDirectory = Directory.Exists(path);
+            // if we don't already have this path, add the path
+            if (Items.Where(x => x.Path == path).Count() == 0)
+            {
+                Items.Add(new FolderFileItem() { Path = path, IsDirectory = isDirectory, IsRecursive = isDirectory });
             }
         }
 
@@ -82,7 +92,7 @@ namespace EasyBackup.ViewModels
                 var stringCollection = (dropInfo.Data as DataObject).GetFileDropList();
                 foreach (string path in stringCollection)
                 {
-                    Items.Add(new FolderFileItem() { Path = path, IsDirectory = Directory.Exists(path) });
+                    AddPath(path);
                 }
             }
         }
