@@ -14,7 +14,6 @@ Features include:
 
 ## Features/Updates to Come
 
-* UI update / upgrade to use MahApps.Metro instead of default WPF
 * Scan files before backing them up to get backup file size and overall backup progress
 * Option to update a previous backup instead of creating an entirely new backup
 * Find and use an icon for the application

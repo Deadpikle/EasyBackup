@@ -8,7 +8,8 @@
         xmlns:viewModels="clr-namespace:EasyBackup.ViewModels"
         mc:Ignorable="d"
         Title="Easy Backup" Height="450" Width="800"
-        TitleCaps="False" GlowBrush="Blue">
+        TitleCaps="False" GlowBrush="Blue"
+        Icon="Graphics/synch-icon.ico">
     <Window.DataContext>
         <viewModels:MainWindowViewModel/>
     </Window.DataContext>

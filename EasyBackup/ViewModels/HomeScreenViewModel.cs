@@ -206,6 +206,16 @@ namespace EasyBackup.ViewModels
             PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation));
         }
 
+        public ICommand ShowAboutWindow
+        {
+            get { return new RelayCommand(ShowAboutWindowDialog); }
+        }
+
+        private void ShowAboutWindowDialog()
+        {
+
+        }
+
         #region IDropTarget
 
         public void DragOver(IDropInfo dropInfo)

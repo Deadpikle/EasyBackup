@@ -78,6 +78,7 @@
             <Button Content="Save Backup Template" Margin="0,5,0,5" Command="{Binding SaveTemplate}"/>
             <Button Content="Load Backup Template" Margin="0,5,0,5" Command="{Binding LoadTemplate}"/>
             <Button Content="Settings" Margin="0,5,0,5"/>
+            <Button Content="About Easy Backup" Margin="0,5,0,5" Command="{Binding ShowAboutWindow}"/>
         </StackPanel>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Choose Backup Location" Width="150" Command="{Binding ChooseBackupLocation}"/>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding BackupLocation}"/>
