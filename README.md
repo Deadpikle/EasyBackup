@@ -12,6 +12,13 @@ Features include:
 * View backup progress as it happens
 * Cancel backup at any time
 
+## Screenshots
+
+<div align="center">
+    <img alt="Setup" src="./screenshots/setup-backup.png">
+    <img alt="Backing up data" src="./screenshots/backing-up.png">
+</div>
+
 ## Features/Updates to Come
 
 * Option to update a previous backup instead of creating an entirely new backup (only adds new files and updates modified files based on a hash; does NOT delete old files that have been removed)
