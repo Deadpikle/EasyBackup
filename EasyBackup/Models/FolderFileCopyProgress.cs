@@ -40,7 +40,14 @@ namespace EasyBackup.Models
         public ulong BytesCopied
         {
             get { return _bytesCopied; }
-            set { _bytesCopied = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesCopied)); }
+            set
+            {
+                _bytesCopied = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(UserReadableBytesCopied));
+                NotifyPropertyChanged(nameof(Progress));
+                NotifyPropertyChanged(nameof(ProgressString));
+            }
         }
 
         public string UserReadableBytesCopied
@@ -55,7 +62,14 @@ namespace EasyBackup.Models
         public ulong TotalBytesToCopy
         {
             get { return _totalBytesToCopy; }
-            set { _totalBytesToCopy = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesToCopy)); }
+            set
+            {
+                _totalBytesToCopy = value;
+                NotifyPropertyChanged();
+                NotifyPropertyChanged(nameof(UserReadableBytesToCopy));
+                NotifyPropertyChanged(nameof(Progress));
+                NotifyPropertyChanged(nameof(ProgressString));
+            }
         }
 
         public string UserReadableBytesToCopy
@@ -65,6 +79,16 @@ namespace EasyBackup.Models
                 var byteSize = ByteSizeLib.ByteSize.FromBytes(TotalBytesToCopy);
                 return byteSize.ToString();
             }
+        }
+
+        public double Progress
+        {
+            get { return (double)BytesCopied / (double)TotalBytesToCopy * 100; }
+        }
+
+        public string ProgressString
+        {
+            get { return string.Format("{0:N2}", Progress); }
         }
     }
 }

@@ -38,6 +38,18 @@
                                     CanUserReorder="False"/>
                 <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
                                     CanUserReorder="False"/>
+                <DataGridTemplateColumn Header="Progress" IsReadOnly="True" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ProgressBar Value="{Binding Progress, Mode=OneWay}" />
+                                <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">
+                                    <Run Text="{Binding ProgressString, Mode=OneWay}"/>%
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Finished?" Binding="{Binding IsFinishedCopying}" IsReadOnly="True" Width="100"
                                     CanUserReorder="False"/>
             </DataGrid.Columns>
@@ -56,7 +68,7 @@
                FontSize="24" Margin="0,0,0,0">
             Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}"/>%
         </TextBlock>
-        <Button Grid.Row="4" Content="{Binding FinishButtonTitle}" Width="100" Command="{Binding CancelBackup}"
+        <Button Grid.Row="4" Content="{Binding FinishButtonTitle}" Width="150" Command="{Binding CancelBackup}"
                 Margin="0,10,0,10"/>
     </Grid>
 </UserControl>
