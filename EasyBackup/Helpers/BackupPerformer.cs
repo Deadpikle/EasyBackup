@@ -164,6 +164,20 @@ namespace EasyBackup.Helpers
                     {
                         Directory.CreateDirectory(backupDirectory);
                     }
+                    else
+                    {
+                        // ok, somehow they started two backups within the same second >_> wait 1 second and start again
+                        Task.Delay(1000);
+                        backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
+                        if (!Directory.Exists(backupDirectory))
+                        {
+                            Directory.CreateDirectory(backupDirectory);
+                        }
+                        else
+                        {
+                            throw new Exception("Couldn't create backup directory (directory already exists");
+                        }
+                    }
                     // ok, start copying the files!
                     foreach (FolderFileItem item in paths)
                     {
