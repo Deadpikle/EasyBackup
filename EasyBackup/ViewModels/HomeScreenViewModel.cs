@@ -1,6 +1,7 @@
 ﻿using EasyBackup.Helpers;
 using EasyBackup.Interfaces;
 using EasyBackup.Models;
+using EasyBackup.Views;
 using GongSolutions.Wpf.DragDrop;
 using System;
 using System.Collections.Generic;
@@ -213,7 +214,9 @@ namespace EasyBackup.ViewModels
 
         private void ShowAboutWindowDialog()
         {
-
+            var aboutWindow = new AboutWindow();
+            aboutWindow.Owner = Application.Current.MainWindow;
+            aboutWindow.Show();
         }
 
         #region IDropTarget

@@ -7,7 +7,9 @@
         xmlns:local="clr-namespace:EasyBackup"
         xmlns:viewModels="clr-namespace:EasyBackup.ViewModels"
         mc:Ignorable="d"
-        Title="Easy Backup" Height="450" Width="800"
+        Title="Easy Backup" 
+        Height="600" MinHeight="600" 
+        Width="800" MinWidth="800"
         TitleCaps="False" GlowBrush="Blue"
         Icon="Graphics/synch-icon.ico">
     <Window.DataContext>

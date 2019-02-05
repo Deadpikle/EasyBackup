@@ -46,6 +46,7 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsDirectory, UpdateSourceTrigger=PropertyChanged}" 
+                                      Style="{x:Null}"
                                       IsEnabled="False" HorizontalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
@@ -54,7 +55,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsRecursive, UpdateSourceTrigger=PropertyChanged}" 
-                                      IsEnabled="{Binding IsDirectory}" HorizontalAlignment="Center"/>
+                                      Style="{x:Null}"
+                                      IsEnabled="{Binding IsDirectory, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -62,8 +64,9 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding OnlyCopiesLatestFile, UpdateSourceTrigger=PropertyChanged}" 
+                                      Style="{x:Null}"
                                       IsEnabled="{Binding CanEnableOnlyCopiesLatestFile}"
-                                       HorizontalAlignment="Center"/>
+                                      HorizontalAlignment="Center"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
@@ -80,7 +83,7 @@
             <Button Content="Settings" Margin="0,5,0,5"/>
             <Button Content="About Easy Backup" Margin="0,5,0,5" Command="{Binding ShowAboutWindow}"/>
         </StackPanel>
-        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Choose Backup Location" Width="150" Command="{Binding ChooseBackupLocation}"/>
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Choose Backup Location" Width="200" Command="{Binding ChooseBackupLocation}"/>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding BackupLocation}"/>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Run Backup" Width="100" Command="{Binding PerformBackup}"/>
     </Grid>

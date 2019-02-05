@@ -16,7 +16,6 @@ Features include:
 
 * Scan files before backing them up to get backup file size and overall backup progress
 * Option to update a previous backup instead of creating an entirely new backup
-* Find and use an icon for the application
 * Other settings and small upgrades here and there
 
 ## Can I help contribute?
