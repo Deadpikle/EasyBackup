@@ -20,22 +20,25 @@
                FontSize="24" FontWeight="Bold" Margin="0,0,0,0"/>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Content="{Binding Status}" HorizontalAlignment="Center" 
                FontSize="18" FontWeight="Bold" Margin="0,0,0,0"/>
-        <ItemsControl Grid.Row="2" ItemsSource="{Binding ItemProgressData}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Grid Margin="3">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="150" />
-                            <ColumnDefinition Width="100" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding Path}" />
-                        <Label Grid.Column="1" Content="{Binding UserReadableBytesCopied}"/>
-                        <Label Grid.Column="2" Content="{Binding IsFinishedCopying}"/>
-                    </Grid>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <DataGrid Grid.Row="2" ItemsSource="{Binding ItemProgressData}"
+                  ColumnHeaderStyle="{StaticResource NoCapsColumnHeader}"
+                  Name="PathsDataGrid"
+                  CanUserAddRows="False"
+                  AutoGenerateColumns="False" CanUserDeleteRows="False"
+                  SelectionUnit="FullRow"
+                  SelectionMode="Single"
+                  GridLinesVisibility="All" 
+                  RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
+                  SelectedItem="{Binding SelectedItem}">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"
+                                    CanUserReorder="False"/>
+                <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
+                                    CanUserReorder="False"/>
+                <DataGridCheckBoxColumn Header="Finished?" Binding="{Binding IsFinishedCopying}" IsReadOnly="True" Width="100"
+                                    CanUserReorder="False"/>
+            </DataGrid.Columns>
+        </DataGrid>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding FinishButtonTitle}" Width="100" Command="{Binding CancelBackup}"/>
     </Grid>
 </UserControl>
