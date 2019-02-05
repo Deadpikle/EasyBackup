@@ -1,4 +1,6 @@
-﻿using System;
+﻿using EasyBackup.ViewModels;
+using MahApps.Metro.Controls.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,6 +25,15 @@ namespace EasyBackup.Views
         public SetupBackup()
         {
             InitializeComponent();
+            DataContextChanged += SetupBackup_DataContextChanged;
+        }
+
+        private void SetupBackup_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (DataContext is SetupBackupViewModel)
+            {
+                (DataContext as SetupBackupViewModel).DialogCoordinator = DialogCoordinator.Instance;
+            }
         }
     }
 }

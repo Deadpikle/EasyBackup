@@ -4,6 +4,7 @@ using EasyBackup.Interfaces;
 using EasyBackup.Models;
 using EasyBackup.Views;
 using GongSolutions.Wpf.DragDrop;
+using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -82,6 +83,8 @@ namespace EasyBackup.ViewModels
             get { return _checkBackupSizeBrush; }
             set { _checkBackupSizeBrush = value; NotifyPropertyChanged(); }
         }
+
+        public IDialogCoordinator DialogCoordinator { get; set; }
 
         public ICommand AddFolder
         {
@@ -275,6 +278,26 @@ namespace EasyBackup.ViewModels
         private void BackupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             _totalBackupSize += bytes;
+        }
+
+        public ICommand RemoveAllItems
+        {
+            get { return new RelayCommand(CheckAndRemoveAllItems); }
+        }
+
+        private async void CheckAndRemoveAllItems()
+        {
+            var result = await DialogCoordinator.ShowMessageAsync(this, "Warning!", "Are you sure you want to remove all items?", 
+                MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
+            {
+                AffirmativeButtonText = "Yes",
+                NegativeButtonText = "No",
+                    ColorScheme = MetroDialogColorScheme.Theme
+                });
+            if (result == MessageDialogResult.Affirmative)
+            {
+                Items.Clear();
+            }
         }
 
         #region IDropTarget
