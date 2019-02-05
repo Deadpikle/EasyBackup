@@ -17,13 +17,16 @@ namespace EasyBackup.ViewModels
         private string _status;
         private string _finishButtonTitle;
         private ulong _backupSize;
+        private ulong _bytesCopiedSoFar;
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
+        private double _currentProgress;
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
             Items = items;
             BackupLocation = backupLocation;
+            _currentProgress = 0;
             _backupPerformer = new BackupPerformer();
             Status = "Running backup";
             ItemProgressData = new List<FolderFileCopyProgress>();
@@ -45,6 +48,11 @@ namespace EasyBackup.ViewModels
         public List<FolderFileItem> Items { get; set; }
 
         public string BackupLocation { get; set; }
+
+        public string CurrentProgressString
+        {
+            get { return string.Format("{0:N2}", _currentProgress); }
+        }
 
         public string Status
         {
@@ -79,7 +87,7 @@ namespace EasyBackup.ViewModels
                 }
                 else
                 {
-                    Status = "Performing backup..." + ByteSizeLib.ByteSize.FromBytes(freeDriveBytes).ToString();
+                    Status = "Performing backup...";
                     _backupPerformer.PerformBackup(Items, BackupLocation);
                     if (_backupPerformer.HasBeenCanceled)
                     {
@@ -131,6 +139,9 @@ namespace EasyBackup.ViewModels
             {
                 var progressInfo = _copyDataToProgressMap[item];
                 progressInfo.BytesCopied += bytes;
+                _bytesCopiedSoFar += bytes;
+                _currentProgress = Math.Min((double)_bytesCopiedSoFar / (double)_backupSize * 100, 100);
+                NotifyPropertyChanged(nameof(CurrentProgressString));
             }
         }
 
