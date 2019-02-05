@@ -16,7 +16,7 @@ namespace EasyBackup.ViewModels
         private BackupPerformer _backupPerformer;
         private string _status;
         private string _finishButtonTitle;
-        private ulong _backupSize;
+        private ulong _totalBackupSize;
         private ulong _bytesCopiedSoFar;
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
@@ -51,6 +51,7 @@ namespace EasyBackup.ViewModels
 
         public string CurrentProgressString
         {
+            // formatting the double without rounding: https://stackoverflow.com/a/2453982/3938401
             get { return string.Format("{0:N2}", _currentProgress); }
         }
 
@@ -80,10 +81,10 @@ namespace EasyBackup.ViewModels
                 Status = "Getting backup size...";
                 _backupPerformer.CalculateBackupSize(Items, BackupLocation);
                 ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-                if (_backupSize > freeDriveBytes)
+                if (_totalBackupSize > freeDriveBytes)
                 {
                     Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
-                                            ByteSize.FromBytes(_backupSize), ByteSize.FromBytes(freeDriveBytes));
+                                            ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
                 }
                 else
                 {
@@ -107,10 +108,10 @@ namespace EasyBackup.ViewModels
             if (_copyDataToProgressMap.ContainsKey(item))
             {
                 // we use += in case it's a directory
-                item.ByteSize += bytes;
+                item.ByteSize = bytes;
                 var progressInfo = _copyDataToProgressMap[item];
-                progressInfo.TotalBytesToCopy += bytes;
-                _backupSize += bytes;
+                progressInfo.TotalBytesToCopy = bytes;
+                _totalBackupSize += bytes;
             }
         }
 
@@ -140,7 +141,7 @@ namespace EasyBackup.ViewModels
                 var progressInfo = _copyDataToProgressMap[item];
                 progressInfo.BytesCopied += bytes;
                 _bytesCopiedSoFar += bytes;
-                _currentProgress = Math.Min((double)_bytesCopiedSoFar / (double)_backupSize * 100, 100);
+                _currentProgress = Math.Min((double)_bytesCopiedSoFar / (double)_totalBackupSize * 100, 100);
                 NotifyPropertyChanged(nameof(CurrentProgressString));
             }
         }

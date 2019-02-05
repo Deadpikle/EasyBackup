@@ -32,12 +32,14 @@ namespace EasyBackup.Helpers
         public bool IsRunning { get; set; }
         public bool HasBeenCanceled { get; set; }
         private bool IsCalculatingFileSize { get; set; }
+        private ulong CurrentDirectorySize { get; set; }
 
         public BackupPerformer()
         {
             IsRunning = false;
             HasBeenCanceled = false;
             IsCalculatingFileSize = false;
+            CurrentDirectorySize = 0;
         }
 
         public void Cancel()
@@ -88,7 +90,7 @@ namespace EasyBackup.Helpers
                 }
                 if (IsCalculatingFileSize)
                 {
-                    CalculatedBytesOfItem?.Invoke(itemBeingCopied, (ulong)file.Length);
+                    CurrentDirectorySize += (ulong)file.Length;
                 }
                 else
                 {
@@ -212,7 +214,12 @@ namespace EasyBackup.Helpers
                                     {
                                         break;
                                     }
+                                    CurrentDirectorySize = 0;
                                     CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
+                                    if (IsCalculatingFileSize)
+                                    {
+                                        CalculatedBytesOfItem?.Invoke(item, CurrentDirectorySize);
+                                    }
                                 }
                             }
                         }
