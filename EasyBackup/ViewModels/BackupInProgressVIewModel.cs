@@ -36,6 +36,7 @@ namespace EasyBackup.ViewModels
             _backupPerformer.FinishedCopyingItem += _backupPerformer_FinishedCopyingItem;
             _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
             _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
+            _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
             RunBackup();
         }
 
@@ -66,6 +67,9 @@ namespace EasyBackup.ViewModels
             Task.Run(() =>
             {
                 FinishButtonTitle = "Cancel Backup";
+                Status = "Getting backup size...";
+                _backupPerformer.CalculateBackupSize(Items, BackupLocation);
+                Status = "Performing backup...";
                 _backupPerformer.PerformBackup(Items, BackupLocation);
                 if (_backupPerformer.HasBeenCanceled)
                 {
@@ -77,6 +81,17 @@ namespace EasyBackup.ViewModels
                 }
                 FinishButtonTitle = "End Backup";
             });
+        }
+
+        private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, long bytes)
+        {
+            if (_copyDataToProgressMap.ContainsKey(item))
+            {
+                // we use += in case it's a directory
+                item.ByteSize += bytes;
+                var progressInfo = _copyDataToProgressMap[item];
+                progressInfo.TotalBytesToCopy += bytes;
+            }
         }
 
         private void _backupPerformer_StartedCopyingItem(FolderFileItem item)

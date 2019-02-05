@@ -52,7 +52,16 @@ namespace EasyBackup.Models
         public long ByteSize
         {
             get { return _byteSize; }
-            set { _byteSize = value; NotifyPropertyChanged(); }
+            set { _byteSize = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableByteSize)); }
+        }
+
+        public string UserReadableByteSize
+        {
+            get
+            {
+                var byteSize = ByteSizeLib.ByteSize.FromBytes(ByteSize);
+                return byteSize.ToString();
+            }
         }
     }
 }

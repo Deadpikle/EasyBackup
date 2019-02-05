@@ -9,6 +9,7 @@ namespace EasyBackup.Models
         private bool _isCopyInProgress;
         private bool _isFinishedCopying;
         private long _bytesCopied;
+        private long _totalBytesToCopy;
 
         public FolderFileCopyProgress(string path)
         {
@@ -47,6 +48,21 @@ namespace EasyBackup.Models
             get
             {
                 var byteSize = ByteSize.FromBytes(BytesCopied);
+                return byteSize.ToString();
+            }
+        }
+
+        public long TotalBytesToCopy
+        {
+            get { return _totalBytesToCopy; }
+            set { _totalBytesToCopy = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesToCopy)); }
+        }
+
+        public string UserReadableBytesToCopy
+        {
+            get
+            {
+                var byteSize = ByteSizeLib.ByteSize.FromBytes(TotalBytesToCopy);
                 return byteSize.ToString();
             }
         }

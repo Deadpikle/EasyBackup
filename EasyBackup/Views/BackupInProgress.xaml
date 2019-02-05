@@ -33,6 +33,8 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
                                     CanUserReorder="False"/>
+                <DataGridTextColumn Header="Size" Binding="{Binding UserReadableBytesToCopy}" IsReadOnly="True"
+                                    CanUserReorder="False"/>
                 <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
                                     CanUserReorder="False"/>
                 <DataGridCheckBoxColumn Header="Finished?" Binding="{Binding IsFinishedCopying}" IsReadOnly="True" Width="100"
