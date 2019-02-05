@@ -31,13 +31,23 @@
                   RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
                   SelectedItem="{Binding SelectedItem}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"
+                <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
                                     CanUserReorder="False"/>
                 <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
                                     CanUserReorder="False"/>
                 <DataGridCheckBoxColumn Header="Finished?" Binding="{Binding IsFinishedCopying}" IsReadOnly="True" Width="100"
                                     CanUserReorder="False"/>
             </DataGrid.Columns>
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MetroDataGrid}" TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground" Value="{DynamicResource GrayBrush10}" />
+                </Style>
+            </DataGrid.Style>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource MetroDataGridRow}">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding FinishButtonTitle}" Width="100" Command="{Binding CancelBackup}"/>
     </Grid>
