@@ -22,6 +22,7 @@
         </Grid.ColumnDefinitions>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Content="Easy Backup" HorizontalAlignment="Center" FontSize="24" FontWeight="Bold" Margin="0,0,0,0"/>
         <DataGrid Grid.Column="0" Grid.Row="1" ItemsSource="{Binding Items}"
+                  ColumnHeaderStyle="{StaticResource NoCapsColumnHeader}"
                   Name="PathsDataGrid"
                   CanUserAddRows="False"
                   AutoGenerateColumns="False" CanUserDeleteRows="False"
@@ -33,6 +34,11 @@
                   RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
                   SelectedItem="{Binding SelectedItem}"
                   d:DataContext="{d:DesignInstance Type={x:Type models:FolderFileItem}}">
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MetroDataGrid}" TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground" Value="{DynamicResource GrayBrush10}" />
+                </Style>
+            </DataGrid.Style>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="Ascending" IsReadOnly="True" Width="*"
                                     CanUserReorder="False"/>

@@ -1,16 +1,18 @@
-﻿<Window x:Class="EasyBackup.MainWindow"
+﻿<mahapps:MetroWindow x:Class="EasyBackup.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
         xmlns:local="clr-namespace:EasyBackup"
         xmlns:viewModels="clr-namespace:EasyBackup.ViewModels"
         mc:Ignorable="d"
-        Title="Easy Backup" Height="450" Width="800">
+        Title="Easy Backup" Height="450" Width="800"
+        TitleCaps="False" GlowBrush="Blue">
     <Window.DataContext>
         <viewModels:MainWindowViewModel/>
     </Window.DataContext>
     <Grid>
         <ContentPresenter Content="{Binding CurrentViewModel}"/>
     </Grid>
-</Window>
+</mahapps:MetroWindow>

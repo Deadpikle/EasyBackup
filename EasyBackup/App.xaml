@@ -4,13 +4,34 @@
              xmlns:local="clr-namespace:EasyBackup"
              xmlns:viewModels="clr-namespace:EasyBackup.ViewModels"
              xmlns:views="clr-namespace:EasyBackup.Views"
+             xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type viewModels:HomeScreenViewModel}">
-            <views:HomeScreen/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type viewModels:BackupInProgressViewModel}">
-            <views:BackupInProgress/>
-        </DataTemplate>
+        <ResourceDictionary>
+            <DataTemplate DataType="{x:Type viewModels:HomeScreenViewModel}">
+                <views:HomeScreen/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type viewModels:BackupInProgressViewModel}">
+                <views:BackupInProgress/>
+            </DataTemplate>
+            
+            <Style TargetType="{x:Type mahapps:WindowButtonCommands}" BasedOn="{StaticResource MahApps.Metro.Styles.WindowButtonCommands.Win10}" />
+            <Style TargetType="{x:Type Button}" BasedOn="{StaticResource MahApps.Metro.Styles.MetroButton}">
+                <Setter Property="FontSize" Value="14"/>
+                <Setter Property="mahapps:ButtonHelper.PreserveTextCase" Value="True"/>
+            </Style>
+            <Style x:Key="NoCapsColumnHeader" 
+                   BasedOn="{StaticResource MetroDataGridColumnHeader}" 
+                   TargetType="{x:Type DataGridColumnHeader}">
+                <Setter Property="mahapps:ControlsHelper.ContentCharacterCasing" Value="Normal"/>
+            </Style>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Controls.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Fonts.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Colors.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/Cobalt.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MahApps.Metro;component/Styles/Accents/BaseLight.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>
