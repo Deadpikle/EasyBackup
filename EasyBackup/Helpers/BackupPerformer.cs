@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace EasyBackup.Helpers
 {
+    // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
+    // TODO: fix possible recursion issues with symlinks :O
     class BackupPerformer
     {
         // // // Events and Delegates // // //
@@ -22,15 +24,20 @@ namespace EasyBackup.Helpers
         public delegate void BackupFailedHandler(Exception e);
         public event BackupFailedHandler BackupFailed;
 
+        public delegate void CalculatedBytesOfItemHandler(FolderFileItem item, long bytes);
+        public event CopiedBytesOfItemHandler CalculatedBytesOfItem;
+
         // // // // // // // // // // // // //
 
         public bool IsRunning { get; set; }
         public bool HasBeenCanceled { get; set; }
+        private bool IsCalculatingFileSize { get; set; }
 
         public BackupPerformer()
         {
             IsRunning = false;
             HasBeenCanceled = false;
+            IsCalculatingFileSize = false;
         }
 
         public void Cancel()
@@ -46,8 +53,6 @@ namespace EasyBackup.Helpers
                 await Task.Delay(100); // wait for cancel to finish
             }
         }
-
-        // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
 
         // Modified from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
         private void CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs)
@@ -81,8 +86,15 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                string tempPath = Path.Combine(destDirName, file.Name);
-                CopySingleFile(itemBeingCopied, file.FullName, tempPath);
+                if (IsCalculatingFileSize)
+                {
+                    CalculatedBytesOfItem?.Invoke(itemBeingCopied, file.Length);
+                }
+                else
+                {
+                    string tempPath = Path.Combine(destDirName, file.Name);
+                    CopySingleFile(itemBeingCopied, file.FullName, tempPath);
+                }
             }
 
             // If copying subdirectories, copy them and their contents to new location.
@@ -132,7 +144,7 @@ namespace EasyBackup.Helpers
             }
         }
 
-        public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
+        private void IterateOverFiles(List<FolderFileItem> paths, string backupDirectory)
         {
             try
             {
@@ -172,18 +184,25 @@ namespace EasyBackup.Helpers
                                     var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
                                     if (latestFile != null)
                                     {
-                                        var outputBackupDirectory = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                        // create directory if needed in backup path
-                                        if (!Directory.Exists(outputBackupDirectory))
+                                        if (IsCalculatingFileSize)
                                         {
-                                            Directory.CreateDirectory(outputBackupDirectory);
+                                            CalculatedBytesOfItem?.Invoke(item, new FileInfo(latestFile.FullName).Length);
                                         }
-                                        var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
-                                        if (HasBeenCanceled)
+                                        else
                                         {
-                                            break;
+                                            var outputBackupDirectory = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                            // create directory if needed in backup path
+                                            if (!Directory.Exists(outputBackupDirectory))
+                                            {
+                                                Directory.CreateDirectory(outputBackupDirectory);
+                                            }
+                                            var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                            if (HasBeenCanceled)
+                                            {
+                                                break;
+                                            }
+                                            CopySingleFile(item, latestFile.FullName, outputPath);
                                         }
-                                        CopySingleFile(item, latestFile.FullName, outputPath);
                                     }
                                 }
                                 else
@@ -199,8 +218,15 @@ namespace EasyBackup.Helpers
                         }
                         else
                         {
-                            var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                            CopySingleFile(item, item.Path, outputPath);
+                            if (IsCalculatingFileSize)
+                            {
+                                CalculatedBytesOfItem?.Invoke(item, new FileInfo(item.Path).Length);
+                            }
+                            else
+                            {
+                                var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                CopySingleFile(item, item.Path, outputPath);
+                            }
                         }
                         if (!HasBeenCanceled)
                         {
@@ -222,6 +248,18 @@ namespace EasyBackup.Helpers
             {
                 IsRunning = false;
             }
+        }
+
+        public void CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
+        {
+            IsCalculatingFileSize = true;
+            IterateOverFiles(paths, backupDirectory);
+            IsCalculatingFileSize = false;
+        }
+
+        public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
+        {
+            IterateOverFiles(paths, backupDirectory);
         }
     }
 }
