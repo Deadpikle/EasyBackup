@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 namespace EasyBackup.Helpers
 {
     // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
-    // TODO: fix possible recursion issues with symlinks :O
     class BackupPerformer
     {
         // // // Events and Delegates // // //
@@ -31,7 +30,8 @@ namespace EasyBackup.Helpers
 
         public bool IsRunning;
         public bool HasBeenCanceled;
-        
+
+        private List<string> _directoryPathsSeen;
         private bool _isCalculatingFileSize;
         private ulong _currentDirectorySize;
 
@@ -73,6 +73,7 @@ namespace EasyBackup.Helpers
                     "Source directory does not exist or could not be found: "
                     + sourceDirName);
             }
+            _directoryPathsSeen.Add(sourceDirName);
 
             DirectoryInfo[] dirs = dir.GetDirectories();
             // If the destination directory doesn't exist, create it.
@@ -110,7 +111,11 @@ namespace EasyBackup.Helpers
                         return;
                     }
                     string temppath = Path.Combine(destDirName, subDir.Name);
-                    CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
+                    if (!_directoryPathsSeen.Contains(subDir.FullName))
+                    {
+                        CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
+                        _directoryPathsSeen.Add(subDir.FullName);
+                    }
                 }
             }
         }
@@ -260,6 +265,7 @@ namespace EasyBackup.Helpers
 
         public void CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
         {
+            _directoryPathsSeen = new List<string>();
             _isCalculatingFileSize = true;
             IterateOverFiles(paths, backupDirectory);
             _isCalculatingFileSize = false;
@@ -267,6 +273,7 @@ namespace EasyBackup.Helpers
 
         public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
         {
+            _directoryPathsSeen = new List<string>();
             IterateOverFiles(paths, backupDirectory);
         }
     }

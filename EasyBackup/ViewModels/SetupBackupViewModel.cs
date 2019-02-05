@@ -257,7 +257,6 @@ namespace EasyBackup.ViewModels
             backupPerformer.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
             backupPerformer.CalculateBackupSize(Items.ToList(), BackupLocation);
             ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-            freeDriveBytes = 2;
             if (_totalBackupSize > freeDriveBytes)
             {
                 CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
