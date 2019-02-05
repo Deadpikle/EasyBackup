@@ -107,7 +107,6 @@ namespace EasyBackup.ViewModels
         {
             if (_copyDataToProgressMap.ContainsKey(item))
             {
-                // we use += in case it's a directory
                 item.ByteSize = bytes;
                 var progressInfo = _copyDataToProgressMap[item];
                 progressInfo.TotalBytesToCopy = bytes;

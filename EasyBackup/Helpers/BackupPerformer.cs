@@ -29,17 +29,18 @@ namespace EasyBackup.Helpers
 
         // // // // // // // // // // // // //
 
-        public bool IsRunning { get; set; }
-        public bool HasBeenCanceled { get; set; }
-        private bool IsCalculatingFileSize { get; set; }
-        private ulong CurrentDirectorySize { get; set; }
+        public bool IsRunning;
+        public bool HasBeenCanceled;
+        
+        private bool _isCalculatingFileSize;
+        private ulong _currentDirectorySize;
 
         public BackupPerformer()
         {
             IsRunning = false;
             HasBeenCanceled = false;
-            IsCalculatingFileSize = false;
-            CurrentDirectorySize = 0;
+            _isCalculatingFileSize = false;
+            _currentDirectorySize = 0;
         }
 
         public void Cancel()
@@ -88,9 +89,9 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                if (IsCalculatingFileSize)
+                if (_isCalculatingFileSize)
                 {
-                    CurrentDirectorySize += (ulong)file.Length;
+                    _currentDirectorySize += (ulong)file.Length;
                 }
                 else
                 {
@@ -186,7 +187,7 @@ namespace EasyBackup.Helpers
                                     var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
                                     if (latestFile != null)
                                     {
-                                        if (IsCalculatingFileSize)
+                                        if (_isCalculatingFileSize)
                                         {
                                             CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(latestFile.FullName).Length);
                                         }
@@ -214,18 +215,18 @@ namespace EasyBackup.Helpers
                                     {
                                         break;
                                     }
-                                    CurrentDirectorySize = 0;
+                                    _currentDirectorySize = 0;
                                     CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
-                                    if (IsCalculatingFileSize)
+                                    if (_isCalculatingFileSize)
                                     {
-                                        CalculatedBytesOfItem?.Invoke(item, CurrentDirectorySize);
+                                        CalculatedBytesOfItem?.Invoke(item, _currentDirectorySize);
                                     }
                                 }
                             }
                         }
                         else
                         {
-                            if (IsCalculatingFileSize)
+                            if (_isCalculatingFileSize)
                             {
                                 CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(item.Path).Length);
                             }
@@ -259,9 +260,9 @@ namespace EasyBackup.Helpers
 
         public void CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
         {
-            IsCalculatingFileSize = true;
+            _isCalculatingFileSize = true;
             IterateOverFiles(paths, backupDirectory);
-            IsCalculatingFileSize = false;
+            _isCalculatingFileSize = false;
         }
 
         public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
