@@ -50,11 +50,11 @@
                                     CanUserReorder="False">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis"/>
+                            <TextBlock Text="{Binding Path}" TextWrapping="Wrap"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Directory?" CanUserReorder="False">
+                <DataGridTemplateColumn Header="Directory?" CanUserReorder="False" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsDirectory, UpdateSourceTrigger=PropertyChanged}" 
@@ -63,7 +63,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Recursive Copy?" CanUserReorder="False">
+                <DataGridTemplateColumn Header="Recursive Copy?" CanUserReorder="False" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsRecursive, UpdateSourceTrigger=PropertyChanged}" 
@@ -72,7 +72,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Only Copy Latest File" CanUserReorder="False">
+                <DataGridTemplateColumn Header="Only Copy Latest File" CanUserReorder="False" CanUserResize="False" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding OnlyCopiesLatestFile, UpdateSourceTrigger=PropertyChanged}" 
@@ -82,7 +82,6 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Width="*" CanUserResize="True"/>
             </DataGrid.Columns>
         </DataGrid>
         <StackPanel Grid.Column="1" Grid.Row="1" Orientation="Vertical" Margin="5">

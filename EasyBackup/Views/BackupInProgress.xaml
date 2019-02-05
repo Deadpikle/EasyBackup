@@ -32,8 +32,14 @@
                   RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
                   SelectedItem="{Binding SelectedItem}">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Path" Binding="{Binding Path}" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
-                                    CanUserReorder="False"/>
+                <DataGridTemplateColumn Header="Path" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
+                                    CanUserReorder="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <DataGridTextColumn Header="Size" Binding="{Binding UserReadableBytesToCopy}" IsReadOnly="True"
                                     CanUserReorder="False"/>
                 <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
