@@ -256,6 +256,7 @@ namespace EasyBackup.ViewModels
 
         private void ScanBackupAndCheckSize()
         {
+            _totalBackupSize = 0;
             var backupPerformer = new BackupPerformer();
             backupPerformer.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
             backupPerformer.CalculateBackupSize(Items.ToList(), BackupLocation);
