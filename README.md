@@ -14,7 +14,6 @@ Features include:
 
 ## Features/Updates to Come
 
-* Scan files before backing them up to get backup file size and overall backup progress
 * Option to update a previous backup instead of creating an entirely new backup
 * Other settings and small upgrades here and there
 

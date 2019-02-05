@@ -18,9 +18,9 @@ namespace EasyBackup.Views
     /// <summary>
     /// Interaction logic for HomeScreen.xaml
     /// </summary>
-    public partial class HomeScreen : UserControl
+    public partial class SetupBackup : UserControl
     {
-        public HomeScreen()
+        public SetupBackup()
         {
             InitializeComponent();
         }

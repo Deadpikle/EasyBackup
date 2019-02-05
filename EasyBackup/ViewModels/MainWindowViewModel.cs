@@ -16,7 +16,7 @@ namespace EasyBackup.ViewModels
         public MainWindowViewModel()
         {
             _viewModels = new Stack<BaseViewModel>();
-            var initialViewModel = new HomeScreenViewModel(this);
+            var initialViewModel = new SetupBackupViewModel(this);
             _viewModels.Push(initialViewModel);
             CurrentViewModel = initialViewModel;
         }

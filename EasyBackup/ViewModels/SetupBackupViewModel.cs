@@ -15,13 +15,13 @@ using System.Windows.Input;
 
 namespace EasyBackup.ViewModels
 {
-    class HomeScreenViewModel : BaseViewModel, IDropTarget
+    class SetupBackupViewModel : BaseViewModel, IDropTarget
     {
         private ObservableCollection<FolderFileItem> _items;
         private FolderFileItem _selectedItem;
         private string _backupLocation;
 
-        public HomeScreenViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
+        public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
             Items = new ObservableCollection<FolderFileItem>();
             // upgrading settings: https://stackoverflow.com/a/534335

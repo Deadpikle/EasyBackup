@@ -8,8 +8,8 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
-            <DataTemplate DataType="{x:Type viewModels:HomeScreenViewModel}">
-                <views:HomeScreen/>
+            <DataTemplate DataType="{x:Type viewModels:SetupBackupViewModel}">
+                <views:SetupBackup/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type viewModels:BackupInProgressViewModel}">
                 <views:BackupInProgress/>
