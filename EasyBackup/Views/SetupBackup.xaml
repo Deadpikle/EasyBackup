@@ -95,15 +95,17 @@
             <Button Content="About Easy Backup" Margin="0,5,0,5" Command="{Binding ShowAboutWindow}"/>
         </StackPanel>
         <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Content="Choose Backup Location" Width="200" Command="{Binding ChooseBackupLocation}"
-                Margin="0,10,0,0"/>
-        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" Content="{Binding BackupLocation}"/>
-        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Check Backup Size" Width="150" Command="{Binding CheckBackupSize}" Margin="0,0,0,10"/>
-        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="0,0,0,10"
+                Margin="0,5,0,0"/>
+        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" HorizontalAlignment="Center" Margin="0,5,0,5" FontSize="14">
+            Backup location: <Run Text="{Binding BackupLocation}"/>
+        </TextBlock>
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Check Backup Size" Width="150" Command="{Binding CheckBackupSize}" Margin="0,0,0,5"/>
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="0,0,0,5"
                Content="{Binding CheckBackupSizeStatus}"
                VerticalAlignment="Center" FontSize="16"
                HorizontalAlignment="Center"
                Foreground="{Binding CheckBackupSizeBrush}"
                Visibility="{Binding IsCheckBackupSizeStatusVisible, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" Content="Run Backup" Width="100" Command="{Binding PerformBackup}" Margin="0,0,0,10"/>
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="6" Content="Run Backup" Width="100" Command="{Binding PerformBackup}" Margin="0,0,0,5"/>
     </Grid>
 </UserControl>
