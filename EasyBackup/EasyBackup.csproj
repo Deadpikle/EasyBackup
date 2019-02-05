@@ -159,5 +159,10 @@
   <ItemGroup>
     <Resource Include="Graphics\synch-icon.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="Licenses.txt">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
