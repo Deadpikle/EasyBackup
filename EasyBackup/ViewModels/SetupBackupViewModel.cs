@@ -1,4 +1,5 @@
-﻿using EasyBackup.Helpers;
+﻿using ByteSizeLib;
+using EasyBackup.Helpers;
 using EasyBackup.Interfaces;
 using EasyBackup.Models;
 using EasyBackup.Views;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EasyBackup.ViewModels
 {
@@ -20,6 +22,11 @@ namespace EasyBackup.ViewModels
         private ObservableCollection<FolderFileItem> _items;
         private FolderFileItem _selectedItem;
         private string _backupLocation;
+        private ulong _totalBackupSize;
+
+        private string _checkBackupSizeStatus;
+        private bool _isCheckBackupSizeStatusVisible;
+        private Brush _checkBackupSizeBrush;
 
         public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
@@ -32,6 +39,7 @@ namespace EasyBackup.ViewModels
                 Properties.Settings.Default.Save();
             }
             LoadBackupTemplate(Properties.Settings.Default.LastUsedBackupTemplatePath);
+            IsCheckBackupSizeStatusVisible = false;
         }
 
         public ObservableCollection<FolderFileItem> Items
@@ -55,6 +63,24 @@ namespace EasyBackup.ViewModels
         {
             get { return _backupLocation; }
             set { _backupLocation = value; NotifyPropertyChanged(); }
+        }
+
+        public string CheckBackupSizeStatus
+        {
+            get { return _checkBackupSizeStatus; }
+            set { _checkBackupSizeStatus = value; NotifyPropertyChanged(); }
+        }
+
+        public bool IsCheckBackupSizeStatusVisible
+        {
+            get { return _isCheckBackupSizeStatusVisible; }
+            set { _isCheckBackupSizeStatusVisible = value; NotifyPropertyChanged(); }
+        }
+
+        public Brush CheckBackupSizeBrush
+        {
+            get { return _checkBackupSizeBrush; }
+            set { _checkBackupSizeBrush = value; NotifyPropertyChanged(); }
         }
 
         public ICommand AddFolder
@@ -100,6 +126,7 @@ namespace EasyBackup.ViewModels
             {
                 Items.Add(new FolderFileItem() { Path = path, IsDirectory = isDirectory, IsRecursive = isDirectory });
             }
+            IsCheckBackupSizeStatusVisible = false;
         }
 
         public ICommand RemoveItem
@@ -217,6 +244,38 @@ namespace EasyBackup.ViewModels
             var aboutWindow = new AboutWindow();
             aboutWindow.Owner = Application.Current.MainWindow;
             aboutWindow.Show();
+        }
+
+        public ICommand CheckBackupSize
+        {
+            get { return new RelayCommand(ScanBackupAndCheckSize); }
+        }
+
+        private void ScanBackupAndCheckSize()
+        {
+            var backupPerformer = new BackupPerformer();
+            backupPerformer.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
+            backupPerformer.CalculateBackupSize(Items.ToList(), BackupLocation);
+            ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+            freeDriveBytes = 2;
+            if (_totalBackupSize > freeDriveBytes)
+            {
+                CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
+                CheckBackupSizeStatus = string.Format("Not enough free space -- need {0} but only have {1}",
+                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+            }
+            else
+            {
+                CheckBackupSizeBrush = new SolidColorBrush(Colors.Green);
+                CheckBackupSizeStatus = string.Format("There's enough space available! We need {0} and have {1} available.",
+                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+            }
+            IsCheckBackupSizeStatusVisible = true;
+        }
+
+        private void BackupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
+        {
+            _totalBackupSize += bytes;
         }
 
         #region IDropTarget
