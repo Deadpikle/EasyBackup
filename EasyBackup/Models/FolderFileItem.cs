@@ -13,7 +13,7 @@ namespace EasyBackup.Models
         private bool _isDirectory;
         private bool _isRecursive;
         private bool _onlyCopiesLatestFile;
-        private long _byteSize;
+        private ulong _byteSize;
 
         public string Path
         {
@@ -49,7 +49,7 @@ namespace EasyBackup.Models
             set { _onlyCopiesLatestFile = value; NotifyPropertyChanged(); }
         }
 
-        public long ByteSize
+        public ulong ByteSize
         {
             get { return _byteSize; }
             set { _byteSize = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableByteSize)); }

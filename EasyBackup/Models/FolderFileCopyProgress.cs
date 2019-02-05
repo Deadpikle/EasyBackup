@@ -8,8 +8,8 @@ namespace EasyBackup.Models
         private string _path;
         private bool _isCopyInProgress;
         private bool _isFinishedCopying;
-        private long _bytesCopied;
-        private long _totalBytesToCopy;
+        private ulong _bytesCopied;
+        private ulong _totalBytesToCopy;
 
         public FolderFileCopyProgress(string path)
         {
@@ -37,7 +37,7 @@ namespace EasyBackup.Models
             set { _isFinishedCopying = value; NotifyPropertyChanged(); }
         }
 
-        public long BytesCopied
+        public ulong BytesCopied
         {
             get { return _bytesCopied; }
             set { _bytesCopied = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesCopied)); }
@@ -52,7 +52,7 @@ namespace EasyBackup.Models
             }
         }
 
-        public long TotalBytesToCopy
+        public ulong TotalBytesToCopy
         {
             get { return _totalBytesToCopy; }
             set { _totalBytesToCopy = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableBytesToCopy)); }

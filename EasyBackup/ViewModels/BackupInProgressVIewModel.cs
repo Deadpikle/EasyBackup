@@ -1,4 +1,5 @@
-﻿using EasyBackup.Helpers;
+﻿using ByteSizeLib;
+using EasyBackup.Helpers;
 using EasyBackup.Interfaces;
 using EasyBackup.Models;
 using System;
@@ -15,6 +16,7 @@ namespace EasyBackup.ViewModels
         private BackupPerformer _backupPerformer;
         private string _status;
         private string _finishButtonTitle;
+        private ulong _backupSize;
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
 
@@ -69,21 +71,30 @@ namespace EasyBackup.ViewModels
                 FinishButtonTitle = "Cancel Backup";
                 Status = "Getting backup size...";
                 _backupPerformer.CalculateBackupSize(Items, BackupLocation);
-                Status = "Performing backup...";
-                _backupPerformer.PerformBackup(Items, BackupLocation);
-                if (_backupPerformer.HasBeenCanceled)
+                ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+                if (_backupSize > freeDriveBytes)
                 {
-                    Status = "Backup was canceled";
+                    Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
+                                            ByteSize.FromBytes(_backupSize), ByteSize.FromBytes(freeDriveBytes));
                 }
                 else
                 {
-                    Status = "Backup successfully finished";
+                    Status = "Performing backup..." + ByteSizeLib.ByteSize.FromBytes(freeDriveBytes).ToString();
+                    _backupPerformer.PerformBackup(Items, BackupLocation);
+                    if (_backupPerformer.HasBeenCanceled)
+                    {
+                        Status = "Backup was canceled";
+                    }
+                    else
+                    {
+                        Status = "Backup successfully finished";
+                    }
+                    FinishButtonTitle = "Finish Backup";
                 }
-                FinishButtonTitle = "End Backup";
             });
         }
 
-        private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, long bytes)
+        private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             if (_copyDataToProgressMap.ContainsKey(item))
             {
@@ -91,6 +102,7 @@ namespace EasyBackup.ViewModels
                 item.ByteSize += bytes;
                 var progressInfo = _copyDataToProgressMap[item];
                 progressInfo.TotalBytesToCopy += bytes;
+                _backupSize += bytes;
             }
         }
 
@@ -113,7 +125,7 @@ namespace EasyBackup.ViewModels
             }
         }
 
-        private void _backupPerformer_CopiedBytesOfItem(FolderFileItem item, long bytes)
+        private void _backupPerformer_CopiedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             if (_copyDataToProgressMap.ContainsKey(item))
             {
@@ -125,7 +137,7 @@ namespace EasyBackup.ViewModels
         private void _backupPerformer_BackupFailed(Exception e)
         {
             Status = "Backup failed. Error: " + e.Message;
-            FinishButtonTitle = "End Backup";
+            FinishButtonTitle = "Finish Backup";
         }
 
         public ICommand CancelBackup

@@ -18,13 +18,13 @@ namespace EasyBackup.Helpers
         public event StartedFinishedCopyingItemHandler StartedCopyingItem;
         public event StartedFinishedCopyingItemHandler FinishedCopyingItem;
 
-        public delegate void CopiedBytesOfItemHandler(FolderFileItem item, long bytes);
+        public delegate void CopiedBytesOfItemHandler(FolderFileItem item, ulong bytes);
         public event CopiedBytesOfItemHandler CopiedBytesOfItem;
 
         public delegate void BackupFailedHandler(Exception e);
         public event BackupFailedHandler BackupFailed;
 
-        public delegate void CalculatedBytesOfItemHandler(FolderFileItem item, long bytes);
+        public delegate void CalculatedBytesOfItemHandler(FolderFileItem item, ulong bytes);
         public event CopiedBytesOfItemHandler CalculatedBytesOfItem;
 
         // // // // // // // // // // // // //
@@ -88,7 +88,7 @@ namespace EasyBackup.Helpers
                 }
                 if (IsCalculatingFileSize)
                 {
-                    CalculatedBytesOfItem?.Invoke(itemBeingCopied, file.Length);
+                    CalculatedBytesOfItem?.Invoke(itemBeingCopied, (ulong)file.Length);
                 }
                 else
                 {
@@ -136,7 +136,7 @@ namespace EasyBackup.Helpers
                             }
                             int read = inStream.Read(buffer, 0, buffer_size);
                             outStream.Write(buffer, 0, read);
-                            CopiedBytesOfItem(itemBeingCopied, read);
+                            CopiedBytesOfItem(itemBeingCopied, (ulong)read);
                             total_read += read;
                         }
                     }
@@ -186,7 +186,7 @@ namespace EasyBackup.Helpers
                                     {
                                         if (IsCalculatingFileSize)
                                         {
-                                            CalculatedBytesOfItem?.Invoke(item, new FileInfo(latestFile.FullName).Length);
+                                            CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(latestFile.FullName).Length);
                                         }
                                         else
                                         {
@@ -220,7 +220,7 @@ namespace EasyBackup.Helpers
                         {
                             if (IsCalculatingFileSize)
                             {
-                                CalculatedBytesOfItem?.Invoke(item, new FileInfo(item.Path).Length);
+                                CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(item.Path).Length);
                             }
                             else
                             {
