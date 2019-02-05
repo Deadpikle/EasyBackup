@@ -180,7 +180,10 @@ namespace EasyBackup.Helpers
                         {
                             Directory.CreateDirectory(outputDirectoryPath);
                         }
-                        StartedCopyingItem?.Invoke(item);
+                        if (!_isCalculatingFileSize)
+                        {
+                            StartedCopyingItem?.Invoke(item);
+                        }
                         if (item.IsDirectory)
                         {
                             if (Directory.Exists(item.Path))
@@ -241,7 +244,7 @@ namespace EasyBackup.Helpers
                                 CopySingleFile(item, item.Path, outputPath);
                             }
                         }
-                        if (!HasBeenCanceled)
+                        if (!HasBeenCanceled && !_isCalculatingFileSize)
                         {
                             FinishedCopyingItem?.Invoke(item);
                         }
