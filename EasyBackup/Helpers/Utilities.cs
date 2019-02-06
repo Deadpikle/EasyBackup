@@ -39,7 +39,16 @@ namespace EasyBackup.Helpers
                 return freeBytesAvailable;
             }
             return 0;
+        }
 
+        public static string BytesToString(ulong bytes)
+        {
+            if (bytes == 0)
+            {
+                return "-";
+            }
+            var byteSize = ByteSizeLib.ByteSize.FromBytes(bytes);
+            return byteSize.ToString();
         }
     }
 }

@@ -59,8 +59,7 @@ namespace EasyBackup.Models
         {
             get
             {
-                var byteSize = ByteSizeLib.ByteSize.FromBytes(ByteSize);
-                return byteSize.ToString();
+                return Utilities.BytesToString(ByteSize);
             }
         }
     }
