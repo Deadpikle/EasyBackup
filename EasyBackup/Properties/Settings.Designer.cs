@@ -46,5 +46,17 @@ namespace EasyBackup.Properties {
                 this["UpgradeRequired"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool PlaySoundsWhenFinished {
+            get {
+                return ((bool)(this["PlaySoundsWhenFinished"]));
+            }
+            set {
+                this["PlaySoundsWhenFinished"] = value;
+            }
+        }
     }
 }

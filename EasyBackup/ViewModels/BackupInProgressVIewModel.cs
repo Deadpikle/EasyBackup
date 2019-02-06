@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -25,6 +26,9 @@ namespace EasyBackup.ViewModels
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
         private double _currentProgress;
 
+        private bool _playsSounds;
+        private SoundPlayer _successSoundPlayer;
+        private SoundPlayer _failureSoundPlayer;
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
@@ -47,6 +51,12 @@ namespace EasyBackup.ViewModels
             _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
             _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
             _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
+            _playsSounds = Properties.Settings.Default.PlaySoundsWhenFinished;
+            if (_playsSounds)
+            {
+                _failureSoundPlayer = new SoundPlayer("Sounds/failure-tbone.wav");
+                _successSoundPlayer = new SoundPlayer("Sounds/success.wav");
+            }
             RunBackup();
         }
 
@@ -94,8 +104,7 @@ namespace EasyBackup.ViewModels
                 Status = "Getting backup size...";
                 if (!Directory.Exists(BackupLocation))
                 {
-                    Status = "Error: Backup directory doesn't exist";
-                    FinishButtonTitle = "Finish Backup";
+                    TellUserBackupFailed("Error: Backup directory doesn't exist");
                     StatusColor = redBrush;
                 }
                 else
@@ -104,8 +113,9 @@ namespace EasyBackup.ViewModels
                     ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
                     if (_totalBackupSize > freeDriveBytes)
                     {
-                        Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
-                                                ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                        var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
+                                                ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
+                        TellUserBackupFailed(error);
                         StatusColor = redBrush;
                     }
                     else
@@ -114,18 +124,37 @@ namespace EasyBackup.ViewModels
                         _backupPerformer.PerformBackup(Items, BackupLocation);
                         if (_backupPerformer.HasBeenCanceled)
                         {
-                            Status = "Backup was canceled";
+                            TellUserBackupFailed("Backup was canceled");
                             StatusColor = redBrush;
                         }
                         else
                         {
-                            Status = "Backup successfully finished";
+                            TellUserBackupSucceeded("Backup successfully finished");
                             StatusColor = greenBrush;
                         }
-                        FinishButtonTitle = "Finish Backup";
                     }
                 }
             });
+        }
+
+        private void TellUserBackupSucceeded(string message)
+        {
+            Status = message;
+            if (_playsSounds)
+            {
+                _successSoundPlayer.Play();
+            }
+            FinishButtonTitle = "Finish Backup";
+        }
+
+        private void TellUserBackupFailed(string message)
+        {
+            Status = message;
+            if (_playsSounds)
+            {
+                _failureSoundPlayer.Play();
+            }
+            FinishButtonTitle = "Finish Backup";
         }
 
         private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)

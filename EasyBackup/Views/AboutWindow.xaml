@@ -32,6 +32,17 @@
                     <Hyperlink NavigateUri="https://icons8.com/icon/63322/synchronize" 
                                RequestNavigate="Hyperlink_RequestNavigate">Synchronize Icon in Flat Style</Hyperlink>.
                 </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="5,5,5,5">
+                	• The success sound on the backup screen was created by 
+                    <Hyperlink NavigateUri="https://freesound.org/people/LittleRobotSoundFactory/sounds/270404/" 
+                               RequestNavigate="Hyperlink_RequestNavigate">LittleRobotSoundFactory</Hyperlink>.
+                </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="5,5,5,5">
+                	• The failure sound on the backup screen was created by 
+                    <Hyperlink NavigateUri="http://soundbible.com/1830-Sad-Trombone.html" 
+                               RequestNavigate="Hyperlink_RequestNavigate">Joe Lamb</Hyperlink>.
+                </TextBlock>
+                <Label Content="Open Source Licenses" FontWeight="Bold" FontSize="14" Margin="0,2,0,2"/>
                 <TextBlock Name="LicensesText" TextWrapping="Wrap" xmlns:space="preserve" Margin="5">
                     
                 </TextBlock>

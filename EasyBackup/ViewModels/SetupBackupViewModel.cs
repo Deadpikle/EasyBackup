@@ -106,6 +106,17 @@ namespace EasyBackup.ViewModels
             get { return !_isCheckingBackupSize; }
         }
 
+        public bool PlaysSoundsOnComplete
+        {
+            get { return Properties.Settings.Default.PlaySoundsWhenFinished; }
+            set
+            {
+                Properties.Settings.Default.PlaySoundsWhenFinished = value;
+                Properties.Settings.Default.Save();
+                NotifyPropertyChanged();
+            }
+        }
+
         public ICommand AddFolder
         {
             get { return new RelayCommand(ChooseFolder); }
