@@ -15,6 +15,14 @@ namespace EasyBackup.ViewModels
 
         public MainWindowViewModel()
         {
+            // upgrading settings: https://stackoverflow.com/a/534335
+            if (Properties.Settings.Default.UpgradeRequired)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.UpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
+
             _viewModels = new Stack<BaseViewModel>();
             var initialViewModel = new SetupBackupViewModel(this);
             _viewModels.Push(initialViewModel);

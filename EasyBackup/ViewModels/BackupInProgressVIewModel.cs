@@ -16,6 +16,8 @@ namespace EasyBackup.ViewModels
 {
     class BackupInProgressViewModel : BaseViewModel
     {
+        #region Private Members
+
         private BackupPerformer _backupPerformer;
         private string _status;
         private Brush _statusColor;
@@ -29,6 +31,8 @@ namespace EasyBackup.ViewModels
         private bool _playsSounds;
         private SoundPlayer _successSoundPlayer;
         private SoundPlayer _failureSoundPlayer;
+
+        #endregion
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
@@ -59,6 +63,8 @@ namespace EasyBackup.ViewModels
             }
             RunBackup();
         }
+
+        #region Properties
 
         public List<FolderFileItem> Items { get; set; }
 
@@ -93,6 +99,10 @@ namespace EasyBackup.ViewModels
             get { return _statusColor; }
             set { _statusColor = value; NotifyPropertyChanged(); }
         }
+
+        #endregion
+
+        #region Running Backup
 
         private void RunBackup()
         {
@@ -157,6 +167,10 @@ namespace EasyBackup.ViewModels
             FinishButtonTitle = "Finish Backup";
         }
 
+        #endregion
+
+        #region Backup Performer -- Callbacks
+
         private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             if (_copyDataToProgressMap.ContainsKey(item))
@@ -206,6 +220,8 @@ namespace EasyBackup.ViewModels
             StatusColor = new SolidColorBrush(Colors.Red);
         }
 
+        #endregion
+
         public ICommand CancelBackup
         {
             get { return new RelayCommand(PopToSetupView); }
@@ -217,6 +233,11 @@ namespace EasyBackup.ViewModels
             {
                 await _backupPerformer.CancelAsync();
             }
+            _backupPerformer.StartedCopyingItem -= _backupPerformer_StartedCopyingItem;
+            _backupPerformer.FinishedCopyingItem -= _backupPerformer_FinishedCopyingItem;
+            _backupPerformer.CopiedBytesOfItem -= _backupPerformer_CopiedBytesOfItem;
+            _backupPerformer.BackupFailed -= _backupPerformer_BackupFailed;
+            _backupPerformer.CalculatedBytesOfItem -= _backupPerformer_CalculatedBytesOfItem;
             PopViewModel();
         }
     }

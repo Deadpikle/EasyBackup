@@ -20,6 +20,9 @@ namespace EasyBackup.ViewModels
 {
     class SetupBackupViewModel : BaseViewModel, IDropTarget
     {
+
+        #region Private Members
+
         private ObservableCollection<FolderFileItem> _items;
         private FolderFileItem _selectedItem;
         private string _backupLocation;
@@ -32,19 +35,16 @@ namespace EasyBackup.ViewModels
         private bool _isCancelCheckBackupSizeEnabled;
         private BackupPerformer _backupSizeChecker;
 
+        #endregion
+
         public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
             Items = new ObservableCollection<FolderFileItem>();
-            // upgrading settings: https://stackoverflow.com/a/534335
-            if (Properties.Settings.Default.UpgradeRequired)
-            {
-                Properties.Settings.Default.Upgrade();
-                Properties.Settings.Default.UpgradeRequired = false;
-                Properties.Settings.Default.Save();
-            }
             LoadBackupTemplate(Properties.Settings.Default.LastUsedBackupTemplatePath);
             IsCheckBackupSizeStatusVisible = false;
         }
+
+        #region Properties
 
         public ObservableCollection<FolderFileItem> Items
         {
@@ -117,10 +117,66 @@ namespace EasyBackup.ViewModels
             }
         }
 
+        #endregion
+
+        #region ICommands
+
         public ICommand AddFolder
         {
             get { return new RelayCommand(ChooseFolder); }
         }
+
+        public ICommand AddFile
+        {
+            get { return new RelayCommand(ChooseFile); }
+        }
+
+        public ICommand RemoveItem
+        {
+            get { return new RelayCommand<object>(list => RemoveItemFromList(list)); }
+        }
+
+        public ICommand SaveTemplate
+        {
+            get { return new RelayCommand(SaveItemsToDisk); }
+        }
+
+        public ICommand LoadTemplate
+        {
+            get { return new RelayCommand(LoadItemsFromDisk); }
+        }
+
+        public ICommand ChooseBackupLocation
+        {
+            get { return new RelayCommand(PickBackupFolder); }
+        }
+
+        public ICommand PerformBackup
+        {
+            get { return new RelayCommand(StartBackup); }
+        }
+
+        public ICommand CheckBackupSize
+        {
+            get { return new RelayCommand(ScanBackupAndCheckSize); }
+        }
+
+        public ICommand ShowAboutWindow
+        {
+            get { return new RelayCommand(ShowAboutWindowDialog); }
+        }
+
+        public ICommand CancelCheckingBackupSize
+        {
+            get { return new RelayCommand(StopScanningBackupSize); }
+        }
+
+        public ICommand RemoveAllItems
+        {
+            get { return new RelayCommand(CheckAndRemoveAllItems); }
+        }
+
+        #endregion
 
         private void ChooseFolder()
         {
@@ -130,11 +186,6 @@ namespace EasyBackup.ViewModels
             {
                 AddPath(dialog.SelectedPath);
             }
-        }
-
-        public ICommand AddFile
-        {
-            get { return new RelayCommand(ChooseFile); }
         }
 
         private void ChooseFile()
@@ -163,11 +214,6 @@ namespace EasyBackup.ViewModels
             IsCheckBackupSizeStatusVisible = false;
         }
 
-        public ICommand RemoveItem
-        {
-            get { return new RelayCommand<object>(list => RemoveItemFromList(list)); }
-        }
-
         private void RemoveItemFromList(object items)
         {
             if (items != null)
@@ -182,11 +228,6 @@ namespace EasyBackup.ViewModels
             }
         }
 
-        public ICommand SaveTemplate
-        {
-            get { return new RelayCommand(SaveItemsToDisk); }
-        }
-
         private void SaveItemsToDisk()
         {
             var saveFileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
@@ -194,7 +235,7 @@ namespace EasyBackup.ViewModels
             saveFileDialog.Filter = "Easy Backup Files | *.ebf";
             saveFileDialog.DefaultExt = "ebf";
             saveFileDialog.OverwritePrompt = true;
-            saveFileDialog.Title = "Choose save location";
+            saveFileDialog.Title = "Choose Save Location";
             if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
                 var backupTemplate = new BackupTemplate() { Paths = Items.ToList(), BackupLocation = BackupLocation };
@@ -202,11 +243,6 @@ namespace EasyBackup.ViewModels
                 File.WriteAllText(saveFileDialog.FileName, json);
                 UpdateLastUsedBackupPath(saveFileDialog.FileName);
             }
-        }
-
-        public ICommand LoadTemplate
-        {
-            get { return new RelayCommand(LoadItemsFromDisk); }
         }
 
         private void LoadItemsFromDisk()
@@ -243,11 +279,6 @@ namespace EasyBackup.ViewModels
             }
         }
 
-        public ICommand ChooseBackupLocation
-        {
-            get { return new RelayCommand(PickBackupFolder); }
-        }
-
         private void PickBackupFolder()
         {
             var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
@@ -258,19 +289,9 @@ namespace EasyBackup.ViewModels
             }
         }
 
-        public ICommand PerformBackup
-        {
-            get { return new RelayCommand(StartBackup); }
-        }
-
         private void StartBackup()
         {
             PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation));
-        }
-
-        public ICommand ShowAboutWindow
-        {
-            get { return new RelayCommand(ShowAboutWindowDialog); }
         }
 
         private void ShowAboutWindowDialog()
@@ -278,11 +299,6 @@ namespace EasyBackup.ViewModels
             var aboutWindow = new AboutWindow();
             aboutWindow.Owner = Application.Current.MainWindow;
             aboutWindow.Show();
-        }
-
-        public ICommand CheckBackupSize
-        {
-            get { return new RelayCommand(ScanBackupAndCheckSize); }
         }
 
         private async void ScanBackupAndCheckSize()
@@ -346,31 +362,23 @@ namespace EasyBackup.ViewModels
             _totalBackupSize += bytes;
         }
 
-        public ICommand CancelCheckingBackupSize
-        {
-            get { return new RelayCommand(StopScanningBackupSize); }
-        }
-
         private void StopScanningBackupSize()
         {
             _backupSizeChecker.Cancel();
             IsCancelCheckBackupSizeEnabled = true;
         }
 
-        public ICommand RemoveAllItems
-        {
-            get { return new RelayCommand(CheckAndRemoveAllItems); }
-        }
-
         private async void CheckAndRemoveAllItems()
         {
             var result = await DialogCoordinator.ShowMessageAsync(this, "Warning!", "Are you sure you want to remove all items?", 
-                MessageDialogStyle.AffirmativeAndNegative, new MetroDialogSettings()
-            {
-                AffirmativeButtonText = "Yes",
-                NegativeButtonText = "No",
+                MessageDialogStyle.AffirmativeAndNegative, 
+                new MetroDialogSettings()
+                {
+                    AffirmativeButtonText = "Yes",
+                    NegativeButtonText = "No",
                     ColorScheme = MetroDialogColorScheme.Theme
-                });
+                }
+            );
             if (result == MessageDialogResult.Affirmative)
             {
                 Items.Clear();
