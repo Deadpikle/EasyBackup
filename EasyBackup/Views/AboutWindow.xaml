@@ -32,7 +32,7 @@
                     <Hyperlink NavigateUri="https://icons8.com/icon/63322/synchronize" 
                                RequestNavigate="Hyperlink_RequestNavigate">Synchronize Icon in Flat Style</Hyperlink>.
                 </TextBlock>
-                <TextBlock Name="LicensesText" TextWrapping="Wrap" xmlns:space="preserve">
+                <TextBlock Name="LicensesText" TextWrapping="Wrap" xmlns:space="preserve" Margin="5">
                     
                 </TextBlock>
                 <!--<TextBlock TextWrapping="Wrap" Margin="5,5,5,5">
