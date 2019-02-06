@@ -88,7 +88,14 @@ namespace EasyBackup.Models
 
         public string ProgressString
         {
-            get { return string.Format("{0:N2}", Progress); }
+            get
+            {
+                if (double.IsNaN(Progress))
+                {
+                    return "0.00";
+                }
+                return string.Format("{0:N2}", Progress);
+            }
         }
     }
 }

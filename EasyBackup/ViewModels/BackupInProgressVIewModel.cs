@@ -82,7 +82,7 @@ namespace EasyBackup.ViewModels
                 Status = "Getting backup size...";
                 if (!Directory.Exists(BackupLocation))
                 {
-                    Status = "Backup directory doesn't exist";
+                    Status = "Error: backup directory doesn't exist";
                     FinishButtonTitle = "Finish Backup";
                 }
                 else
