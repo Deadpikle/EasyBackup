@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace EasyBackup.ViewModels
 {
@@ -16,12 +17,14 @@ namespace EasyBackup.ViewModels
     {
         private BackupPerformer _backupPerformer;
         private string _status;
+        private Brush _statusColor;
         private string _finishButtonTitle;
         private ulong _totalBackupSize;
         private ulong _bytesCopiedSoFar;
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
         private double _currentProgress;
+
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
         {
@@ -30,6 +33,7 @@ namespace EasyBackup.ViewModels
             _currentProgress = 0;
             _backupPerformer = new BackupPerformer();
             Status = "Running backup";
+            StatusColor = new SolidColorBrush(Colors.Black);
             ItemProgressData = new List<FolderFileCopyProgress>();
             _copyDataToProgressMap = new Dictionary<FolderFileItem, FolderFileCopyProgress>();
             foreach (FolderFileItem item in Items)
@@ -74,16 +78,25 @@ namespace EasyBackup.ViewModels
             set { _finishButtonTitle = value; NotifyPropertyChanged(); }
         }
 
+        public Brush StatusColor
+        {
+            get { return _statusColor; }
+            set { _statusColor = value; NotifyPropertyChanged(); }
+        }
+
         private void RunBackup()
         {
+            var redBrush = new SolidColorBrush(Colors.Red);
+            var greenBrush = new SolidColorBrush(Colors.Green);
             Task.Run(() =>
             {
                 FinishButtonTitle = "Cancel Backup";
                 Status = "Getting backup size...";
                 if (!Directory.Exists(BackupLocation))
                 {
-                    Status = "Error: backup directory doesn't exist";
+                    Status = "Error: Backup directory doesn't exist";
                     FinishButtonTitle = "Finish Backup";
+                    StatusColor = redBrush;
                 }
                 else
                 {
@@ -93,6 +106,7 @@ namespace EasyBackup.ViewModels
                     {
                         Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
                                                 ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                        StatusColor = redBrush;
                     }
                     else
                     {
@@ -101,10 +115,12 @@ namespace EasyBackup.ViewModels
                         if (_backupPerformer.HasBeenCanceled)
                         {
                             Status = "Backup was canceled";
+                            StatusColor = redBrush;
                         }
                         else
                         {
                             Status = "Backup successfully finished";
+                            StatusColor = greenBrush;
                         }
                         FinishButtonTitle = "Finish Backup";
                     }
@@ -158,6 +174,7 @@ namespace EasyBackup.ViewModels
         {
             Status = "Backup failed. Error: " + e.Message;
             FinishButtonTitle = "Finish Backup";
+            StatusColor = new SolidColorBrush(Colors.Red);
         }
 
         public ICommand CancelBackup

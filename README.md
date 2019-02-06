@@ -21,7 +21,6 @@ Features include:
 
 ## Features/Updates to Come
 
-* Scan of backup location on setup screen is asynchronous and cancelable
 * Option to update a previous backup instead of creating an entirely new backup (only adds new files and updates modified files based on a hash; does NOT delete old files that have been removed)
 
 ## Can I help contribute?
