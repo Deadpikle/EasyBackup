@@ -81,17 +81,20 @@ namespace EasyBackup.Models
 
         public double Progress
         {
-            get { return (double)BytesCopied / (double)TotalBytesToCopy * 100; }
+            get
+            {
+                if (TotalBytesToCopy == 0)
+                {
+                    return 0;
+                }
+                return (double)BytesCopied / (double)TotalBytesToCopy * 100;
+            }
         }
 
         public string ProgressString
         {
             get
             {
-                if (double.IsNaN(Progress))
-                {
-                    return "0.00";
-                }
                 return string.Format("{0:N2}", Progress);
             }
         }

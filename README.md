@@ -10,6 +10,7 @@ Features include:
   * The most recently used backup template file is automatically loaded for you when starting the software. A backup is only a few clicks away!
 * If copying a directory non-recursively, choose to only copy the last modified file in that directory. This could be useful when backing up a directory that contains local file backups, for example -- you may not need all the local backups, just the latest one.
 * View backup progress as it happens
+* Optional sounds when backup succeeds or fails
 * Cancel backup at any time
 
 ## Screenshots
