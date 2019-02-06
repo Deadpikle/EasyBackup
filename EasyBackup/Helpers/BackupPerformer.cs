@@ -77,7 +77,7 @@ namespace EasyBackup.Helpers
 
             DirectoryInfo[] dirs = dir.GetDirectories();
             // If the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName))
+            if (!Directory.Exists(destDirName) && !_isCalculatingFileSize)
             {
                 Directory.CreateDirectory(destDirName);
             }
@@ -157,14 +157,14 @@ namespace EasyBackup.Helpers
             try
             {
                 IsRunning = true;
-                if (Directory.Exists(backupDirectory))
+                if (Directory.Exists(backupDirectory) || _isCalculatingFileSize)
                 {
                     backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
-                    if (!Directory.Exists(backupDirectory))
+                    if (!Directory.Exists(backupDirectory) && !_isCalculatingFileSize)
                     {
                         Directory.CreateDirectory(backupDirectory);
                     }
-                    else
+                    else if (!_isCalculatingFileSize)
                     {
                         // ok, somehow they started two backups within the same second >_> wait 1 second and start again
                         Task.Delay(1000);
@@ -190,7 +190,7 @@ namespace EasyBackup.Helpers
                         directoryName = directoryName.Replace(pathRoot, "");
                         directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
                         var outputDirectoryPath = Path.Combine(backupDirectory, directoryName);
-                        if (!Directory.Exists(outputDirectoryPath))
+                        if (!Directory.Exists(outputDirectoryPath) && !_isCalculatingFileSize)
                         {
                             Directory.CreateDirectory(outputDirectoryPath);
                         }

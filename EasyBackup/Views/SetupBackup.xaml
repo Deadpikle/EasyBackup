@@ -5,6 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:dd="urn:gong-wpf-dragdrop"
              xmlns:models="clr-namespace:EasyBackup.Models"
+             xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:EasyBackup.Views"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800"
@@ -102,7 +103,14 @@
         <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="3" HorizontalAlignment="Center" Margin="0,5,0,5" FontSize="14">
             Backup location: <Run Text="{Binding BackupLocation}"/>
         </TextBlock>
-        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Check Backup Size" Width="150" Command="{Binding CheckBackupSize}" Margin="0,0,0,5"/>
+        <Button Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Content="Check Backup Size" Width="150" Command="{Binding CheckBackupSize}" Margin="0,0,0,5"
+                Visibility="{Binding IsCheckBackupSizeEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Visibility="{Binding IsCheckingBackupSize, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Orientation="Horizontal" HorizontalAlignment="Center">
+            <Button Content="Cancel Check Backup Size" Width="150" Command="{Binding CancelCheckingBackupSize}" Margin="0,0,10,5"
+                    IsEnabled="{Binding IsCancelCheckBackupSizeEnabled}"/>
+            <mahapps:ProgressRing Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" IsLarge="False" IsActive="{Binding IsCheckingBackupSize}" Width="40" Height="40"/>
+        </StackPanel>
         <Label Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Margin="0,0,0,5"
                Content="{Binding CheckBackupSizeStatus}"
                VerticalAlignment="Center" FontSize="16"

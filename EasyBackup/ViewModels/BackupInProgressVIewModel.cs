@@ -4,6 +4,7 @@ using EasyBackup.Interfaces;
 using EasyBackup.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,26 +80,34 @@ namespace EasyBackup.ViewModels
             {
                 FinishButtonTitle = "Cancel Backup";
                 Status = "Getting backup size...";
-                _backupPerformer.CalculateBackupSize(Items, BackupLocation);
-                ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-                if (_totalBackupSize > freeDriveBytes)
+                if (!Directory.Exists(BackupLocation))
                 {
-                    Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
-                                            ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                    Status = "Backup directory doesn't exist";
+                    FinishButtonTitle = "Finish Backup";
                 }
                 else
                 {
-                    Status = "Performing backup...";
-                    _backupPerformer.PerformBackup(Items, BackupLocation);
-                    if (_backupPerformer.HasBeenCanceled)
+                    _backupPerformer.CalculateBackupSize(Items, BackupLocation);
+                    ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+                    if (_totalBackupSize > freeDriveBytes)
                     {
-                        Status = "Backup was canceled";
+                        Status = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
+                                                ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
                     }
                     else
                     {
-                        Status = "Backup successfully finished";
+                        Status = "Performing backup...";
+                        _backupPerformer.PerformBackup(Items, BackupLocation);
+                        if (_backupPerformer.HasBeenCanceled)
+                        {
+                            Status = "Backup was canceled";
+                        }
+                        else
+                        {
+                            Status = "Backup successfully finished";
+                        }
+                        FinishButtonTitle = "Finish Backup";
                     }
-                    FinishButtonTitle = "Finish Backup";
                 }
             });
         }

@@ -28,6 +28,9 @@ namespace EasyBackup.ViewModels
         private string _checkBackupSizeStatus;
         private bool _isCheckBackupSizeStatusVisible;
         private Brush _checkBackupSizeBrush;
+        private bool _isCheckingBackupSize;
+        private bool _isCancelCheckBackupSizeEnabled;
+        private BackupPerformer _backupSizeChecker;
 
         public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
@@ -85,6 +88,23 @@ namespace EasyBackup.ViewModels
         }
 
         public IDialogCoordinator DialogCoordinator { get; set; }
+
+        public bool IsCheckingBackupSize
+        {
+            get { return _isCheckingBackupSize; }
+            set { _isCheckingBackupSize = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(IsCheckBackupSizeEnabled)); }
+        }
+
+        public bool IsCancelCheckBackupSizeEnabled
+        {
+            get { return _isCancelCheckBackupSizeEnabled; }
+            set { _isCancelCheckBackupSizeEnabled = value; NotifyPropertyChanged(); }
+        }
+
+        public bool IsCheckBackupSizeEnabled
+        {
+            get { return !_isCheckingBackupSize; }
+        }
 
         public ICommand AddFolder
         {
@@ -254,31 +274,76 @@ namespace EasyBackup.ViewModels
             get { return new RelayCommand(ScanBackupAndCheckSize); }
         }
 
-        private void ScanBackupAndCheckSize()
+        private async void ScanBackupAndCheckSize()
         {
+            IsCheckingBackupSize = true;
+            IsCheckBackupSizeStatusVisible = false;
             _totalBackupSize = 0;
-            var backupPerformer = new BackupPerformer();
-            backupPerformer.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
-            backupPerformer.CalculateBackupSize(Items.ToList(), BackupLocation);
-            ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-            if (_totalBackupSize > freeDriveBytes)
+            ulong freeDriveBytes = 0;
+            _backupSizeChecker = new BackupPerformer();
+            _backupSizeChecker.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
+            IsCancelCheckBackupSizeEnabled = true;
+            var redBrush = new SolidColorBrush(Colors.Red);
+            bool didFail = false;
+            await Task.Run(() =>
             {
-                CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
-                CheckBackupSizeStatus = string.Format("Not enough free space -- need {0} but only have {1}",
-                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
-            }
-            else
+                try
+                {
+                    if (!Directory.Exists(BackupLocation))
+                    {
+                        CheckBackupSizeBrush = redBrush;
+                        CheckBackupSizeStatus = "Backup directory doesn't exist";
+                        didFail = true;
+                    }
+                    else
+                    {
+                        _backupSizeChecker.CalculateBackupSize(Items.ToList(), BackupLocation);
+                        freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+                    }
+                }
+                catch (Exception e)
+                {
+                    CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
+                    CheckBackupSizeStatus = string.Format("Failed to check size of backup -- {0}", e.Message);
+                    didFail = true;
+                }
+            });
+            if (!_backupSizeChecker.HasBeenCanceled && !didFail)
             {
-                CheckBackupSizeBrush = new SolidColorBrush(Colors.Green);
-                CheckBackupSizeStatus = string.Format("There's enough space available! We need {0} and have {1} available.",
-                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                if (_totalBackupSize > freeDriveBytes)
+                {
+                    CheckBackupSizeBrush = redBrush;
+                    CheckBackupSizeStatus = string.Format("Not enough free space -- need {0} but only have {1}",
+                                            ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                }
+                else
+                {
+                    CheckBackupSizeBrush = new SolidColorBrush(Colors.Green);
+                    CheckBackupSizeStatus = string.Format("There's enough space available! We need {0} and have {1} available.",
+                                            ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes));
+                }
             }
             IsCheckBackupSizeStatusVisible = true;
+            _backupSizeChecker.CalculatedBytesOfItem -= BackupPerformer_CalculatedBytesOfItem;
+            _backupSizeChecker = null;
+            IsCheckingBackupSize = false;
+            IsCancelCheckBackupSizeEnabled = false;
         }
 
         private void BackupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             _totalBackupSize += bytes;
+        }
+
+        public ICommand CancelCheckingBackupSize
+        {
+            get { return new RelayCommand(StopScanningBackupSize); }
+        }
+
+        private void StopScanningBackupSize()
+        {
+            _backupSizeChecker.Cancel();
+            IsCancelCheckBackupSizeEnabled = true;
         }
 
         public ICommand RemoveAllItems
