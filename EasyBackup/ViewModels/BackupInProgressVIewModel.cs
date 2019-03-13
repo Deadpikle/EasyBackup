@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -34,7 +35,8 @@ namespace EasyBackup.ViewModels
 
         #endregion
 
-        public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, string backupLocation) : base(viewModelChanger)
+        public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, 
+            string backupLocation, bool compressesOutput = false, SecureString compressedPassword = null) : base(viewModelChanger)
         {
             Items = items;
             BackupLocation = backupLocation;

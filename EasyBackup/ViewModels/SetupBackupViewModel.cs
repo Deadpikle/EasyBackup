@@ -333,7 +333,33 @@ namespace EasyBackup.ViewModels
 
         private void StartBackup()
         {
-            PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation));
+            if (SavesToCompressedFile && CompressedFileUsesPassword && string.IsNullOrWhiteSpace(Utilities.SecureStringToString(Password)))
+            {
+                DialogCoordinator.ShowMessageAsync(this, "Error!", "Your password cannot be blank",
+                    MessageDialogStyle.Affirmative,
+                    new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "OK",
+                        ColorScheme = MetroDialogColorScheme.Theme
+                    }
+                );
+            }
+            else if (SavesToCompressedFile && CompressedFileUsesPassword && Utilities.SecureStringToString(Password) != Utilities.SecureStringToString(ConfirmPassword))
+            {
+                DialogCoordinator.ShowMessageAsync(this, "Error!", "Password and confirm password do not match",
+                    MessageDialogStyle.Affirmative,
+                    new MetroDialogSettings()
+                    {
+                        AffirmativeButtonText = "OK",
+                        ColorScheme = MetroDialogColorScheme.Theme
+                    }
+                );
+            }
+            else
+            {
+                PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation,
+                    SavesToCompressedFile, CompressedFileUsesPassword ? Password : null));
+            }
         }
 
         private void ShowAboutWindowDialog()
