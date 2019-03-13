@@ -291,6 +291,7 @@ namespace EasyBackup.Helpers
                             SetConsoleCtrlHandler(null, false);
                             didFinishCancel = true;
                         }
+                        return;
                     }
                 }
                 if (!string.IsNullOrWhiteSpace(e.Data))
