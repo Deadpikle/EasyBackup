@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -34,6 +35,9 @@ namespace EasyBackup.ViewModels
         private bool _isCheckingBackupSize;
         private bool _isCancelCheckBackupSizeEnabled;
         private BackupPerformer _backupSizeChecker;
+
+        private SecureString _password;
+        private SecureString _confirmPassword;
 
         #endregion
 
@@ -115,6 +119,44 @@ namespace EasyBackup.ViewModels
                 Properties.Settings.Default.Save();
                 NotifyPropertyChanged();
             }
+        }
+
+        public bool SavesToCompressedFile
+        {
+            get { return Properties.Settings.Default.SavesToCompressedFile; }
+            set
+            {
+                Properties.Settings.Default.SavesToCompressedFile = value;
+                Properties.Settings.Default.Save();
+                NotifyPropertyChanged();
+                if (value == false)
+                {
+                    CompressedFileUsesPassword = false;
+                }
+            }
+        }
+
+        public bool CompressedFileUsesPassword
+        {
+            get { return Properties.Settings.Default.CompressedFileUsesPassword; }
+            set
+            {
+                Properties.Settings.Default.CompressedFileUsesPassword = value;
+                Properties.Settings.Default.Save();
+                NotifyPropertyChanged();
+            }
+        }
+
+        public SecureString Password
+        {
+            private get { return _password; }
+            set { _password = value; NotifyPropertyChanged(); }
+        }
+
+        public SecureString ConfirmPassword
+        {
+            private get { return _confirmPassword; }
+            set { _confirmPassword = value; NotifyPropertyChanged(); }
         }
 
         #endregion

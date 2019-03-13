@@ -35,5 +35,23 @@ namespace EasyBackup.Views
                 (DataContext as SetupBackupViewModel).DialogCoordinator = DialogCoordinator.Instance;
             }
         }
+
+        private void Password_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            var dataContext = DataContext as SetupBackupViewModel;
+            if (dataContext != null)
+            {
+                dataContext.Password = PasswordInput.SecurePassword;
+            }
+        }
+
+        private void ConfirmPassword_PasswordChanged(object sender, RoutedEventArgs e)
+        {
+            var dataContext = DataContext as SetupBackupViewModel;
+            if (dataContext != null)
+            {
+                dataContext.ConfirmPassword = ConfirmPasswordInput.SecurePassword;
+            }
+        }
     }
 }

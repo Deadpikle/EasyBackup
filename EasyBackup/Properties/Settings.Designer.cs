@@ -58,5 +58,29 @@ namespace EasyBackup.Properties {
                 this["PlaySoundsWhenFinished"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool SavesToCompressedFile {
+            get {
+                return ((bool)(this["SavesToCompressedFile"]));
+            }
+            set {
+                this["SavesToCompressedFile"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompressedFileUsesPassword {
+            get {
+                return ((bool)(this["CompressedFileUsesPassword"]));
+            }
+            set {
+                this["CompressedFileUsesPassword"] = value;
+            }
+        }
     }
 }

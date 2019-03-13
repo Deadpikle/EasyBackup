@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -49,6 +50,29 @@ namespace EasyBackup.Helpers
             }
             var byteSize = ByteSizeLib.ByteSize.FromBytes(bytes);
             return byteSize.ToString();
+        }
+
+        // https://stackoverflow.com/a/12169099/3938401
+        public static bool Is64BitOS()
+        {
+            return Environment.Is64BitOperatingSystem;
+        }
+
+        // https://stackoverflow.com/a/819705
+        public static string SecureStringToString(SecureString value)
+        {
+            IntPtr valuePtr = IntPtr.Zero;
+            try
+            {
+                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+                return Marshal.PtrToStringUni(valuePtr);
+            }
+            catch { }
+            finally
+            {
+                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
+            }
+            return "";
         }
     }
 }
