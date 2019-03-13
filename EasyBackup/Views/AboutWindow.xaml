@@ -42,6 +42,13 @@
                     <Hyperlink NavigateUri="http://soundbible.com/1830-Sad-Trombone.html" 
                                RequestNavigate="Hyperlink_RequestNavigate">Joe Lamb</Hyperlink>.
                 </TextBlock>
+                <TextBlock TextWrapping="Wrap" Margin="5,0,5,0">
+                Compressed files are created using <Hyperlink NavigateUri="https://www.7-zip.org" 
+                               RequestNavigate="Hyperlink_RequestNavigate">7-Zip</Hyperlink> (7za.exe). 
+                    7-Zip is licensed under the GNU LGPL license.
+                    You can find the source code for 7-Zip at <Hyperlink NavigateUri="https://www.7-zip.org" 
+                               RequestNavigate="Hyperlink_RequestNavigate">www.7-zip.org</Hyperlink>.
+                </TextBlock>
                 <Label Content="Open Source Licenses" FontWeight="Bold" FontSize="14" Margin="0,2,0,2"/>
                 <TextBlock Name="LicensesText" TextWrapping="Wrap" xmlns:space="preserve" Margin="5">
                     

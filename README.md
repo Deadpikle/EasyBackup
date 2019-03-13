@@ -12,6 +12,7 @@ Features include:
 * View backup progress as it happens
 * Optional sounds when backup succeeds or fails
 * Cancel backup at any time
+* Files for backup can be compressed with or without a password (uses 7-zip LZMA compression).
 
 ## Screenshots
 
@@ -30,4 +31,6 @@ Glad you asked! There are always things that can be done on an open-source proje
 
 ## License
 
-MIT License. Thanks for using this software!
+The core EasyBackup code is under the MIT License. Thanks for using this software!
+
+Compressed files are created using [7-Zip](https://www.7-zip.org) (7za.exe). 7-Zip is licensed under the GNU LGPL license. You can find the source code for 7-Zip at [www.7-zip.org](https://www.7-zip.org).
