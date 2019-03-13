@@ -295,15 +295,6 @@ namespace EasyBackup.Helpers
                 }
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    //Console.WriteLine(e.Data);
-                    /*
-                    if (e.Data.StartsWith("Add new data to archive"))
-                    {
-                        // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
-                        sizeInBytes = int.Parse(e.Data.Split(',')[1].Split('(')[0].Trim().Split(' ')[0].Trim());
-                        remainingBytes = sizeInBytes;
-                    }
-                    else */
                     if (e.Data.StartsWith("+ "))
                     {
                         didStartCompressingFile = true;
@@ -344,10 +335,6 @@ namespace EasyBackup.Helpers
                 }
             });
             // TODO: errors
-            // TODO: optimization
-            // TODO: split into volumes  -- https://superuser.com/a/184601
-            /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
-                7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
             /**
              * -y (yes to prompts)
              * -ssw (Compresses files open for writing by another applications)
@@ -355,8 +342,9 @@ namespace EasyBackup.Helpers
              * -bb1 (log level 1)
              * -spf (Use fully qualified file paths)
              * -mx1 (compression level to fastest)
+             * -v2g (split into 2 gb volumes -- https://superuser.com/a/184601)
              * */
-            var args = "-y -ssw -bsp1 -bb1 -spf -mx1";
+            var args = "-y -ssw -bsp1 -bb1 -spf -mx1 -v2g";
             if (UsesPasswordForCompressedFile)
             {
                 var pass = Utilities.SecureStringToString(CompressedFilePassword);
@@ -509,7 +497,6 @@ namespace EasyBackup.Helpers
                     {
                         // first, figure out each file that needs to be copied into the 7z file. this way we can optimize 
                         // the copy to 1 single Process start.
-                        // TODO: do whatever we need to do to accurately track progress!! (path->item dictionary should do it!)
                         var filePaths = new List<string>();
                         var pathsToFolderFileItem = new Dictionary<string, FolderFileItem>();
                         var pathToFileSize = new Dictionary<string, ulong>();
