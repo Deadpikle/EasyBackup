@@ -251,7 +251,7 @@ namespace EasyBackup.Helpers
                 if (HasBeenCanceled)
                 {
                     // TODO: cancel!
-                    process.Close(); //???
+                    process.Close(); //??? don't know if this will cancel 7zip nicely or not. :S need to test
                 }
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
@@ -305,6 +305,7 @@ namespace EasyBackup.Helpers
             // TODO: errors
             // TODO: optimization
             // TODO: clean cancel
+            // TODO: if too many files, it fails :(
             // TODO: split into volumes  -- https://superuser.com/a/184601
             /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
                 7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
@@ -325,8 +326,17 @@ namespace EasyBackup.Helpers
                     args = "-p" + pass + " " + args; // add password flag
                 }
             }
-            string inputPaths = string.Join(" ", quotedFilePaths);
-            args = "a " + args + " \"" + destination + "\" " + inputPaths; // a = add file
+            string inputPaths = string.Join("\n", quotedFilePaths);
+            // to circumvent issue where inputPaths is too long for command line, need to write them to a file
+            // and then load the file into 7z via command line params (@fileName as last param -- https://superuser.com/a/940894)
+            var tmpFileName = Path.GetTempFileName();
+            using (StreamWriter sw = new StreamWriter(tmpFileName))
+            {
+                sw.Write(inputPaths);
+            }
+
+            args = "a " + args + " \"" + destination + "\" @" + tmpFileName; // a = add file
+            Console.WriteLine(args.Length.ToString());
             process.StartInfo.Arguments = args;
             process.Start();
             process.BeginOutputReadLine();
