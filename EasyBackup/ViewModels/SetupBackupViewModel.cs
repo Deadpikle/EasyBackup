@@ -144,6 +144,11 @@ namespace EasyBackup.ViewModels
                 Properties.Settings.Default.CompressedFileUsesPassword = value;
                 Properties.Settings.Default.Save();
                 NotifyPropertyChanged();
+                if (value == false)
+                {
+                    Password.Clear();
+                    ConfirmPassword.Clear();
+                }
             }
         }
 
