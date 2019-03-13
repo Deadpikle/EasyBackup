@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -216,6 +217,25 @@ namespace EasyBackup.Helpers
             }
         }
 
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool GenerateConsoleCtrlEvent(ConsoleCtrlEvent sigevent, int dwProcessGroupId);
+        public enum ConsoleCtrlEvent
+        {
+            CTRL_C = 0,
+            CTRL_BREAK = 1,
+            CTRL_CLOSE = 2,
+            CTRL_LOGOFF = 5,
+            CTRL_SHUTDOWN = 6
+        }
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern bool AttachConsole(uint dwProcessId);
+        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
+        internal static extern bool FreeConsole();
+        [DllImport("kernel32.dll")]
+        static extern bool SetConsoleCtrlHandler(ConsoleCtrlDelegate HandlerRoutine, bool Add);
+        // Delegate type to be used as the Handler Routine for SCCH
+        delegate Boolean ConsoleCtrlDelegate(uint CtrlType);
+
         private void BackupToCompressedFile(string destination, List<string> filePaths, 
             Dictionary<string, FolderFileItem> pathsToFolderFileItem, Dictionary<string, ulong> pathsToFileSize)
         {
@@ -235,6 +255,7 @@ namespace EasyBackup.Helpers
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.RedirectStandardOutput = true;
+            //process.StartInfo.RedirectStandardInput = true;
             //process.StartInfo.RedirectStandardError = true;
 
             process.EnableRaisingEvents = true;
@@ -247,15 +268,35 @@ namespace EasyBackup.Helpers
             string currentFilePath = "";
             FolderFileItem currentItem = null;
             var bytesCopiedForItem = new Dictionary<FolderFileItem, ulong>();
+            var didFinishCancel = false;
             process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
+                if (didFinishCancel) // in case more events come through
+                {
+                    return;
+                }
                 if (HasBeenCanceled)
                 {
-                    // TODO: cancel!
-                    process.Close(); //??? don't know if this will cancel 7zip nicely or not. :S need to test
+                    // https://stackoverflow.com/a/29274238/3938401
+                    if (AttachConsole((uint)process.Id))
+                    {
+                        SetConsoleCtrlHandler(null, true);
+                        try
+                        {
+                            GenerateConsoleCtrlEvent(ConsoleCtrlEvent.CTRL_C, process.SessionId); // ends the process
+                            process.Kill(); // process is canned, so OK to kill
+                        }
+                        finally
+                        {
+                            FreeConsole();
+                            SetConsoleCtrlHandler(null, false);
+                            didFinishCancel = true;
+                        }
+                    }
                 }
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    Console.WriteLine(e.Data);/*
+                    //Console.WriteLine(e.Data);
+                    /*
                     if (e.Data.StartsWith("Add new data to archive"))
                     {
                         // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
@@ -304,8 +345,6 @@ namespace EasyBackup.Helpers
             });
             // TODO: errors
             // TODO: optimization
-            // TODO: clean cancel
-            // TODO: if too many files, it fails :(
             // TODO: split into volumes  -- https://superuser.com/a/184601
             /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
                 7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
@@ -334,7 +373,6 @@ namespace EasyBackup.Helpers
             {
                 sw.Write(inputPaths);
             }
-
             args = "a " + args + " \"" + destination + "\" @" + tmpFileName; // a = add file
             Console.WriteLine(args.Length.ToString());
             process.StartInfo.Arguments = args;
@@ -342,10 +380,14 @@ namespace EasyBackup.Helpers
             process.BeginOutputReadLine();
             process.WaitForExit();
             // make sure last item is handled properly
-            if (currentItem != null && remainingBytes > 0)
+            if (!HasBeenCanceled && currentItem != null && remainingBytes > 0)
             {
                 CopiedBytesOfItem(currentItem, remainingBytes);
                 FinishedCopyingItem?.Invoke(currentItem);
+            }
+            if (HasBeenCanceled)
+            {
+                File.Delete(destination);
             }
         }
 
@@ -522,6 +564,15 @@ namespace EasyBackup.Helpers
                         {
                             // ok, we can do le copy now
                             BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths, pathsToFolderFileItem, pathToFileSize);
+                            if (HasBeenCanceled)
+                            {
+                                try
+                                {
+                                    // not a huge deal if this fails
+                                    File.Delete(backupDirectory);
+                                }
+                                catch (Exception) { }
+                            }
                         }
                     }
                 }
