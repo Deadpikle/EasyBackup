@@ -569,7 +569,7 @@ namespace EasyBackup.Helpers
                                 try
                                 {
                                     // not a huge deal if this fails
-                                    File.Delete(backupDirectory);
+                                    Directory.Delete(backupDirectory);
                                 }
                                 catch (Exception) { }
                             }
