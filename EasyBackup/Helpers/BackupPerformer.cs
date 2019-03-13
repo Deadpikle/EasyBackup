@@ -185,83 +185,6 @@ namespace EasyBackup.Helpers
                 }
                 if (UsesCompressedFile)
                 {
-                    var is64BitOS = Utilities.Is64BitOS();
-                    Process process = new Process();
-                    var currentDir = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
-                    var exePath = is64BitOS ? currentDir + "/tools/x64/7za.exe" : currentDir + "/tools/x86/7za.exe";
-                    process.StartInfo.FileName = exePath;
-                    process.StartInfo.WorkingDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
-
-                    // https://stackoverflow.com/a/6522928/3938401
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    //process.StartInfo.RedirectStandardError = true;
-
-                    process.EnableRaisingEvents = true;
-                    // see below for output handler
-                    //process.ErrorDataReceived += Process_OutputDataReceived;
-                    var sizeInBytes = 0;
-                    var remainingBytes = 0;
-                    var didStartCompressingFile = false;
-                    var lastPercent = 0.0;
-                    process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
-                        if (!string.IsNullOrWhiteSpace(e.Data))
-                        {
-                            Console.WriteLine(e.Data);
-                            if (e.Data.StartsWith("Add new data to archive"))
-                            {
-                                // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
-                                sizeInBytes = int.Parse(e.Data.Split(',')[1].Split('(')[0].Trim().Split(' ')[0].Trim());
-                                remainingBytes = sizeInBytes;
-                            }
-                            else if (e.Data.StartsWith("+ "))
-                            {
-                                didStartCompressingFile = true;
-                            }
-                            else if (e.Data.Contains("%") && didStartCompressingFile)
-                            {
-                                var percent = double.Parse(e.Data.Trim().Split('%')[0]);
-                                var actualPercent = percent - lastPercent;
-                                lastPercent = percent;
-                                var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
-                                CopiedBytesOfItem(itemBeingCopied, (ulong)copiedBytes);
-                                remainingBytes -= (int)copiedBytes;
-                            }
-                        }
-                    });
-                    // TODO: errors
-                    // TODO: optimization
-                    // TODO: clean cancel
-                    // TODO: split into volumes  -- https://superuser.com/a/184601
-                    /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
-                        7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
-                    /**
-                     * -y (yes to prompts)
-                     * -ssw (Compresses files open for writing by another applications)
-                     * -bsp1 (output for progress to stdout)
-                     * -bb1 (log level 1)
-                     * -spf (Use fully qualified file paths)
-                     * -mx1 (compression level to fastest)
-                     * */
-                    var args = "-y -ssw -bsp1 -bb1 -spf -mx1";
-                    if (UsesPasswordForCompressedFile)
-                    {
-                        var pass = Utilities.SecureStringToString(CompressedFilePassword);
-                        if (!string.IsNullOrWhiteSpace(pass))
-                        {
-                            args = "-p" + pass + " " + args; // add password flag
-                        }
-                    }
-                    args = "a " + args + " \"" + destination + "\" \"" + source + "\""; // a = add file
-                    process.StartInfo.Arguments = args;
-                    process.Start();
-                    process.BeginOutputReadLine();
-                    process.WaitForExit();
-                    if (remainingBytes > 0)
-                    {
-                        CopiedBytesOfItem(itemBeingCopied, (ulong)remainingBytes);
-                    }
                 }
                 else
                 {
@@ -286,6 +209,93 @@ namespace EasyBackup.Helpers
                         }
                     }
                 }
+            }
+        }
+
+        private void BackupToCompressedFile(string destination, List<string> filePaths)
+        {
+            var quotedFilePaths = new List<string>();
+            foreach (string filePath in filePaths)
+            {
+                quotedFilePaths.Add("\"" + filePath + "\"");
+            }
+            var is64BitOS = Utilities.Is64BitOS();
+            Process process = new Process();
+            var currentDir = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+            var exePath = is64BitOS ? currentDir + "/tools/x64/7za.exe" : currentDir + "/tools/x86/7za.exe";
+            process.StartInfo.FileName = exePath;
+            process.StartInfo.WorkingDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+
+            // https://stackoverflow.com/a/6522928/3938401
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            //process.StartInfo.RedirectStandardError = true;
+
+            process.EnableRaisingEvents = true;
+            // see below for output handler
+            //process.ErrorDataReceived += Process_OutputDataReceived;
+            var sizeInBytes = 0;
+            var remainingBytes = 0;
+            var didStartCompressingFile = false;
+            var lastPercent = 0.0;
+            process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
+                if (!string.IsNullOrWhiteSpace(e.Data))
+                {
+                    Console.WriteLine(e.Data);
+                    if (e.Data.StartsWith("Add new data to archive"))
+                    {
+                        // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
+                        sizeInBytes = int.Parse(e.Data.Split(',')[1].Split('(')[0].Trim().Split(' ')[0].Trim());
+                        remainingBytes = sizeInBytes;
+                    }
+                    else if (e.Data.StartsWith("+ "))
+                    {
+                        didStartCompressingFile = true;
+                    }
+                    else if (e.Data.Contains("%") && didStartCompressingFile)
+                    {
+                        var percent = double.Parse(e.Data.Trim().Split('%')[0]);
+                        var actualPercent = percent - lastPercent;
+                        lastPercent = percent;
+                        var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
+                        //CopiedBytesOfItem(itemBeingCopied, (ulong)copiedBytes);
+                        remainingBytes -= (int)copiedBytes;
+                    }
+                }
+            });
+            // TODO: errors
+            // TODO: optimization
+            // TODO: clean cancel
+            // TODO: split into volumes  -- https://superuser.com/a/184601
+            /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
+                7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
+            /**
+             * -y (yes to prompts)
+             * -ssw (Compresses files open for writing by another applications)
+             * -bsp1 (output for progress to stdout)
+             * -bb1 (log level 1)
+             * -spf (Use fully qualified file paths)
+             * -mx1 (compression level to fastest)
+             * */
+            var args = "-y -ssw -bsp1 -bb1 -spf -mx1";
+            if (UsesPasswordForCompressedFile)
+            {
+                var pass = Utilities.SecureStringToString(CompressedFilePassword);
+                if (!string.IsNullOrWhiteSpace(pass))
+                {
+                    args = "-p" + pass + " " + args; // add password flag
+                }
+            }
+            string inputPaths = string.Join(" ", quotedFilePaths);
+            args = "a " + args + " \"" + destination + "\" " + inputPaths; // a = add file
+            process.StartInfo.Arguments = args;
+            process.Start();
+            process.BeginOutputReadLine();
+            process.WaitForExit();
+            if (remainingBytes > 0)
+            {
+                //CopiedBytesOfItem(itemBeingCopied, (ulong)remainingBytes);
             }
         }
 
@@ -405,7 +415,7 @@ namespace EasyBackup.Helpers
                     {
                         // first, figure out each file that needs to be copied into the 7z file. this way we can optimize 
                         // the copy to 1 single Process start.
-                        // TODO: do whatever we need to do to accurately track progress!!
+                        // TODO: do whatever we need to do to accurately track progress!! (path->item dictionary should do it!)
                         var filePaths = new List<string>();
                         foreach (FolderFileItem item in paths)
                         {
@@ -444,6 +454,12 @@ namespace EasyBackup.Helpers
                             }
                         }
                         _directoryPathsSeen.Clear();
+                        if (!HasBeenCanceled)
+                        {
+                            // ok, we can do le copy now
+                            // TODO: better file name (include timestamp)
+                            BackupToCompressedFile(Path.Combine(backupDirectory, "backup.7z"), filePaths);
+                        }
                     }
                 }
                 else
