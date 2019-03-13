@@ -338,6 +338,7 @@ namespace EasyBackup.Helpers
             });
             // TODO: errors
             /**
+             * Command line params:
              * -y (yes to prompts)
              * -ssw (Compresses files open for writing by another applications)
              * -bsp1 (output for progress to stdout)

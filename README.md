@@ -1,6 +1,6 @@
 # Easy Backup
 
-Easy Backup is a small Windows utility that allows you to copy files from one location to another for the purposes of a backup. That's it, really. No file compression or file security involved -- just a simple "copy this thing to this other place" application for quick and easy backups to an external or other drive.
+Easy Backup is a small Windows utility that allows you to copy files from one location to another for the purposes of a backup. 
 
 Features include:
 
@@ -12,7 +12,7 @@ Features include:
 * View backup progress as it happens
 * Optional sounds when backup succeeds or fails
 * Cancel backup at any time
-* Files for backup can be compressed with or without a password (uses 7-zip LZMA compression).
+* Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location.
 
 ## Screenshots
 
