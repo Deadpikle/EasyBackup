@@ -246,7 +246,13 @@ namespace EasyBackup.Helpers
             var lastPercent = 0.0;
             string currentFilePath = "";
             FolderFileItem currentItem = null;
+            var bytesCopiedForItem = new Dictionary<FolderFileItem, ulong>();
             process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
+                if (HasBeenCanceled)
+                {
+                    // TODO: cancel!
+                    process.Close(); //???
+                }
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
                     Console.WriteLine(e.Data);/*
@@ -264,8 +270,24 @@ namespace EasyBackup.Helpers
                         if (currentItem != null && remainingBytes > 0)
                         {
                             CopiedBytesOfItem(currentItem, remainingBytes);
+                            bytesCopiedForItem[currentItem] += remainingBytes;
+                            if (!currentItem.IsDirectory)
+                            {
+                                FinishedCopyingItem?.Invoke(currentItem);
+                            }
+                            else
+                            {
+                                if (bytesCopiedForItem[currentItem] == currentItem.ByteSize)
+                                {
+                                    FinishedCopyingItem?.Invoke(currentItem);
+                                }
+                            }
                         }
                         currentItem = pathsToFolderFileItem[currentFilePath]; // TODO: check more safely :sweat_smile:
+                        if (!bytesCopiedForItem.ContainsKey(currentItem))
+                        {
+                            bytesCopiedForItem[currentItem] = 0;
+                        }
                         sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];  // TODO: check more safely :sweat_smile:
                     }
                     else if (e.Data.Contains("%") && didStartCompressingFile)
@@ -275,6 +297,7 @@ namespace EasyBackup.Helpers
                         lastPercent = percent;
                         var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
                         CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
+                        bytesCopiedForItem[currentItem] += (ulong)copiedBytes;
                         remainingBytes -= (ulong)copiedBytes;
                     }
                 }
@@ -282,7 +305,6 @@ namespace EasyBackup.Helpers
             // TODO: errors
             // TODO: optimization
             // TODO: clean cancel
-            // TODO: subfolders not working for directories
             // TODO: split into volumes  -- https://superuser.com/a/184601
             /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
                 7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
@@ -309,10 +331,11 @@ namespace EasyBackup.Helpers
             process.Start();
             process.BeginOutputReadLine();
             process.WaitForExit();
-
+            // make sure last item is handled properly
             if (currentItem != null && remainingBytes > 0)
             {
                 CopiedBytesOfItem(currentItem, remainingBytes);
+                FinishedCopyingItem?.Invoke(currentItem);
             }
         }
 
