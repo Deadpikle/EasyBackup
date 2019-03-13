@@ -307,7 +307,8 @@ namespace EasyBackup.Helpers
                 IsRunning = true;
                 if (Directory.Exists(backupDirectory) || _isCalculatingFileSize)
                 {
-                    backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
+                    var backupName = "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss");
+                    backupDirectory = Path.Combine(backupDirectory, "easy-backup", backupName);
                     if (!Directory.Exists(backupDirectory) && !_isCalculatingFileSize)
                     {
                         Directory.CreateDirectory(backupDirectory);
@@ -316,7 +317,8 @@ namespace EasyBackup.Helpers
                     {
                         // ok, somehow they started two backups within the same second >_> wait 1 second and start again
                         Task.Delay(1000);
-                        backupDirectory = Path.Combine(backupDirectory, "easy-backup", "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss"));
+                        backupName = "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss");
+                        backupDirectory = Path.Combine(backupDirectory, "easy-backup", backupName);
                         if (!Directory.Exists(backupDirectory))
                         {
                             Directory.CreateDirectory(backupDirectory);
@@ -457,8 +459,7 @@ namespace EasyBackup.Helpers
                         if (!HasBeenCanceled)
                         {
                             // ok, we can do le copy now
-                            // TODO: better file name (include timestamp)
-                            BackupToCompressedFile(Path.Combine(backupDirectory, "backup.7z"), filePaths);
+                            BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths);
                         }
                     }
                 }
