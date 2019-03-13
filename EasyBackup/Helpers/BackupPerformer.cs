@@ -132,9 +132,9 @@ namespace EasyBackup.Helpers
             }
         }
 
-        private List<string> GetFilesInDirectory(string sourceDirName, bool searchSubDirs)
+        private Dictionary<string, ulong> GetFilePathsAndSizesInDirectory(string sourceDirName, bool searchSubDirs)
         {
-            var fileList = new List<string>();
+            var fileList = new Dictionary<string, ulong>();
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
             if (!dir.Exists)
             {
@@ -151,7 +151,7 @@ namespace EasyBackup.Helpers
                 {
                     return fileList;
                 }
-                fileList.Add(file.FullName);
+                fileList.Add(file.FullName, (ulong)file.Length);
             }
 
             // If copying subdirectories, search them and their contents 
@@ -166,7 +166,11 @@ namespace EasyBackup.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
-                        fileList.AddRange(GetFilesInDirectory(subDir.FullName, searchSubDirs));
+                        var additionalFileInfo = GetFilePathsAndSizesInDirectory(subDir.FullName, searchSubDirs);
+                        foreach (KeyValuePair<string, ulong> entry in additionalFileInfo)
+                        {
+                            fileList.Add(entry.Key, entry.Value);
+                        }
                         _directoryPathsSeen.Add(subDir.FullName);
                     }
                 }
@@ -212,7 +216,8 @@ namespace EasyBackup.Helpers
             }
         }
 
-        private void BackupToCompressedFile(string destination, List<string> filePaths)
+        private void BackupToCompressedFile(string destination, List<string> filePaths, 
+            Dictionary<string, FolderFileItem> pathsToFolderFileItem, Dictionary<string, ulong> pathsToFileSize)
         {
             var quotedFilePaths = new List<string>();
             foreach (string filePath in filePaths)
@@ -235,23 +240,33 @@ namespace EasyBackup.Helpers
             process.EnableRaisingEvents = true;
             // see below for output handler
             //process.ErrorDataReceived += Process_OutputDataReceived;
-            var sizeInBytes = 0;
-            var remainingBytes = 0;
+            var sizeInBytes = 0UL;
+            var remainingBytes = 0UL;
             var didStartCompressingFile = false;
             var lastPercent = 0.0;
+            string currentFilePath = "";
+            FolderFileItem currentItem = null;
             process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
                 if (!string.IsNullOrWhiteSpace(e.Data))
                 {
-                    Console.WriteLine(e.Data);
+                    Console.WriteLine(e.Data);/*
                     if (e.Data.StartsWith("Add new data to archive"))
                     {
                         // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
                         sizeInBytes = int.Parse(e.Data.Split(',')[1].Split('(')[0].Trim().Split(' ')[0].Trim());
                         remainingBytes = sizeInBytes;
                     }
-                    else if (e.Data.StartsWith("+ "))
+                    else */
+                    if (e.Data.StartsWith("+ "))
                     {
                         didStartCompressingFile = true;
+                        currentFilePath = e.Data.Substring(2);
+                        if (currentItem != null && remainingBytes > 0)
+                        {
+                            CopiedBytesOfItem(currentItem, remainingBytes);
+                        }
+                        currentItem = pathsToFolderFileItem[currentFilePath]; // TODO: check more safely :sweat_smile:
+                        sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];  // TODO: check more safely :sweat_smile:
                     }
                     else if (e.Data.Contains("%") && didStartCompressingFile)
                     {
@@ -259,14 +274,15 @@ namespace EasyBackup.Helpers
                         var actualPercent = percent - lastPercent;
                         lastPercent = percent;
                         var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
-                        //CopiedBytesOfItem(itemBeingCopied, (ulong)copiedBytes);
-                        remainingBytes -= (int)copiedBytes;
+                        CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
+                        remainingBytes -= (ulong)copiedBytes;
                     }
                 }
             });
             // TODO: errors
             // TODO: optimization
             // TODO: clean cancel
+            // TODO: subfolders not working for directories
             // TODO: split into volumes  -- https://superuser.com/a/184601
             /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
                 7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
@@ -293,9 +309,10 @@ namespace EasyBackup.Helpers
             process.Start();
             process.BeginOutputReadLine();
             process.WaitForExit();
-            if (remainingBytes > 0)
+
+            if (currentItem != null && remainingBytes > 0)
             {
-                //CopiedBytesOfItem(itemBeingCopied, (ulong)remainingBytes);
+                CopiedBytesOfItem(currentItem, remainingBytes);
             }
         }
 
@@ -419,6 +436,8 @@ namespace EasyBackup.Helpers
                         // the copy to 1 single Process start.
                         // TODO: do whatever we need to do to accurately track progress!! (path->item dictionary should do it!)
                         var filePaths = new List<string>();
+                        var pathsToFolderFileItem = new Dictionary<string, FolderFileItem>();
+                        var pathToFileSize = new Dictionary<string, ulong>();
                         foreach (FolderFileItem item in paths)
                         {
                             if (HasBeenCanceled)
@@ -438,7 +457,9 @@ namespace EasyBackup.Helpers
                                         {
                                             break;
                                         }
+                                        pathsToFolderFileItem.Add(latestFile.FullName, item);
                                         filePaths.Add(latestFile.FullName);
+                                        pathToFileSize.Add(item.Path, (ulong)new FileInfo(latestFile.FullName).Length);
                                     }
                                 }
                                 else
@@ -447,11 +468,19 @@ namespace EasyBackup.Helpers
                                     {
                                         break;
                                     }
-                                    filePaths.AddRange(GetFilesInDirectory(item.Path, item.IsRecursive));
+                                    var filesWithSizesInDirectory = GetFilePathsAndSizesInDirectory(item.Path, item.IsRecursive);
+                                    foreach (KeyValuePair<string, ulong> entry in filesWithSizesInDirectory)
+                                    {
+                                        pathsToFolderFileItem.Add(entry.Key, item);
+                                        pathToFileSize.Add(entry.Key, entry.Value);
+                                        filePaths.Add(entry.Key);
+                                    }
                                 }
                             }
                             else
                             {
+                                pathsToFolderFileItem.Add(item.Path, item);
+                                pathToFileSize.Add(item.Path, (ulong)new FileInfo(item.Path).Length);
                                 filePaths.Add(item.Path);
                             }
                         }
@@ -459,7 +488,7 @@ namespace EasyBackup.Helpers
                         if (!HasBeenCanceled)
                         {
                             // ok, we can do le copy now
-                            BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths);
+                            BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths, pathsToFolderFileItem, pathToFileSize);
                         }
                     }
                 }
