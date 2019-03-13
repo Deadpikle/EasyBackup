@@ -172,4 +172,16 @@
     </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>echo Copying files from "$(SolutionDir)packages\7-Zip.CommandLine.18.1.0" to "$(ProjectDir)bin\$(Configuration)"
+if not exist "$(ProjectDir)bin\$(Configuration)" mkdir "$(ProjectDir)bin\$(Configuration)"
+if not exist "$(ProjectDir)bin\$(Configuration)\tools" mkdir "$(ProjectDir)bin\$(Configuration)\tools"
+if not exist "$(ProjectDir)bin\$(Configuration)\tools\x86" mkdir "$(ProjectDir)bin\$(Configuration)\tools\x86"
+if not exist "$(ProjectDir)bin\$(Configuration)\tools\x64" mkdir "$(ProjectDir)bin\$(Configuration)\tools\x64"
+
+echo f | xcopy "$(SolutionDir)packages\7-Zip.CommandLine.18.1.0\tools\7za.exe"  "$(ProjectDir)bin\$(Configuration)\tools\x86\7za.exe" /d /y
+
+echo f | xcopy "$(SolutionDir)packages\7-Zip.CommandLine.18.1.0\tools\x64\7za.exe"  "$(ProjectDir)bin\$(Configuration)\tools\x64\7za.exe" /d /y
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>
