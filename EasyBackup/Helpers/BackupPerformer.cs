@@ -207,12 +207,16 @@ namespace EasyBackup.Helpers
                             }
                         }
                     });
-
+                    // TODO: errors
+                    // TODO: optimization
                     /**
                      * -ssw (Compresses files open for writing by another applications)
                      * -spf (Use fully qualified file paths)
+                     * -mx1 (compression level to fastest)
+                     * -bsp1 (output for progress to stdout)
+                     * -y (yes to prompts)
                      * */
-                    var args = "-y -ssw -bsp1 -bb1 -spf \"" + source + "\"";
+                    var args = "-y -ssw -bsp1 -bb1 -spf -mx1";
                     if (UsesPasswordForCompressedFile)
                     {
                         var pass = Utilities.SecureStringToString(CompressedFilePassword);
@@ -221,7 +225,7 @@ namespace EasyBackup.Helpers
                             args = "-p" + pass + " " + args; // add password flag
                         }
                     }
-                    args = "a \"" + destination + "\" " + args; // a = add file
+                    args = "a " + args + " \"" + destination + "\" \"" + source + "\""; // a = add file
                     process.StartInfo.Arguments = args;
                     process.Start();
                     process.BeginOutputReadLine();
