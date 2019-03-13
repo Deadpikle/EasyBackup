@@ -276,6 +276,7 @@ namespace EasyBackup.Helpers
                 }
                 if (HasBeenCanceled)
                 {
+                    // ONLY WORKS IF YOU AREN'T ALREADY SHOWING A CONSOLE!
                     // https://stackoverflow.com/a/29274238/3938401
                     if (AttachConsole((uint)process.Id))
                     {
