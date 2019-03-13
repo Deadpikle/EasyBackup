@@ -87,9 +87,8 @@ namespace EasyBackup.Helpers
             }
             _directoryPathsSeen.Add(sourceDirName);
 
-            DirectoryInfo[] dirs = dir.GetDirectories();
             // If the destination directory doesn't exist, create it.
-            if (!UsesCompressedFile && !Directory.Exists(destDirName) && !_isCalculatingFileSize)
+            if (!Directory.Exists(destDirName) && !_isCalculatingFileSize)
             {
                 Directory.CreateDirectory(destDirName);
             }
@@ -108,47 +107,71 @@ namespace EasyBackup.Helpers
                 }
                 else
                 {
-                    if (UsesCompressedFile)
-                    {
-                        CopySingleFile(itemBeingCopied, file.FullName, destDirName);
-                    }
-                    else
-                    {
-                        string tempPath = Path.Combine(destDirName, file.Name);
-                        CopySingleFile(itemBeingCopied, file.FullName, tempPath);
-                    }
+                    string tempPath = Path.Combine(destDirName, file.Name);
+                    CopySingleFile(itemBeingCopied, file.FullName, tempPath);
                 }
             }
 
             // If copying subdirectories, copy them and their contents to new location.
             if (copySubDirs)
             {
+                DirectoryInfo[] dirs = dir.GetDirectories();
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     if (HasBeenCanceled)
                     {
                         return;
                     }
-
-                    if (UsesCompressedFile)
+                    if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
-                        if (!_directoryPathsSeen.Contains(subDir.FullName))
-                        {
-                            CopyDirectory(itemBeingCopied, subDir.FullName, destDirName, copySubDirs);
-                            _directoryPathsSeen.Add(subDir.FullName);
-                        }
-                    }
-                    else
-                    {
-                        if (!_directoryPathsSeen.Contains(subDir.FullName))
-                        {
-                            string temppath = Path.Combine(destDirName, subDir.Name);
-                            CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
-                            _directoryPathsSeen.Add(subDir.FullName);
-                        }
+                        string temppath = Path.Combine(destDirName, subDir.Name);
+                        CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
+                        _directoryPathsSeen.Add(subDir.FullName);
                     }
                 }
             }
+        }
+
+        private List<string> GetFilesInDirectory(string sourceDirName, bool searchSubDirs)
+        {
+            var fileList = new List<string>();
+            DirectoryInfo dir = new DirectoryInfo(sourceDirName);
+            if (!dir.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirName);
+            }
+            _directoryPathsSeen.Add(sourceDirName);
+            // Get the files in the current directory
+            FileInfo[] files = dir.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                if (HasBeenCanceled)
+                {
+                    return fileList;
+                }
+                fileList.Add(file.FullName);
+            }
+
+            // If copying subdirectories, search them and their contents 
+            if (searchSubDirs)
+            {
+                DirectoryInfo[] dirs = dir.GetDirectories();
+                foreach (DirectoryInfo subDir in dirs)
+                {
+                    if (HasBeenCanceled)
+                    {
+                        return fileList;
+                    }
+                    if (!_directoryPathsSeen.Contains(subDir.FullName))
+                    {
+                        fileList.AddRange(GetFilesInDirectory(subDir.FullName, searchSubDirs));
+                        _directoryPathsSeen.Add(subDir.FullName);
+                    }
+                }
+            }
+            return fileList;
         }
 
         // Modified from https://stackoverflow.com/a/33726939/3938401
@@ -209,12 +232,17 @@ namespace EasyBackup.Helpers
                     });
                     // TODO: errors
                     // TODO: optimization
+                    // TODO: clean cancel
+                    // TODO: split into volumes  -- https://superuser.com/a/184601
+                    /*  Use the -v option (v is for volume) -v100m will split the archive into chunks of 100MB.
+                        7z -v option supports b k m g (bytes, kilobytes, megabytes, gigabytes) */
                     /**
+                     * -y (yes to prompts)
                      * -ssw (Compresses files open for writing by another applications)
+                     * -bsp1 (output for progress to stdout)
+                     * -bb1 (log level 1)
                      * -spf (Use fully qualified file paths)
                      * -mx1 (compression level to fastest)
-                     * -bsp1 (output for progress to stdout)
-                     * -y (yes to prompts)
                      * */
                     var args = "-y -ssw -bsp1 -bb1 -spf -mx1";
                     if (UsesPasswordForCompressedFile)
@@ -288,29 +316,29 @@ namespace EasyBackup.Helpers
                             throw new Exception("Couldn't create backup directory (directory already exists)");
                         }
                     }
-                    // ok, start copying the files!
-                    foreach (FolderFileItem item in paths)
+                    // ok, start copying the files if not using compressed file.
+                    if (!UsesCompressedFile || _isCalculatingFileSize)
                     {
-                        if (HasBeenCanceled)
+                        foreach (FolderFileItem item in paths)
                         {
-                            break;
-                        }
-                        var directoryName = Path.GetDirectoryName(item.Path);
-                        var pathRoot = Path.GetPathRoot(item.Path);
-                        directoryName = directoryName.Replace(pathRoot, "");
-                        directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
-                        var outputDirectoryPath = UsesCompressedFile ? backupDirectory : Path.Combine(backupDirectory, directoryName);
-                        if (!Directory.Exists(outputDirectoryPath) && !_isCalculatingFileSize)
-                        {
-                            Directory.CreateDirectory(outputDirectoryPath);
-                        }
-                        if (!_isCalculatingFileSize)
-                        {
-                            StartedCopyingItem?.Invoke(item);
-                        }
-                        if (item.IsDirectory)
-                        {
-                            if (Directory.Exists(item.Path))
+                            if (HasBeenCanceled)
+                            {
+                                break;
+                            }
+                            var directoryName = Path.GetDirectoryName(item.Path);
+                            var pathRoot = Path.GetPathRoot(item.Path);
+                            directoryName = directoryName.Replace(pathRoot, "");
+                            directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
+                            var outputDirectoryPath = Path.Combine(backupDirectory, directoryName);
+                            if (!Directory.Exists(outputDirectoryPath) && !_isCalculatingFileSize)
+                            {
+                                Directory.CreateDirectory(outputDirectoryPath);
+                            }
+                            if (!_isCalculatingFileSize)
+                            {
+                                StartedCopyingItem?.Invoke(item);
+                            }
+                            if (item.IsDirectory && Directory.Exists(item.Path))
                             {
                                 if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
                                 {
@@ -335,15 +363,8 @@ namespace EasyBackup.Helpers
                                             {
                                                 break;
                                             }
-                                            if (UsesCompressedFile)
-                                            {
-                                                CopySingleFile(item, latestFile.FullName, Path.Combine(outputDirectoryPath, "backup.7z"));
-                                            }
-                                            else
-                                            {
-                                                var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
-                                                CopySingleFile(item, latestFile.FullName, outputPath);
-                                            }
+                                            var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                            CopySingleFile(item, latestFile.FullName, outputPath);
                                         }
                                     }
                                 }
@@ -354,34 +375,19 @@ namespace EasyBackup.Helpers
                                         break;
                                     }
                                     _currentDirectorySize = 0;
-
-                                    if (UsesCompressedFile)
-                                    {
-                                        CopyDirectory(item, item.Path, Path.Combine(outputDirectoryPath, "backup.7z"), item.IsRecursive);
-                                    }
-                                    else
-                                    {
-                                        var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                        CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
-                                    }
+                                    var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
                                     if (_isCalculatingFileSize)
                                     {
                                         CalculatedBytesOfItem?.Invoke(item, _currentDirectorySize);
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            if (_isCalculatingFileSize)
-                            {
-                                CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(item.Path).Length);
-                            }
                             else
                             {
-                                if (UsesCompressedFile)
+                                if (_isCalculatingFileSize)
                                 {
-                                    CopySingleFile(item, item.Path, Path.Combine(outputDirectoryPath, "backup.7z"));
+                                    CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(item.Path).Length);
                                 }
                                 else
                                 {
@@ -389,11 +395,55 @@ namespace EasyBackup.Helpers
                                     CopySingleFile(item, item.Path, outputPath);
                                 }
                             }
+                            if (!HasBeenCanceled && !_isCalculatingFileSize)
+                            {
+                                FinishedCopyingItem?.Invoke(item);
+                            }
                         }
-                        if (!HasBeenCanceled && !_isCalculatingFileSize)
+                    }
+                    else
+                    {
+                        // first, figure out each file that needs to be copied into the 7z file. this way we can optimize 
+                        // the copy to 1 single Process start.
+                        // TODO: do whatever we need to do to accurately track progress!!
+                        var filePaths = new List<string>();
+                        foreach (FolderFileItem item in paths)
                         {
-                            FinishedCopyingItem?.Invoke(item);
+                            if (HasBeenCanceled)
+                            {
+                                break;
+                            }
+                            if (item.IsDirectory && Directory.Exists(item.Path))
+                            {
+                                if (item.OnlyCopiesLatestFile && item.CanEnableOnlyCopiesLatestFile)
+                                {
+                                    // scan directory and copy only the latest file out of it
+                                    var directoryInfo = new DirectoryInfo(item.Path);
+                                    var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+                                    if (latestFile != null)
+                                    {
+                                        if (HasBeenCanceled)
+                                        {
+                                            break;
+                                        }
+                                        filePaths.Add(latestFile.FullName);
+                                    }
+                                }
+                                else
+                                {
+                                    if (HasBeenCanceled)
+                                    {
+                                        break;
+                                    }
+                                    filePaths.AddRange(GetFilesInDirectory(item.Path, item.IsRecursive));
+                                }
+                            }
+                            else
+                            {
+                                filePaths.Add(item.Path);
+                            }
                         }
+                        _directoryPathsSeen.Clear();
                     }
                 }
                 else
