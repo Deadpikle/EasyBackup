@@ -63,6 +63,15 @@ namespace EasyBackup.ViewModels
                 _failureSoundPlayer = new SoundPlayer("Sounds/failure-tbone.wav");
                 _successSoundPlayer = new SoundPlayer("Sounds/success.wav");
             }
+            if (compressesOutput)
+            {
+                _backupPerformer.UsesCompressedFile = true;
+                if (compressedPassword != null)
+                {
+                    _backupPerformer.UsesPasswordForCompressedFile = true;
+                    _backupPerformer.CompressedFilePassword = compressedPassword;
+                }
+            }
             RunBackup();
         }
 

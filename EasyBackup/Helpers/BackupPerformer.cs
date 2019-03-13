@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -31,6 +32,10 @@ namespace EasyBackup.Helpers
         public bool IsRunning;
         public bool HasBeenCanceled;
 
+        public bool UsesCompressedFile;
+        public bool UsesPasswordForCompressedFile;
+        public SecureString CompressedFilePassword;
+
         private List<string> _directoryPathsSeen;
         private bool _isCalculatingFileSize;
         private ulong _currentDirectorySize;
@@ -41,6 +46,9 @@ namespace EasyBackup.Helpers
             HasBeenCanceled = false;
             _isCalculatingFileSize = false;
             _currentDirectorySize = 0;
+            UsesCompressedFile = false;
+            UsesPasswordForCompressedFile = false;
+            CompressedFilePassword = null;
         }
 
         public void Cancel()
