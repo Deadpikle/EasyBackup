@@ -1,8 +1,10 @@
 ﻿using EasyBackup.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Security;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ namespace EasyBackup.Helpers
         // // // // // // // // // // // // //
 
         public bool IsRunning;
+        public bool HadError;
         public bool HasBeenCanceled;
 
         public bool UsesCompressedFile;
@@ -47,6 +50,7 @@ namespace EasyBackup.Helpers
             _isCalculatingFileSize = false;
             _currentDirectorySize = 0;
             UsesCompressedFile = false;
+            HadError = false;
             UsesPasswordForCompressedFile = false;
             CompressedFilePassword = null;
         }
@@ -85,7 +89,7 @@ namespace EasyBackup.Helpers
 
             DirectoryInfo[] dirs = dir.GetDirectories();
             // If the destination directory doesn't exist, create it.
-            if (!Directory.Exists(destDirName) && !_isCalculatingFileSize)
+            if (!UsesCompressedFile && !Directory.Exists(destDirName) && !_isCalculatingFileSize)
             {
                 Directory.CreateDirectory(destDirName);
             }
@@ -104,8 +108,15 @@ namespace EasyBackup.Helpers
                 }
                 else
                 {
-                    string tempPath = Path.Combine(destDirName, file.Name);
-                    CopySingleFile(itemBeingCopied, file.FullName, tempPath);
+                    if (UsesCompressedFile)
+                    {
+                        CopySingleFile(itemBeingCopied, file.FullName, destDirName);
+                    }
+                    else
+                    {
+                        string tempPath = Path.Combine(destDirName, file.Name);
+                        CopySingleFile(itemBeingCopied, file.FullName, tempPath);
+                    }
                 }
             }
 
@@ -118,11 +129,23 @@ namespace EasyBackup.Helpers
                     {
                         return;
                     }
-                    string temppath = Path.Combine(destDirName, subDir.Name);
-                    if (!_directoryPathsSeen.Contains(subDir.FullName))
+
+                    if (UsesCompressedFile)
                     {
-                        CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
-                        _directoryPathsSeen.Add(subDir.FullName);
+                        if (!_directoryPathsSeen.Contains(subDir.FullName))
+                        {
+                            CopyDirectory(itemBeingCopied, subDir.FullName, destDirName, copySubDirs);
+                            _directoryPathsSeen.Add(subDir.FullName);
+                        }
+                    }
+                    else
+                    {
+                        if (!_directoryPathsSeen.Contains(subDir.FullName))
+                        {
+                            string temppath = Path.Combine(destDirName, subDir.Name);
+                            CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
+                            _directoryPathsSeen.Add(subDir.FullName);
+                        }
                     }
                 }
             }
@@ -137,23 +160,97 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                if (UsesCompressedFile)
                 {
-                    using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
-                    {
-                        int buffer_size = 10240;
-                        byte[] buffer = new byte[buffer_size];
-                        long total_read = 0;
-                        while (total_read < inStream.Length)
+                    var is64BitOS = Utilities.Is64BitOS();
+                    Process process = new Process();
+                    var currentDir = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+                    var exePath = is64BitOS ? currentDir + "/tools/x64/7za.exe" : currentDir + "/tools/x86/7za.exe";
+                    process.StartInfo.FileName = exePath;
+                    process.StartInfo.WorkingDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+
+                    // https://stackoverflow.com/a/6522928/3938401
+                    process.StartInfo.UseShellExecute = false;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.RedirectStandardOutput = true;
+                    //process.StartInfo.RedirectStandardError = true;
+
+                    process.EnableRaisingEvents = true;
+                    // see below for output handler
+                    //process.ErrorDataReceived += Process_OutputDataReceived;
+                    var sizeInBytes = 0;
+                    var remainingBytes = 0;
+                    var didStartCompressingFile = false;
+                    var lastPercent = 0.0;
+                    process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
+                        if (!string.IsNullOrWhiteSpace(e.Data))
                         {
-                            if (HasBeenCanceled)
+                            Console.WriteLine(e.Data);
+                            if (e.Data.StartsWith("Add new data to archive"))
                             {
-                                break;
+                                // format --- Add new data to archive: 1 file, 5262808 bytes (5140 KiB)
+                                sizeInBytes = int.Parse(e.Data.Split(',')[1].Split('(')[0].Trim().Split(' ')[0].Trim());
+                                remainingBytes = sizeInBytes;
                             }
-                            int read = inStream.Read(buffer, 0, buffer_size);
-                            outStream.Write(buffer, 0, read);
-                            CopiedBytesOfItem(itemBeingCopied, (ulong)read);
-                            total_read += read;
+                            else if (e.Data.StartsWith("+ "))
+                            {
+                                didStartCompressingFile = true;
+                            }
+                            else if (e.Data.Contains("%") && didStartCompressingFile)
+                            {
+                                var percent = double.Parse(e.Data.Trim().Split('%')[0]);
+                                var actualPercent = percent - lastPercent;
+                                lastPercent = percent;
+                                var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
+                                CopiedBytesOfItem(itemBeingCopied, (ulong)copiedBytes);
+                                remainingBytes -= (int)copiedBytes;
+                            }
+                        }
+                    });
+
+                    /**
+                     * -ssw (Compresses files open for writing by another applications)
+                     * -spf (Use fully qualified file paths)
+                     * */
+                    var args = "-y -ssw -bsp1 -bb1 -spf \"" + source + "\"";
+                    if (UsesPasswordForCompressedFile)
+                    {
+                        var pass = Utilities.SecureStringToString(CompressedFilePassword);
+                        if (!string.IsNullOrWhiteSpace(pass))
+                        {
+                            args = "-p" + pass + " " + args; // add password flag
+                        }
+                    }
+                    args = "a \"" + destination + "\" " + args; // a = add file
+                    process.StartInfo.Arguments = args;
+                    process.Start();
+                    process.BeginOutputReadLine();
+                    process.WaitForExit();
+                    if (remainingBytes > 0)
+                    {
+                        CopiedBytesOfItem(itemBeingCopied, (ulong)remainingBytes);
+                    }
+                }
+                else
+                {
+                    using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                    {
+                        using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        {
+                            int buffer_size = 10240;
+                            byte[] buffer = new byte[buffer_size];
+                            long total_read = 0;
+                            while (total_read < inStream.Length)
+                            {
+                                if (HasBeenCanceled)
+                                {
+                                    break;
+                                }
+                                int read = inStream.Read(buffer, 0, buffer_size);
+                                outStream.Write(buffer, 0, read);
+                                CopiedBytesOfItem(itemBeingCopied, (ulong)read);
+                                total_read += read;
+                            }
                         }
                     }
                 }
@@ -164,6 +261,7 @@ namespace EasyBackup.Helpers
         {
             try
             {
+                HadError = false;
                 IsRunning = true;
                 if (Directory.Exists(backupDirectory) || _isCalculatingFileSize)
                 {
@@ -183,7 +281,7 @@ namespace EasyBackup.Helpers
                         }
                         else
                         {
-                            throw new Exception("Couldn't create backup directory (directory already exists");
+                            throw new Exception("Couldn't create backup directory (directory already exists)");
                         }
                     }
                     // ok, start copying the files!
@@ -197,7 +295,7 @@ namespace EasyBackup.Helpers
                         var pathRoot = Path.GetPathRoot(item.Path);
                         directoryName = directoryName.Replace(pathRoot, "");
                         directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
-                        var outputDirectoryPath = Path.Combine(backupDirectory, directoryName);
+                        var outputDirectoryPath = UsesCompressedFile ? backupDirectory : Path.Combine(backupDirectory, directoryName);
                         if (!Directory.Exists(outputDirectoryPath) && !_isCalculatingFileSize)
                         {
                             Directory.CreateDirectory(outputDirectoryPath);
@@ -229,24 +327,39 @@ namespace EasyBackup.Helpers
                                             {
                                                 Directory.CreateDirectory(outputBackupDirectory);
                                             }
-                                            var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
                                             if (HasBeenCanceled)
                                             {
                                                 break;
                                             }
-                                            CopySingleFile(item, latestFile.FullName, outputPath);
+                                            if (UsesCompressedFile)
+                                            {
+                                                CopySingleFile(item, latestFile.FullName, Path.Combine(outputDirectoryPath, "backup.7z"));
+                                            }
+                                            else
+                                            {
+                                                var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
+                                                CopySingleFile(item, latestFile.FullName, outputPath);
+                                            }
                                         }
                                     }
                                 }
                                 else
                                 {
-                                    var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
                                     if (HasBeenCanceled)
                                     {
                                         break;
                                     }
                                     _currentDirectorySize = 0;
-                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
+
+                                    if (UsesCompressedFile)
+                                    {
+                                        CopyDirectory(item, item.Path, Path.Combine(outputDirectoryPath, "backup.7z"), item.IsRecursive);
+                                    }
+                                    else
+                                    {
+                                        var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                        CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
+                                    }
                                     if (_isCalculatingFileSize)
                                     {
                                         CalculatedBytesOfItem?.Invoke(item, _currentDirectorySize);
@@ -262,8 +375,15 @@ namespace EasyBackup.Helpers
                             }
                             else
                             {
-                                var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                CopySingleFile(item, item.Path, outputPath);
+                                if (UsesCompressedFile)
+                                {
+                                    CopySingleFile(item, item.Path, Path.Combine(outputDirectoryPath, "backup.7z"));
+                                }
+                                else
+                                {
+                                    var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
+                                    CopySingleFile(item, item.Path, outputPath);
+                                }
                             }
                         }
                         if (!HasBeenCanceled && !_isCalculatingFileSize)
@@ -280,6 +400,7 @@ namespace EasyBackup.Helpers
             }
             catch (Exception e)
             {
+                HadError = true;
                 BackupFailed?.Invoke(e);
             }
             finally

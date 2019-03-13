@@ -27,8 +27,7 @@
                   SelectionUnit="FullRow"
                   SelectionMode="Single"
                   GridLinesVisibility="All" 
-                  RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1"
-                  SelectedItem="{Binding SelectedItem}">
+                  RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1">
             <DataGrid.Columns>
                 <DataGridTemplateColumn Header="Path" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
                                     CanUserReorder="False">

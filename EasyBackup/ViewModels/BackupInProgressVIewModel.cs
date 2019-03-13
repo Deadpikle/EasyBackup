@@ -33,6 +33,9 @@ namespace EasyBackup.ViewModels
         private SoundPlayer _successSoundPlayer;
         private SoundPlayer _failureSoundPlayer;
 
+        private SolidColorBrush _redBrush = new SolidColorBrush(Colors.Red);
+        private SolidColorBrush _greenBrush = new SolidColorBrush(Colors.Green);
+
         #endregion
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, 
@@ -117,8 +120,6 @@ namespace EasyBackup.ViewModels
 
         private void RunBackup()
         {
-            var redBrush = new SolidColorBrush(Colors.Red);
-            var greenBrush = new SolidColorBrush(Colors.Green);
             Task.Run(() =>
             {
                 FinishButtonTitle = "Cancel Backup";
@@ -126,7 +127,6 @@ namespace EasyBackup.ViewModels
                 if (!Directory.Exists(BackupLocation))
                 {
                     TellUserBackupFailed("Error: Backup directory doesn't exist");
-                    StatusColor = redBrush;
                 }
                 else
                 {
@@ -137,21 +137,21 @@ namespace EasyBackup.ViewModels
                         var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
                                                 ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
                         TellUserBackupFailed(error);
-                        StatusColor = redBrush;
                     }
                     else
                     {
                         Status = "Performing backup...";
                         _backupPerformer.PerformBackup(Items, BackupLocation);
-                        if (_backupPerformer.HasBeenCanceled)
+                        if (!_backupPerformer.HadError) // if error, message already handled
                         {
-                            TellUserBackupFailed("Backup was canceled");
-                            StatusColor = redBrush;
-                        }
-                        else
-                        {
-                            TellUserBackupSucceeded("Backup successfully finished");
-                            StatusColor = greenBrush;
+                            if (_backupPerformer.HasBeenCanceled)
+                            {
+                                TellUserBackupFailed("Backup was canceled");
+                            }
+                            else
+                            {
+                                TellUserBackupSucceeded("Backup successfully finished");
+                            }
                         }
                     }
                 }
@@ -161,6 +161,7 @@ namespace EasyBackup.ViewModels
         private void TellUserBackupSucceeded(string message)
         {
             Status = message;
+            StatusColor = _greenBrush;
             if (_playsSounds)
             {
                 _successSoundPlayer.Play();
@@ -171,6 +172,7 @@ namespace EasyBackup.ViewModels
         private void TellUserBackupFailed(string message)
         {
             Status = message;
+            StatusColor = _redBrush;
             if (_playsSounds)
             {
                 _failureSoundPlayer.Play();
@@ -226,24 +228,31 @@ namespace EasyBackup.ViewModels
 
         private void _backupPerformer_BackupFailed(Exception e)
         {
-            Status = "Backup failed. Error: " + e.Message;
-            FinishButtonTitle = "Finish Backup";
-            StatusColor = new SolidColorBrush(Colors.Red);
+            TellUserBackupFailed("Backup failed. Error: " + e.Message);
+            StatusColor = _redBrush;
         }
 
         #endregion
 
         public ICommand CancelBackup
         {
-            get { return new RelayCommand(PopToSetupView); }
+            get { return new RelayCommand(StopBackup); }
         }
 
-        private async void PopToSetupView()
+        private async void StopBackup()
         {
             if (_backupPerformer.IsRunning)
             {
                 await _backupPerformer.CancelAsync();
             }
+            else
+            {
+                PopToSetupView();
+            }
+        }
+
+        private void PopToSetupView()
+        {
             _backupPerformer.StartedCopyingItem -= _backupPerformer_StartedCopyingItem;
             _backupPerformer.FinishedCopyingItem -= _backupPerformer_FinishedCopyingItem;
             _backupPerformer.CopiedBytesOfItem -= _backupPerformer_CopiedBytesOfItem;
