@@ -336,11 +336,11 @@ namespace EasyBackup.ViewModels
             }
         }
 
-        private void StartBackup()
+        private async void StartBackup()
         {
             if (SavesToCompressedFile && CompressedFileUsesPassword && string.IsNullOrWhiteSpace(Utilities.SecureStringToString(Password)))
             {
-                DialogCoordinator.ShowMessageAsync(this, "Error!", "Your password cannot be blank",
+                await DialogCoordinator.ShowMessageAsync(this, "Error!", "Your password cannot be blank",
                     MessageDialogStyle.Affirmative,
                     new MetroDialogSettings()
                     {
@@ -351,7 +351,7 @@ namespace EasyBackup.ViewModels
             }
             else if (SavesToCompressedFile && CompressedFileUsesPassword && Utilities.SecureStringToString(Password) != Utilities.SecureStringToString(ConfirmPassword))
             {
-                DialogCoordinator.ShowMessageAsync(this, "Error!", "Password and confirm password do not match",
+                await DialogCoordinator.ShowMessageAsync(this, "Error!", "Password and confirm password do not match",
                     MessageDialogStyle.Affirmative,
                     new MetroDialogSettings()
                     {
@@ -362,8 +362,30 @@ namespace EasyBackup.ViewModels
             }
             else
             {
-                PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation,
-                    SavesToCompressedFile, CompressedFileUsesPassword ? Password : null));
+                bool canProceed = true;
+                if (SavesToCompressedFile && CompressedFileUsesPassword)
+                {
+                    var result = await DialogCoordinator.ShowMessageAsync(this, "Warning!", "This backup will be encrypted. " +
+                        "The backup cannot be recovered if you forget your password. " +
+                        "Are you sure you want to proceed? ",
+                        MessageDialogStyle.AffirmativeAndNegative,
+                        new MetroDialogSettings()
+                        {
+                            AffirmativeButtonText = "Yes",
+                            NegativeButtonText = "No",
+                            ColorScheme = MetroDialogColorScheme.Theme
+                        }
+                    );
+                    if (result != MessageDialogResult.Affirmative)
+                    {
+                        canProceed = false;
+                    }
+                }
+                if (canProceed)
+                {
+                    PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation,
+                        SavesToCompressedFile, CompressedFileUsesPassword ? Password : null));
+                }
             }
         }
 
