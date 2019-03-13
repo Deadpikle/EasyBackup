@@ -1,6 +1,6 @@
 # Easy Backup
 
-Easy Backup is a small Windows utility that allows you to copy files from one location to another for the purposes of a backup. 
+Easy Backup is a small Windows utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. 
 
 Features include:
 
