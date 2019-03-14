@@ -315,12 +315,26 @@ namespace EasyBackup.Helpers
                             }
                         }
                     }
-                    currentItem = pathsToFolderFileItem[currentFilePath]; // TODO: check more safely :sweat_smile:
-                    if (!bytesCopiedForItem.ContainsKey(currentItem))
+                    if (pathsToFolderFileItem.ContainsKey(currentFilePath))
+                    {
+                        currentItem = pathsToFolderFileItem[currentFilePath];
+                    }
+                    else
+                    {
+                        currentItem = null;
+                    }
+                    if (!bytesCopiedForItem.ContainsKey(currentItem) && currentItem != null)
                     {
                         bytesCopiedForItem[currentItem] = 0;
                     }
-                    sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];  // TODO: check more safely :sweat_smile:
+                    if (pathsToFileSize.ContainsKey(currentFilePath))
+                    {
+                        sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];
+                    }
+                    else
+                    {
+                        sizeInBytes = remainingBytes = 0;
+                    }
                 }
                 else if (e.Data.Contains("%") && didStartCompressingFile)
                 {
@@ -328,8 +342,11 @@ namespace EasyBackup.Helpers
                     var actualPercent = percent - lastPercent;
                     lastPercent = percent;
                     var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
-                    CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
-                    bytesCopiedForItem[currentItem] += (ulong)copiedBytes;
+                    if (currentItem != null)
+                    {
+                        CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
+                        bytesCopiedForItem[currentItem] += (ulong)copiedBytes;
+                    }
                     remainingBytes -= (ulong)copiedBytes;
                 }
                 else if (e.Data.Contains("Error:"))
