@@ -255,7 +255,8 @@ namespace EasyBackup.Helpers
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.RedirectStandardOutput = true;
-            Console.OutputEncoding = System.Text.Encoding.UTF8; // so we get all filenames properly
+            process.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+
             //process.StartInfo.RedirectStandardError = true;
             process.EnableRaisingEvents = true;
             var didError = false;
