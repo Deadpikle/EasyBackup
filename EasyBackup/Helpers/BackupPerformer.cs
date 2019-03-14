@@ -255,6 +255,7 @@ namespace EasyBackup.Helpers
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.RedirectStandardOutput = true;
+            Console.OutputEncoding = System.Text.Encoding.UTF8; // so we get all filenames properly
             //process.StartInfo.RedirectStandardError = true;
             process.EnableRaisingEvents = true;
             var didError = false;
@@ -295,7 +296,7 @@ namespace EasyBackup.Helpers
                         return;
                     }
                 }
-                if (e.Data.StartsWith("+ "))
+                if (e.Data.StartsWith("+ ") && e.Data.Trim() != "+")
                 {
                     didStartCompressingFile = true;
                     currentFilePath = e.Data.Substring(2);
@@ -323,7 +324,7 @@ namespace EasyBackup.Helpers
                     {
                         currentItem = null;
                     }
-                    if (!bytesCopiedForItem.ContainsKey(currentItem) && currentItem != null)
+                    if (currentItem != null && !bytesCopiedForItem.ContainsKey(currentItem))
                     {
                         bytesCopiedForItem[currentItem] = 0;
                     }
@@ -370,9 +371,10 @@ namespace EasyBackup.Helpers
              * -spf (Use fully qualified file paths)
              * -mx1 (compression level to fastest)
              * -v2g (split into 2 gb volumes -- https://superuser.com/a/184601)
+             * -sccUTF-8 (set console output to UTF-8)
              * -p (set password for file)
              * */
-            var args = "-y -ssw -bsp1 -bse1 -bb1 -spf -mx1 -v2g";
+            var args = "-y -ssw -bsp1 -bse1 -bb1 -spf -mx1 -v2g -sccUTF-8";
             if (UsesPasswordForCompressedFile)
             {
                 var pass = Utilities.SecureStringToString(CompressedFilePassword);
@@ -389,7 +391,7 @@ namespace EasyBackup.Helpers
             {
                 sw.Write(inputPaths);
             }
-            args = "a " + args + " \"" + destination + "\" @" + tmpFileName; // a = add file
+            args = "a " + args + " \"" + destination + "\" @\"" + tmpFileName + "\""; // a = add file
             process.StartInfo.Arguments = args;
             process.Start();
             process.BeginOutputReadLine();
