@@ -255,12 +255,9 @@ namespace EasyBackup.Helpers
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.RedirectStandardOutput = true;
-            //process.StartInfo.RedirectStandardInput = true;
             //process.StartInfo.RedirectStandardError = true;
-
             process.EnableRaisingEvents = true;
-            // see below for output handler
-            //process.ErrorDataReceived += Process_OutputDataReceived;
+            var didError = false;
             var sizeInBytes = 0UL;
             var remainingBytes = 0UL;
             var didStartCompressingFile = false;
@@ -269,12 +266,14 @@ namespace EasyBackup.Helpers
             FolderFileItem currentItem = null;
             var bytesCopiedForItem = new Dictionary<FolderFileItem, ulong>();
             var didFinishCancel = false;
+            var nextMessageIsError = false;
+            string errorMessage = "";
             process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
-                if (didFinishCancel) // in case more events come through
+                if (string.IsNullOrWhiteSpace(e.Data) || didFinishCancel) // in case more events come through
                 {
                     return;
                 }
-                if (HasBeenCanceled)
+                if (HasBeenCanceled || didError)
                 {
                     // ONLY WORKS IF YOU AREN'T ALREADY SHOWING A CONSOLE!
                     // https://stackoverflow.com/a/29274238/3938401
@@ -286,6 +285,7 @@ namespace EasyBackup.Helpers
                             GenerateConsoleCtrlEvent(ConsoleCtrlEvent.CTRL_C, process.SessionId); // ends the process
                             process.Kill(); // process is canned, so OK to kill
                         }
+                        catch { }
                         finally
                         {
                             FreeConsole();
@@ -295,59 +295,66 @@ namespace EasyBackup.Helpers
                         return;
                     }
                 }
-                if (!string.IsNullOrWhiteSpace(e.Data))
+                if (e.Data.StartsWith("+ "))
                 {
-                    if (e.Data.StartsWith("+ "))
+                    didStartCompressingFile = true;
+                    currentFilePath = e.Data.Substring(2);
+                    if (currentItem != null && remainingBytes > 0)
                     {
-                        didStartCompressingFile = true;
-                        currentFilePath = e.Data.Substring(2);
-                        if (currentItem != null && remainingBytes > 0)
+                        CopiedBytesOfItem(currentItem, remainingBytes);
+                        bytesCopiedForItem[currentItem] += remainingBytes;
+                        if (!currentItem.IsDirectory)
                         {
-                            CopiedBytesOfItem(currentItem, remainingBytes);
-                            bytesCopiedForItem[currentItem] += remainingBytes;
-                            if (!currentItem.IsDirectory)
+                            FinishedCopyingItem?.Invoke(currentItem);
+                        }
+                        else
+                        {
+                            if (bytesCopiedForItem[currentItem] == currentItem.ByteSize)
                             {
                                 FinishedCopyingItem?.Invoke(currentItem);
                             }
-                            else
-                            {
-                                if (bytesCopiedForItem[currentItem] == currentItem.ByteSize)
-                                {
-                                    FinishedCopyingItem?.Invoke(currentItem);
-                                }
-                            }
                         }
-                        currentItem = pathsToFolderFileItem[currentFilePath]; // TODO: check more safely :sweat_smile:
-                        if (!bytesCopiedForItem.ContainsKey(currentItem))
-                        {
-                            bytesCopiedForItem[currentItem] = 0;
-                        }
-                        sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];  // TODO: check more safely :sweat_smile:
                     }
-                    else if (e.Data.Contains("%") && didStartCompressingFile)
+                    currentItem = pathsToFolderFileItem[currentFilePath]; // TODO: check more safely :sweat_smile:
+                    if (!bytesCopiedForItem.ContainsKey(currentItem))
                     {
-                        var percent = double.Parse(e.Data.Trim().Split('%')[0]);
-                        var actualPercent = percent - lastPercent;
-                        lastPercent = percent;
-                        var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
-                        CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
-                        bytesCopiedForItem[currentItem] += (ulong)copiedBytes;
-                        remainingBytes -= (ulong)copiedBytes;
+                        bytesCopiedForItem[currentItem] = 0;
                     }
+                    sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];  // TODO: check more safely :sweat_smile:
+                }
+                else if (e.Data.Contains("%") && didStartCompressingFile)
+                {
+                    var percent = double.Parse(e.Data.Trim().Split('%')[0]);
+                    var actualPercent = percent - lastPercent;
+                    lastPercent = percent;
+                    var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
+                    CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
+                    bytesCopiedForItem[currentItem] += (ulong)copiedBytes;
+                    remainingBytes -= (ulong)copiedBytes;
+                }
+                else if (e.Data.Contains("Error:"))
+                {
+                    nextMessageIsError = true;
+                }
+                else if (nextMessageIsError)
+                {
+                    errorMessage = e.Data;
+                    didError = true;
+                    nextMessageIsError = false;
                 }
             });
-            // TODO: errors
             /**
              * Command line params:
              * -y (yes to prompts)
              * -ssw (Compresses files open for writing by another applications)
              * -bsp1 (output for progress to stdout)
+             * -bse1 (output for errors to stdout)
              * -bb1 (log level 1)
              * -spf (Use fully qualified file paths)
              * -mx1 (compression level to fastest)
              * -v2g (split into 2 gb volumes -- https://superuser.com/a/184601)
              * */
-            var args = "-y -ssw -bsp1 -bb1 -spf -mx1 -v2g";
+            var args = "-y -ssw -bsp1 -bse1 -bb1 -spf -mx1 -v2g";
             if (UsesPasswordForCompressedFile)
             {
                 var pass = Utilities.SecureStringToString(CompressedFilePassword);
@@ -365,10 +372,10 @@ namespace EasyBackup.Helpers
                 sw.Write(inputPaths);
             }
             args = "a " + args + " \"" + destination + "\" @" + tmpFileName; // a = add file
-            Console.WriteLine(args.Length.ToString());
             process.StartInfo.Arguments = args;
             process.Start();
             process.BeginOutputReadLine();
+            //process.BeginErrorReadLine();
             process.WaitForExit();
             // make sure last item is handled properly
             if (!HasBeenCanceled && currentItem != null && remainingBytes > 0)
@@ -379,6 +386,14 @@ namespace EasyBackup.Helpers
             if (HasBeenCanceled)
             {
                 File.Delete(destination);
+            }
+            if (didError)
+            {
+                if (string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    errorMessage = "Compression operation failed";
+                }
+                throw new Exception(errorMessage);
             }
         }
 
