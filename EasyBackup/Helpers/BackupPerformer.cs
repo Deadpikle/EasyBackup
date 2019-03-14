@@ -370,6 +370,7 @@ namespace EasyBackup.Helpers
              * -spf (Use fully qualified file paths)
              * -mx1 (compression level to fastest)
              * -v2g (split into 2 gb volumes -- https://superuser.com/a/184601)
+             * -p (set password for file)
              * */
             var args = "-y -ssw -bsp1 -bse1 -bb1 -spf -mx1 -v2g";
             if (UsesPasswordForCompressedFile)
