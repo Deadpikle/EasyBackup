@@ -5,7 +5,8 @@ Easy Backup is a small Windows utility that allows you to copy files from one lo
 Features include:
 
 * Choose files or folders to backup (either via file dialogs or via drag & drop)
-* Toggle recursive copy of directories on and off
+* Toggle copy of subdirectories on and off
+* When copying a directory, you can choose to just copy the latest file out of that directory (by date modified)
 * Save and load your backup locations as a template so that it's easy as pie to re-run a backup that you've run in the past
   * The most recently used backup template file is automatically loaded for you when starting the software. A backup is only a few clicks away!
 * If copying a directory non-recursively, choose to only copy the last modified file in that directory. This could be useful when backing up a directory that contains local file backups, for example -- you may not need all the local backups, just the latest one.
