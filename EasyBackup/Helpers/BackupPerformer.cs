@@ -70,8 +70,25 @@ namespace EasyBackup.Helpers
             }
         }
 
+        private bool ShouldAllowPath(List<string> excludedPaths, string path)
+        {
+            if (excludedPaths == null)
+            {
+                return true;
+            }
+            var excluded = new char[] { '/', '/' };
+            foreach (string excludedPath in excludedPaths)
+            {
+                if (path.Trim(excluded).Contains(excludedPath.Trim(excluded)))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         // Modified from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
-        private void CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs)
+        private void CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs, List<string> excludedPaths = null)
         {
             if (HasBeenCanceled)
             {
@@ -102,13 +119,14 @@ namespace EasyBackup.Helpers
                 {
                     return;
                 }
-                if (_isCalculatingFileSize)
+                string tempPath = Path.Combine(destDirName, file.Name);
+                bool shouldAllow = ShouldAllowPath(excludedPaths, file.FullName);
+                if (_isCalculatingFileSize && shouldAllow)
                 {
                     _currentDirectorySize += (ulong)file.Length;
                 }
-                else
+                else if (shouldAllow)
                 {
-                    string tempPath = Path.Combine(destDirName, file.Name);
                     CopySingleFile(itemBeingCopied, file.FullName, tempPath);
                 }
             }
@@ -126,14 +144,17 @@ namespace EasyBackup.Helpers
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
                         string temppath = Path.Combine(destDirName, subDir.Name);
-                        CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs);
+                        if (ShouldAllowPath(excludedPaths, subDir.FullName))
+                        {
+                            CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs, excludedPaths);
+                        }
                         _directoryPathsSeen.Add(subDir.FullName);
                     }
                 }
             }
         }
 
-        private Dictionary<string, ulong> GetFilePathsAndSizesInDirectory(string sourceDirName, bool searchSubDirs)
+        private Dictionary<string, ulong> GetFilePathsAndSizesInDirectory(string sourceDirName, bool searchSubDirs, List<string> excludedPaths = null)
         {
             var fileList = new Dictionary<string, ulong>();
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
@@ -152,7 +173,10 @@ namespace EasyBackup.Helpers
                 {
                     return fileList;
                 }
-                fileList.Add(file.FullName, (ulong)file.Length);
+                if (ShouldAllowPath(excludedPaths, file.FullName))
+                {
+                    fileList.Add(file.FullName, (ulong)file.Length);
+                }
             }
 
             // If copying subdirectories, search them and their contents 
@@ -167,10 +191,13 @@ namespace EasyBackup.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
-                        var additionalFileInfo = GetFilePathsAndSizesInDirectory(subDir.FullName, searchSubDirs);
-                        foreach (KeyValuePair<string, ulong> entry in additionalFileInfo)
+                        if (ShouldAllowPath(excludedPaths, subDir.FullName))
                         {
-                            fileList.Add(entry.Key, entry.Value);
+                            var additionalFileInfo = GetFilePathsAndSizesInDirectory(subDir.FullName, searchSubDirs);
+                            foreach (KeyValuePair<string, ulong> entry in additionalFileInfo)
+                            {
+                                fileList.Add(entry.Key, entry.Value);
+                            }
                         }
                         _directoryPathsSeen.Add(subDir.FullName);
                     }
@@ -507,7 +534,7 @@ namespace EasyBackup.Helpers
                                     }
                                     _currentDirectorySize = 0;
                                     var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive);
+                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive, item.ExcludedPaths);
                                     if (_isCalculatingFileSize)
                                     {
                                         CalculatedBytesOfItem?.Invoke(item, _currentDirectorySize);
@@ -569,7 +596,7 @@ namespace EasyBackup.Helpers
                                     {
                                         break;
                                     }
-                                    var filesWithSizesInDirectory = GetFilePathsAndSizesInDirectory(item.Path, item.IsRecursive);
+                                    var filesWithSizesInDirectory = GetFilePathsAndSizesInDirectory(item.Path, item.IsRecursive, item.ExcludedPaths);
                                     foreach (KeyValuePair<string, ulong> entry in filesWithSizesInDirectory)
                                     {
                                         pathsToFolderFileItem.Add(entry.Key, item);

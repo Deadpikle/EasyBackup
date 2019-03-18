@@ -125,7 +125,8 @@ namespace EasyBackup.ViewModels
         {
             var isDirectory = Directory.Exists(path);
             // if we don't already have this path, add the path
-            if (Items.Where(x => x.Path == path).Count() == 0 && path.Contains(DirectoryPath))
+            var excluded = new char[] { '/', '/' };
+            if (Items.Where(x => x.Path == path).Count() == 0 && path.Trim(excluded).Contains(DirectoryPath.Trim(excluded)))
             {
                 Items.Add(new FolderFileItem() { Path = path, IsDirectory = isDirectory, IsRecursive = false });
             }
