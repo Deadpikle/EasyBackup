@@ -4,6 +4,7 @@ using EasyBackup.Interfaces;
 using EasyBackup.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -12,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Threading;
 
 namespace EasyBackup.ViewModels
 {
@@ -35,6 +37,11 @@ namespace EasyBackup.ViewModels
 
         private SolidColorBrush _redBrush = new SolidColorBrush(Colors.Red);
         private SolidColorBrush _greenBrush = new SolidColorBrush(Colors.Green);
+
+        private DispatcherTimer _dispatcherTimer;
+        private Stopwatch _stopwatch;
+        private string _currentTimeString;
+        private string _runningLabel;
 
         #endregion
 
@@ -75,6 +82,14 @@ namespace EasyBackup.ViewModels
                     _backupPerformer.CompressedFilePassword = compressedPassword;
                 }
             }
+
+            _dispatcherTimer = new DispatcherTimer();
+            _stopwatch = new Stopwatch();
+            CurrentTimeString = "00:00:00";
+            RunningLabel = "Running";
+            _dispatcherTimer.Tick += new EventHandler(BackupLengthDispatcherTimerTick);
+            _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 1);
+
             RunBackup();
         }
 
@@ -114,12 +129,26 @@ namespace EasyBackup.ViewModels
             set { _statusColor = value; NotifyPropertyChanged(); }
         }
 
+        public string CurrentTimeString
+        {
+            get { return _currentTimeString; }
+            set { _currentTimeString = value; NotifyPropertyChanged(); }
+        }
+
+        public string RunningLabel
+        {
+            get { return _runningLabel; }
+            set { _runningLabel = value; NotifyPropertyChanged(); }
+        }
+
         #endregion
 
         #region Running Backup
 
         private void RunBackup()
         {
+            _stopwatch.Start();
+            _dispatcherTimer.Start();
             Task.Run(() =>
             {
                 FinishButtonTitle = "Cancel Backup";
@@ -158,8 +187,20 @@ namespace EasyBackup.ViewModels
             });
         }
 
+        void BackupLengthDispatcherTimerTick(object sender, EventArgs e)
+        {
+            if (_stopwatch.IsRunning)
+            {
+                TimeSpan ts = _stopwatch.Elapsed;
+                CurrentTimeString = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+            }
+        }
+
         private void TellUserBackupSucceeded(string message)
         {
+            RunningLabel = "Ran";
+            _stopwatch.Stop();
+            _dispatcherTimer.Stop();
             Status = message;
             StatusColor = _greenBrush;
             if (_playsSounds)
@@ -171,6 +212,9 @@ namespace EasyBackup.ViewModels
 
         private void TellUserBackupFailed(string message)
         {
+            RunningLabel = "Ran";
+            _stopwatch.Stop();
+            _dispatcherTimer.Stop();
             Status = message;
             StatusColor = _redBrush;
             if (_playsSounds)

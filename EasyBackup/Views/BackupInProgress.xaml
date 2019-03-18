@@ -71,7 +71,8 @@
                FontSize="18" FontWeight="Bold" Margin="0,5,0,5" TextWrapping="Wrap" Foreground="{Binding StatusColor}"/>
         <TextBlock Grid.Row="3" HorizontalAlignment="Center" FontWeight="Bold"
                FontSize="24" Margin="0,0,0,0">
-            Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}"/>%
+            Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}"/>% 
+            (<Run Text="{Binding RunningLabel, Mode=OneWay}"/> for <Run Text="{Binding CurrentTimeString, Mode=OneWay}"/>)
         </TextBlock>
         <Button Grid.Row="4" Content="{Binding FinishButtonTitle}" Width="150" Command="{Binding CancelBackup}"
                 Margin="0,10,0,10"/>
