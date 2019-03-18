@@ -480,6 +480,16 @@ namespace EasyBackup.ViewModels
             }
         }
 
+        public ICommand EditDirectoryExclusions
+        {
+            get { return new RelayCommand<FolderFileItem>(o => ShowEditDirectoryExclusionsScreen(o)); }
+        }
+
+        private void ShowEditDirectoryExclusionsScreen(FolderFileItem item)
+        {
+            PushViewModel(new ExcludeFilesFoldersViewModel(this, item));
+        }
+
         #region IDropTarget
 
         public void DragOver(IDropInfo dropInfo)

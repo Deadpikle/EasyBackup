@@ -94,6 +94,7 @@
     <Compile Include="ViewModels\BackupInProgressViewModel.cs" />
     <Compile Include="ViewModels\BaseViewModel.cs" />
     <Compile Include="Helpers\ChangeNotifier.cs" />
+    <Compile Include="ViewModels\ExcludeFilesFoldersViewModel.cs" />
     <Compile Include="ViewModels\SetupBackupViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
@@ -101,6 +102,9 @@
     </Compile>
     <Compile Include="Views\BackupInProgress.xaml.cs">
       <DependentUpon>BackupInProgress.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ExcludeFilesFolders.xaml.cs">
+      <DependentUpon>ExcludeFilesFolders.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SetupBackup.xaml.cs">
       <DependentUpon>SetupBackup.xaml</DependentUpon>
@@ -122,6 +126,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\BackupInProgress.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ExcludeFilesFolders.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

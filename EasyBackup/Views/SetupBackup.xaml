@@ -8,6 +8,7 @@
              xmlns:mahapps="http://metro.mahapps.com/winfx/xaml/controls"
              xmlns:local="clr-namespace:EasyBackup.Views"
              mc:Ignorable="d" 
+             Name="SetupBackupUserControl"
              d:DesignHeight="600" d:DesignWidth="800"
              xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
              Dialog:DialogParticipation.Register="{Binding}">
@@ -66,7 +67,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTemplateColumn Header="Recursive Copy?" CanUserReorder="False" Width="Auto">
+                <DataGridTemplateColumn Header="Copy Subdirectories?" CanUserReorder="False" Width="Auto">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <CheckBox IsChecked="{Binding IsRecursive, UpdateSourceTrigger=PropertyChanged}" 
@@ -82,6 +83,16 @@
                                       Style="{x:Null}"
                                       IsEnabled="{Binding CanEnableOnlyCopiesLatestFile}"
                                       HorizontalAlignment="Center"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="" CanUserResize="False" Width="155">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Exclude Files/Folders" 
+                                                Command="{Binding ElementName=SetupBackupUserControl, Path=DataContext.EditDirectoryExclusions}"
+                                                CommandParameter="{Binding}"
+                                                Visibility="{Binding CanEditFolderExclusions, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
