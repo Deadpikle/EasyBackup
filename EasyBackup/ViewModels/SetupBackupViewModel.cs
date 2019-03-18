@@ -39,6 +39,8 @@ namespace EasyBackup.ViewModels
         private SecureString _password;
         private SecureString _confirmPassword;
 
+        private string _lastSaveFilePath;
+
         #endregion
 
         public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
@@ -283,6 +285,10 @@ namespace EasyBackup.ViewModels
             saveFileDialog.DefaultExt = "ebf";
             saveFileDialog.OverwritePrompt = true;
             saveFileDialog.Title = "Choose Save Location";
+            if (File.Exists(_lastSaveFilePath))
+            {
+                saveFileDialog.FileName = _lastSaveFilePath;
+            }
             if (saveFileDialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
             {
                 var backupTemplate = new BackupTemplate() { Paths = Items.ToList(), BackupLocation = BackupLocation };
@@ -310,6 +316,7 @@ namespace EasyBackup.ViewModels
         {
             Properties.Settings.Default.LastUsedBackupTemplatePath = path;
             Properties.Settings.Default.Save();
+            _lastSaveFilePath = path;
         }
 
         private void LoadBackupTemplate(string path)
@@ -323,6 +330,7 @@ namespace EasyBackup.ViewModels
                     Items = new ObservableCollection<FolderFileItem>(backupTemplate.Paths);
                     BackupLocation = backupTemplate.BackupLocation;
                 }
+                _lastSaveFilePath = path;
             }
         }
 
