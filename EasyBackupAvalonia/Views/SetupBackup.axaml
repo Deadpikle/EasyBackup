@@ -145,7 +145,7 @@
                 Grid.ColumnSpan="2"
                 Grid.Row="2"
                 Content="Choose Backup Location"
-                Width="200"
+                HorizontalAlignment="Center"
                 Command="{Binding ChooseBackupLocation}"
                 Margin="0,5,0,0" />
         <TextBlock Grid.Column="0"
@@ -155,21 +155,21 @@
                    Margin="0,5,0,5"
                    FontSize="14">
             Backup location: <Run Text="{Binding BackupLocation}" />
-    </TextBlock>
+        </TextBlock>
     <Button Grid.Column="0"
             Grid.ColumnSpan="2"
             Grid.Row="4"
             Content="Check Backup Size"
-            Width="150"
+            HorizontalAlignment="Center"
             Command="{Binding CheckBackupSize}"
             Margin="0,0,0,5"
             IsVisible="{Binding IsCheckBackupSizeEnabled}" />
     <StackPanel Grid.Column="0"
                 Grid.ColumnSpan="2"
                 Grid.Row="4"
+                HorizontalAlignment="Center"
                 IsVisible="{Binding IsCheckingBackupSize}"
-                Orientation="Horizontal"
-                HorizontalAlignment="Center">
+                Orientation="Horizontal">
         <Button Content="Cancel Check Backup Size"
                 Width="150"
                 Command="{Binding CancelCheckingBackupSize}"
@@ -191,6 +191,7 @@
             Grid.ColumnSpan="2"
             Grid.Row="6"
             Content="Run Backup"
+            HorizontalAlignment="Center"
             Width="100"
             Command="{Binding PerformBackup}"
             Margin="0,0,0,5" />

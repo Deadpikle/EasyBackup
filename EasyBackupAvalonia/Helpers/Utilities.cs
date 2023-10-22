@@ -62,5 +62,21 @@ namespace EasyBackupAvalonia.Helpers
             }
             return "";
         }
+
+        public static string SaveFileLocation
+        {
+            get
+            {
+                var folder = Path.Combine(Environment.GetFolderPath(
+                        Environment.SpecialFolder.ApplicationData, 
+                        Environment.SpecialFolderOption.DoNotVerify), 
+                    "EasyBackup");
+                if (!Directory.Exists(folder))
+                {
+                    Directory.CreateDirectory(folder);
+                }
+                return Path.Combine(folder, "settings.json");
+            }
+        }
     }
 }

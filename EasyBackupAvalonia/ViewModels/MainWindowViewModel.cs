@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using EasyBackupAvalonia.Helpers;
 using EasyBackupAvalonia.Interfaces;
+using EasyBackupAvalonia.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +16,7 @@ namespace EasyBackupAvalonia.ViewModels
 
         public MainWindowViewModel(TopLevel topLevel)
         {
+            Settings.Init();
             _viewModels = new Stack<BaseViewModel>();
             var initialViewModel = new SetupBackupViewModel(this)
             {

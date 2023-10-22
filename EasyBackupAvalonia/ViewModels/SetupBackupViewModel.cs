@@ -48,7 +48,7 @@ namespace EasyBackupAvalonia.ViewModels
         public SetupBackupViewModel(IChangeViewModel viewModelChanger) : base(viewModelChanger)
         {
             Items = new ObservableCollection<FolderFileItem>();
-            //LoadBackupTemplate(Properties.Settings.Default.LastUsedBackupTemplatePath);
+            LoadBackupTemplate(Settings.LastUsedBackupTemplatePath);
             IsCheckBackupSizeStatusVisible = false;
         }
 
@@ -114,22 +114,20 @@ namespace EasyBackupAvalonia.ViewModels
 
         public bool PlaysSoundsOnComplete
         {
-            get { return true; }
+            get { return Settings.PlaySoundsOnComplete; }
             set
             {
-                // Properties.Settings.Default.PlaySoundsWhenFinished = value;
-                // Properties.Settings.Default.Save();
+                Settings.PlaySoundsOnComplete = value;
                 NotifyPropertyChanged();
             }
         }
 
         public bool SavesToCompressedFile
         {
-            get { return false; }//Properties.Settings.Default.SavesToCompressedFile; }
+            get { return Settings.SavesToCompressedFile; }
             set
             {
-                // Properties.Settings.Default.SavesToCompressedFile = value;
-                // Properties.Settings.Default.Save();
+                Settings.SavesToCompressedFile = value;
                 NotifyPropertyChanged();
                 if (value == false)
                 {
@@ -140,11 +138,10 @@ namespace EasyBackupAvalonia.ViewModels
 
         public bool CompressedFileUsesPassword
         {
-            get { return false; } //Properties.Settings.Default.CompressedFileUsesPassword; }
+            get { return Settings.CompressedFileUsesPassword; }
             set
             {
-                // Properties.Settings.Default.CompressedFileUsesPassword = value;
-                // Properties.Settings.Default.Save();
+                Settings.CompressedFileUsesPassword = value;
                 NotifyPropertyChanged();
                 if (value == false)
                 {
@@ -297,8 +294,7 @@ namespace EasyBackupAvalonia.ViewModels
 
         private void UpdateLastUsedBackupPath(string path)
         {
-            //Properties.Settings.Default.LastUsedBackupTemplatePath = path;
-            //Properties.Settings.Default.Save();
+            Settings.LastUsedBackupTemplatePath = path;
             _lastSaveFilePath = path;
         }
 

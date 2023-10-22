@@ -70,9 +70,7 @@ namespace EasyBackupAvalonia.ViewModels
             _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
             _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
             _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
-            // _playsSounds = Properties.Settings.Default.PlaySoundsWhenFinished;
-            // TODO: get settings/properties working again
-            _playsSounds = true;
+            _playsSounds = Settings.PlaySoundsOnComplete;
             if (_playsSounds)
             {
                 _soundPlayer = new Player();
