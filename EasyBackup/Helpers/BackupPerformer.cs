@@ -1,4 +1,5 @@
 ﻿using EasyBackup.Models;
+using Monitor.Core.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -94,6 +95,19 @@ namespace EasyBackup.Helpers
             {
                 return;
             }
+            try
+            {
+                if (JunctionPoint.Exists(sourceDirName))
+                {
+                    Console.WriteLine("Skipping {0} as it is a junction", sourceDirName);
+                    return;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Skipping {0} as it is likely a junction, need to rethink this functionality later", sourceDirName);
+                return;
+            }
             // Get the subdirectories for the specified directory.
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
 
@@ -157,6 +171,19 @@ namespace EasyBackup.Helpers
         private Dictionary<string, ulong> GetFilePathsAndSizesInDirectory(string sourceDirName, bool searchSubDirs, List<string> excludedPaths = null)
         {
             var fileList = new Dictionary<string, ulong>();
+            try
+            {
+                if (JunctionPoint.Exists(sourceDirName))
+                {
+                    Console.WriteLine("Skipping {0} as it is a junction", sourceDirName);
+                    return fileList;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Skipping {0} as it is likely a junction, need to rethink this functionality later", sourceDirName);
+                return fileList;
+            }
             DirectoryInfo dir = new DirectoryInfo(sourceDirName);
             if (!dir.Exists)
             {
@@ -484,6 +511,18 @@ namespace EasyBackup.Helpers
                             if (HasBeenCanceled)
                             {
                                 break;
+                            }
+                            try
+                            {
+                                if (JunctionPoint.Exists(item.Path))
+                                {
+                                    Console.WriteLine("Skipping {0} as it is a junction", item.Path);
+                                    continue;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+
                             }
                             var directoryName = Path.GetDirectoryName(item.Path);
                             var pathRoot = Path.GetPathRoot(item.Path);
