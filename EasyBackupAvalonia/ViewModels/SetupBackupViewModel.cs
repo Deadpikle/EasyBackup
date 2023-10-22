@@ -2,7 +2,6 @@
 using EasyBackupAvalonia.Helpers;
 using EasyBackupAvalonia.Interfaces;
 using EasyBackupAvalonia.Models;
-// using EasyBackupAvalonia.Views;
 using Avalonia.Media;
 using Avalonia.Platform.Storage;
 using MsBox.Avalonia;
@@ -51,9 +50,6 @@ namespace EasyBackupAvalonia.ViewModels
             Items = new ObservableCollection<FolderFileItem>();
             //LoadBackupTemplate(Properties.Settings.Default.LastUsedBackupTemplatePath);
             IsCheckBackupSizeStatusVisible = false;
-            var player = new Player();
-            player.Play("Sounds/success.wav").Wait();
-            Console.WriteLine(player.Playing ? "Playback started" : "Could not start the playback");
         }
 
         #region Properties
@@ -181,6 +177,7 @@ namespace EasyBackupAvalonia.ViewModels
         public ICommand SaveTemplate => new RelayCommand(o => SaveItemsToDisk());
         public ICommand CheckBackupSize => new RelayCommand(o => ScanBackupAndCheckSize());
         public ICommand PerformBackup => new RelayCommand(o => StartBackup());
+        public ICommand EditDirectoryExclusions => new RelayCommand(o => ShowEditDirectoryExclusionsScreen(o as FolderFileItem));
 
         public async void ChooseFolder()
         {

@@ -1,0 +1,104 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="EasyBackupAvalonia.Views.ExcludeFilesFolders">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+        </Grid.ColumnDefinitions>
+        <Button Grid.Row="0"
+                Grid.ColumnSpan="2"
+                Content="Cancel"
+                Margin="5,5,0,5"
+                Command="{Binding CancelChangeExclusions}"
+                Width="100"
+                HorizontalAlignment="Left" />
+        <Label Grid.Row="0"
+               Grid.Column="0"
+               Grid.ColumnSpan="2"
+               Content="Easy Backup - Exclude Files/Folders"
+               HorizontalAlignment="Center"
+               FontSize="24"
+               FontWeight="Bold"
+               Margin="0,0,0,0" />
+        <TextBlock TextWrapping="Wrap"
+                   Grid.Row="1"
+                   Grid.Column="0"
+                   Grid.ColumnSpan="2"
+                   Text="{Binding DirectoryPath}"
+                   HorizontalAlignment="Center"
+                   FontSize="14"
+                   Margin="0,0,0,0" />
+        <DataGrid Grid.Column="0"
+                  Grid.Row="2"
+                  ItemsSource="{Binding Items}"
+                  Name="PathsDataGrid"
+                  AutoGenerateColumns="False"
+                  Background="Transparent"
+                  DragDrop.AllowDrop="True"
+                  SelectedItem="{Binding SelectedItem}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Path"
+                                        IsReadOnly="True"
+                                        Width="*"
+                                        CanUserReorder="False"
+                                        CanUserSort="True">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}"
+                                       TextWrapping="Wrap" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Directory?"
+                                        CanUserReorder="False"
+                                        Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsDirectory}"
+                                      IsEnabled="False"
+                                      HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Column="1"
+                    Grid.Row="2"
+                    Orientation="Vertical"
+                    Margin="5">
+            <Button Content="Add File"
+                    Margin="0,5,0,5"
+                    Command="{Binding AddFile}" />
+            <Button Content="Add Folder"
+                    Margin="0,5,0,5"
+                    Command="{Binding AddFolder}" />
+            <Button Content="Remove File/Folder"
+                    Margin="0,5,0,5"
+                    CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}"
+                    Command="{Binding RemoveItem}"
+                    IsEnabled="{Binding IsItemSelected}" />
+            <Button Content="Remove All Items"
+                    Margin="0,5,0,5"
+                    Command="{Binding RemoveAllItems}" />
+        </StackPanel>
+        <Button Grid.Row="3"
+                Grid.ColumnSpan="2"
+                Content="Save"
+                Margin="5"
+                Command="{Binding SaveExclusions}"
+                Width="100"
+                HorizontalAlignment="Center" />
+    </Grid>
+</UserControl>

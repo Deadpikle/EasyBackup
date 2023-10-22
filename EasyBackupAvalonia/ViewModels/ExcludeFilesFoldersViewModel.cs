@@ -1,6 +1,10 @@
 ﻿using EasyBackupAvalonia.Helpers;
 using EasyBackupAvalonia.Interfaces;
 using EasyBackupAvalonia.Models;
+using Avalonia.Media;
+using Avalonia.Platform.Storage;
+using MsBox.Avalonia;
+using MsBox.Avalonia.Enums;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,6 +19,7 @@ namespace EasyBackupAvalonia.ViewModels
     class ExcludeFilesFoldersViewModel : BaseViewModel/*, IDropTarget*/
     {
         private FolderFileItem _itemBeingEdited;
+        private FolderFileItem _selectedItem;
         private ObservableCollection<FolderFileItem> _items;
 
         public ExcludeFilesFoldersViewModel(IChangeViewModel viewModelChanger, FolderFileItem itemBeingEdited) : base(viewModelChanger)
@@ -37,6 +42,17 @@ namespace EasyBackupAvalonia.ViewModels
             set { _items = value; NotifyPropertyChanged(); }
         }
 
+        public FolderFileItem SelectedItem
+        {
+            get { return _selectedItem; }
+            set { _selectedItem = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(IsItemSelected)); }
+        }
+
+        public bool IsItemSelected
+        {
+            get { return _selectedItem != null; }
+        }
+
         public string DirectoryPath
         {
             get { return _itemBeingEdited.Path; }
@@ -57,36 +73,48 @@ namespace EasyBackupAvalonia.ViewModels
             PopViewModel();
         }
 
-        private void ChooseFolder()
+        public ICommand CancelChangeExclusions => new RelayCommand(o => CancelChangeAndPopView());
+        public ICommand SaveExclusions => new RelayCommand(o => SaveExclusionsAndPopView());
+        public ICommand AddFile => new RelayCommand(o => ChooseFiles());
+        public ICommand AddFolder => new RelayCommand(o => ChooseFolders());
+        public ICommand RemoveItem => new RelayCommand(o => RemoveItemFromList(o));
+        public ICommand RemoveAllItems => new RelayCommand(o => CheckAndRemoveAllItems());
+
+        private async void ChooseFolders()
         {
-            //var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-            //dialog.ShowNewFolderButton = true;
-            //dialog.SelectedPath = DirectoryPath + "\\";
-            //if (dialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
-            //{
-            //    AddPath(dialog.SelectedPath);
-            //}
+            if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
+            {
+                var results = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+                {
+                    Title = "Select folders...",
+                    SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(_itemBeingEdited.Path),
+                    AllowMultiple = true,
+                });
+                foreach (IStorageFolder folder in results)
+                {
+                    AddPath(folder.Path.AbsolutePath);
+                }
+            }
         }
 
-        private void ChooseFile()
+        private async void ChooseFiles()
         {
-            //var dialog = new Ookii.Dialogs.Wpf.VistaOpenFileDialog();
-            //dialog.Reset();
-            //dialog.Multiselect = true;
-            //dialog.ShowReadOnly = true;
-            //dialog.Title = "Choose a file";
-            //dialog.RestoreDirectory = false;
-            //dialog.FileName = DirectoryPath + "\\";
-            //if (dialog.ShowDialog(Application.Current.MainWindow).GetValueOrDefault())
-            //{
-            //    foreach (string fileName in dialog.FileNames)
-            //    {
-            //        AddPath(fileName);
-            //    }
-            //}
+            if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
+            {
+                var results = await provider.OpenFilePickerAsync(new FilePickerOpenOptions()
+                {
+                    Title = "Select files...",
+                    SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(_itemBeingEdited.Path),
+                    AllowMultiple = true,
+                });
+                foreach (IStorageFile file in results)
+                {
+                    AddPath(file.Path.AbsolutePath);
+                }
+            }
         }
 
-        private void AddPath(string path)
+        public void AddPath(string path)
         {
             var isDirectory = Directory.Exists(path);
             // if we don't already have this path, add the path
@@ -99,19 +127,17 @@ namespace EasyBackupAvalonia.ViewModels
 
         private async void CheckAndRemoveAllItems()
         {
-            //var result = await DialogCoordinator.ShowMessageAsync(this, "Warning!", "Are you sure you want to remove all items?",
-            //    MessageDialogStyle.AffirmativeAndNegative,
-            //    new MetroDialogSettings()
-            //    {
-            //        AffirmativeButtonText = "Yes",
-            //        NegativeButtonText = "No",
-            //        ColorScheme = MetroDialogColorScheme.Theme
-            //    }
-            //);
-            //if (result == MessageDialogResult.Affirmative)
-            //{
-            //    Items.Clear();
-            //}
+            // eventually change to https://github.com/AvaloniaUtils/DialogHost.Avalonia as that's much nicer,
+            // but it is more complex to implement with MMVM (aka more time-consuming)
+            var box = MessageBoxManager.GetMessageBoxStandard(
+                "Warning!", 
+                "Are you sure you want to remove all items?", 
+                ButtonEnum.YesNo);
+            var result = await box.ShowAsync();
+            if (result == ButtonResult.Yes)
+            {
+                Items.Clear();
+            }
         }
 
         private void RemoveItemFromList(object items)
@@ -123,34 +149,8 @@ namespace EasyBackupAvalonia.ViewModels
                 for (int i = 0; i < selection.Count(); i++)
                 {
                     Items.Remove(selection.ElementAt(i));
-                    i--; // have to do this as selection array is modified when we do the remove O_o
                 }
             }
         }
-
-        #region IDropTarget
-
-        //public void DragOver(IDropInfo dropInfo)
-        //{
-        //    if (dropInfo.Data is DataObject && (dropInfo.Data as DataObject).GetFileDropList().Count > 0)
-        //    {
-        //        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-        //        dropInfo.Effects = DragDropEffects.Copy;
-        //    }
-        //}
-//
-        //public void Drop(IDropInfo dropInfo)
-        //{
-        //    if (dropInfo.Data is DataObject)
-        //    {
-        //        var stringCollection = (dropInfo.Data as DataObject).GetFileDropList();
-        //        foreach (string path in stringCollection)
-        //        {
-        //            AddPath(path);
-        //        }
-        //    }
-        //}
-
-        #endregion
     }
 }
