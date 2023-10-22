@@ -12,7 +12,7 @@ namespace EasyBackupAvalonia.Models
 {
     class Settings
     {
-        public static int VersionNumber => 1;
+        public static int VersionNumber => 2;
 
         private class SettingsData
         {

@@ -49,7 +49,8 @@ namespace EasyBackupAvalonia.ViewModels
         #endregion
 
         public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, 
-            string backupLocation, bool compressesOutput = false, SecureString compressedPassword = null) : base(viewModelChanger)
+            string backupLocation, bool compressesOutput = false, SecureString compressedPassword = null,
+            bool isIncremental = false) : base(viewModelChanger)
         {
             Items = items;
             BackupLocation = backupLocation;
@@ -86,6 +87,7 @@ namespace EasyBackupAvalonia.ViewModels
                     _backupPerformer.CompressedFilePassword = compressedPassword;
                 }
             }
+            _backupPerformer.IsIncremental = isIncremental;
 
             _dispatcherTimer = new DispatcherTimer();
             _stopwatch = new Stopwatch();

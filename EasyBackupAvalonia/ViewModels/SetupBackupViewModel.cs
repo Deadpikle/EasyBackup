@@ -21,7 +21,7 @@ using System.Windows.Input;
 
 namespace EasyBackupAvalonia.ViewModels
 {
-    class SetupBackupViewModel : BaseViewModel/*, IDropTarget*/
+    class SetupBackupViewModel : BaseViewModel
     {
 
         #region Private Members
@@ -30,6 +30,7 @@ namespace EasyBackupAvalonia.ViewModels
         private FolderFileItem _selectedItem;
         private string _backupLocation;
         private ulong _totalBackupSize;
+        private bool _isIncremental;
 
         private string _checkBackupSizeStatus;
         private bool _isCheckBackupSizeStatusVisible;
@@ -110,6 +111,16 @@ namespace EasyBackupAvalonia.ViewModels
         public bool IsCheckBackupSizeEnabled
         {
             get { return !_isCheckingBackupSize; }
+        }
+
+        public bool IsIncremental
+        {
+            get => _isIncremental;
+            set
+            {
+                _isIncremental = value;
+                NotifyPropertyChanged();
+            }
         }
 
         public bool PlaysSoundsOnComplete
@@ -256,7 +267,12 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 if (result != null)
                 {
-                    var backupTemplate = new BackupTemplate() { Paths = Items.ToList(), BackupLocation = BackupLocation };
+                    var backupTemplate = new BackupTemplate() 
+                    { 
+                        Paths = Items.ToList(), 
+                        BackupLocation = BackupLocation, 
+                        IsIncremental = IsIncremental 
+                    };
                     using FileStream createStream = File.Create(result.Path.AbsolutePath);
                     await JsonSerializer.SerializeAsync<BackupTemplate>(createStream, backupTemplate);
                     await createStream.DisposeAsync();
@@ -308,6 +324,7 @@ namespace EasyBackupAvalonia.ViewModels
                 {
                     Items = new ObservableCollection<FolderFileItem>(backupTemplate.Paths);
                     BackupLocation = backupTemplate.BackupLocation;
+                    IsIncremental = backupTemplate.IsIncremental;
                 }
                 _lastSaveFilePath = path;
             }
@@ -368,7 +385,7 @@ namespace EasyBackupAvalonia.ViewModels
                 if (canProceed)
                 {
                     PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation,
-                        SavesToCompressedFile, CompressedFileUsesPassword ? Password : null));
+                        SavesToCompressedFile, CompressedFileUsesPassword ? Password : null, IsIncremental));
                 }
             }
         }
@@ -466,30 +483,5 @@ namespace EasyBackupAvalonia.ViewModels
         {
             PushViewModel(new ExcludeFilesFoldersViewModel(this, item));
         }
-
-        #region IDropTarget
-
-        //public void DragOver(IDropInfo dropInfo)
-        //{
-        //    if (dropInfo.Data is DataObject && (dropInfo.Data as DataObject).GetFileDropList().Count > 0)
-        //    {
-        //        dropInfo.DropTargetAdorner = DropTargetAdorners.Highlight;
-        //        dropInfo.Effects = DragDropEffects.Copy;
-        //    }
-        //}
-//
-        //public void Drop(IDropInfo dropInfo)
-        //{
-        //    if (dropInfo.Data is DataObject)
-        //    {
-        //        var stringCollection = (dropInfo.Data as DataObject).GetFileDropList();
-        //        foreach (string path in stringCollection)
-        //        {
-        //            AddPath(path);
-        //        }
-        //    }
-        //}
-
-        #endregion
     }
 }

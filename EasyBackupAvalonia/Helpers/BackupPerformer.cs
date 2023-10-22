@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -36,6 +37,8 @@ namespace EasyBackupAvalonia.Helpers
         public bool HadError;
         public bool HasBeenCanceled;
 
+        public bool IsIncremental;
+
         public bool UsesCompressedFile;
         public bool UsesPasswordForCompressedFile;
         public SecureString CompressedFilePassword;
@@ -54,6 +57,7 @@ namespace EasyBackupAvalonia.Helpers
             HadError = false;
             UsesPasswordForCompressedFile = false;
             CompressedFilePassword = null;
+            IsIncremental = false;
         }
 
         public void Cancel()
@@ -206,6 +210,17 @@ namespace EasyBackupAvalonia.Helpers
             return fileList;
         }
 
+        public string HashFile(string filePath)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                using (FileStream fileStream = File.OpenRead(filePath))
+                {
+                    return BitConverter.ToString(sha256.ComputeHash(fileStream)).Replace("-", "");
+                }
+            }
+        }
+
         // Modified from https://stackoverflow.com/a/33726939/3938401
         private void CopySingleFile(FolderFileItem itemBeingCopied, string source, string destination)
         {
@@ -220,25 +235,51 @@ namespace EasyBackupAvalonia.Helpers
                 }
                 else
                 {
-                    using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                    var needsToCopy = true;
+                    if (IsIncremental && File.Exists(destination))
                     {
-                        using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
+                        var sourceHash = HashFile(source);
+                        var outputHash = HashFile(destination);
+                        needsToCopy = sourceHash != outputHash;
+                    }
+                    if (needsToCopy)
+                    {
+                        if (IsIncremental && File.Exists(destination))
                         {
-                            int buffer_size = 10240;
-                            byte[] buffer = new byte[buffer_size];
-                            long total_read = 0;
-                            while (total_read < inStream.Length)
+                            // output file already exists. don't get rid of file in case
+                            // something goes wrong during copy (that way we don't lose anything).
+                            // remove old one after the fact.
+                            // TODO: one improvement/setting could be to retain old files for X number of days.
+                            File.Move(destination, destination + ".old");                            
+                        }
+                        using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                        {
+                            using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
                             {
-                                if (HasBeenCanceled)
+                                int buffer_size = 10240;
+                                byte[] buffer = new byte[buffer_size];
+                                long total_read = 0;
+                                while (total_read < inStream.Length)
                                 {
-                                    break;
+                                    if (HasBeenCanceled)
+                                    {
+                                        break;
+                                    }
+                                    int read = inStream.Read(buffer, 0, buffer_size);
+                                    outStream.Write(buffer, 0, read);
+                                    CopiedBytesOfItem(itemBeingCopied, (ulong)read);
+                                    total_read += read;
                                 }
-                                int read = inStream.Read(buffer, 0, buffer_size);
-                                outStream.Write(buffer, 0, read);
-                                CopiedBytesOfItem(itemBeingCopied, (ulong)read);
-                                total_read += read;
                             }
                         }
+                        if (IsIncremental && File.Exists(destination + ".old"))
+                        {
+                            File.Delete(destination + ".old"); // remove old file now that new one is in place
+                        }
+                    }
+                    else
+                    {
+                        CopiedBytesOfItem(itemBeingCopied, (ulong)new FileInfo(source).Length);
                     }
                 }
             }
@@ -454,12 +495,18 @@ namespace EasyBackupAvalonia.Helpers
                 if (Directory.Exists(backupDirectory) || _isCalculatingFileSize)
                 {
                     var backupName = "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss");
+                    var originalBackupDir = backupDirectory;
                     backupDirectory = Path.Combine(backupDirectory, "easy-backup", backupName);
+                    if (IsIncremental)
+                    {
+                        backupName = "backup-incremental";
+                        backupDirectory = Path.Combine(originalBackupDir, "easy-backup", backupName);
+                    }
                     if (!Directory.Exists(backupDirectory) && !_isCalculatingFileSize)
                     {
                         Directory.CreateDirectory(backupDirectory);
                     }
-                    else if (!_isCalculatingFileSize)
+                    else if (!_isCalculatingFileSize && !IsIncremental)
                     {
                         // ok, somehow they started two backups within the same second >_> wait 1 second and start again
                         Task.Delay(1000);
