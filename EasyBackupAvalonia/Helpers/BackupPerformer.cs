@@ -491,7 +491,8 @@ namespace EasyBackupAvalonia.Helpers
                                 directoryName = directoryName.Replace(pathRoot, "");
                                 directoryName = Path.Combine(pathRoot.Replace(":\\", ""), directoryName);
                             }
-                            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || 
+                                     RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                             {
                                 // Do something
                                 if (directoryName.StartsWith(pathRoot))
