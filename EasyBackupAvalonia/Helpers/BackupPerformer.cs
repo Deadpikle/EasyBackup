@@ -47,6 +47,8 @@ namespace EasyBackupAvalonia.Helpers
         private bool _isCalculatingFileSize;
         private ulong _currentDirectorySize;
 
+        private EnumerationOptions _enumerationOptions;
+
         public BackupPerformer()
         {
             IsRunning = false;
@@ -58,6 +60,12 @@ namespace EasyBackupAvalonia.Helpers
             UsesPasswordForCompressedFile = false;
             CompressedFilePassword = null;
             IsIncremental = false;
+            _enumerationOptions = new EnumerationOptions()
+            {
+                IgnoreInaccessible = true,
+                MatchType = MatchType.Win32,
+                AttributesToSkip = 0,
+            };
         }
 
         public void Cancel()
@@ -116,7 +124,7 @@ namespace EasyBackupAvalonia.Helpers
             }
 
             // Get the files in the directory and copy them to the new location.
-            FileInfo[] files = dir.GetFiles();
+            FileInfo[] files = dir.GetFiles("*", enumerationOptions: _enumerationOptions);
             foreach (FileInfo file in files)
             {
                 if (HasBeenCanceled)
@@ -138,7 +146,7 @@ namespace EasyBackupAvalonia.Helpers
             // If copying subdirectories, copy them and their contents to new location.
             if (copySubDirs)
             {
-                DirectoryInfo[] dirs = dir.GetDirectories();
+                DirectoryInfo[] dirs = dir.GetDirectories("*", enumerationOptions: _enumerationOptions);
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     if (HasBeenCanceled)
@@ -170,7 +178,7 @@ namespace EasyBackupAvalonia.Helpers
             }
             _directoryPathsSeen.Add(sourceDirName);
             // Get the files in the current directory
-            FileInfo[] files = dir.GetFiles();
+            FileInfo[] files = dir.GetFiles("*", enumerationOptions: _enumerationOptions);
             foreach (FileInfo file in files)
             {
                 if (HasBeenCanceled)
@@ -186,7 +194,7 @@ namespace EasyBackupAvalonia.Helpers
             // If copying subdirectories, search them and their contents 
             if (searchSubDirs)
             {
-                DirectoryInfo[] dirs = dir.GetDirectories();
+                DirectoryInfo[] dirs = dir.GetDirectories("*", enumerationOptions: _enumerationOptions);
                 foreach (DirectoryInfo subDir in dirs)
                 {
                     if (HasBeenCanceled)
@@ -562,7 +570,8 @@ namespace EasyBackupAvalonia.Helpers
                                 {
                                     // scan directory and copy only the latest file out of it
                                     var directoryInfo = new DirectoryInfo(item.Path);
-                                    var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+                                    var latestFile = directoryInfo.GetFiles("*", enumerationOptions: _enumerationOptions)
+                                        .OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
                                     if (latestFile != null)
                                     {
                                         if (_isCalculatingFileSize)
@@ -638,7 +647,8 @@ namespace EasyBackupAvalonia.Helpers
                                 {
                                     // scan directory and copy only the latest file out of it
                                     var directoryInfo = new DirectoryInfo(item.Path);
-                                    var latestFile = directoryInfo.GetFiles().OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
+                                    var latestFile = directoryInfo.GetFiles("*", enumerationOptions: _enumerationOptions)
+                                        .OrderByDescending(x => x.LastWriteTimeUtc).FirstOrDefault();
                                     if (latestFile != null)
                                     {
                                         if (HasBeenCanceled)
