@@ -220,6 +220,8 @@ namespace EasyBackup.Helpers
                 }
                 else
                 {
+                    destination = "\\\\?\\" + destination; // force long path syntax
+                    source = "\\\\?\\" + source; // force long path syntax
                     using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
                     {
                         using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
