@@ -92,7 +92,7 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 foreach (IStorageFolder folder in results)
                 {
-                    AddPath(folder.Path.AbsolutePath);
+                    AddPath(folder.Path.LocalPath);
                 }
             }
         }
@@ -109,7 +109,7 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 foreach (IStorageFile file in results)
                 {
-                    AddPath(file.Path.AbsolutePath);
+                    AddPath(file.Path.LocalPath);
                 }
             }
         }

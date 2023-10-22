@@ -198,7 +198,7 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 foreach (IStorageFolder folder in results)
                 {
-                    AddPath(folder.Path.AbsolutePath);
+                    AddPath(folder.Path.LocalPath);
                 }
             }
         }
@@ -214,7 +214,7 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 foreach (IStorageFile file in results)
                 {
-                    AddPath(file.Path.AbsolutePath);
+                    AddPath(file.Path.LocalPath);
                 }
             }
         }
@@ -273,10 +273,10 @@ namespace EasyBackupAvalonia.ViewModels
                         BackupLocation = BackupLocation, 
                         IsIncremental = IsIncremental 
                     };
-                    using FileStream createStream = File.Create(result.Path.AbsolutePath);
+                    using FileStream createStream = File.Create(result.Path.LocalPath);
                     await JsonSerializer.SerializeAsync<BackupTemplate>(createStream, backupTemplate);
                     await createStream.DisposeAsync();
-                    UpdateLastUsedBackupPath(result.Path.AbsolutePath);
+                    UpdateLastUsedBackupPath(result.Path.LocalPath);
                 }
             }
         }
@@ -302,8 +302,8 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 foreach (IStorageFile file in results)
                 {
-                    LoadBackupTemplate(file.Path.AbsolutePath);
-                    UpdateLastUsedBackupPath(file.Path.AbsolutePath);
+                    LoadBackupTemplate(file.Path.LocalPath);
+                    UpdateLastUsedBackupPath(file.Path.LocalPath);
                 }
             }
         }
@@ -341,7 +341,7 @@ namespace EasyBackupAvalonia.ViewModels
                 });
                 if (results.Count == 1)
                 {
-                    BackupLocation = results[0].Path.AbsolutePath;
+                    BackupLocation = results[0].Path.LocalPath;
                 }
             }
         }

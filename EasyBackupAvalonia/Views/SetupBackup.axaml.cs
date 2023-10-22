@@ -28,7 +28,7 @@ namespace EasyBackupAvalonia.Views
             {
                 foreach (var fileName in e.Data.GetFiles())
                 {
-                    sbvm.AddPath(fileName.Path.AbsolutePath);
+                    sbvm.AddPath(fileName.Path.LocalPath);
                 }
             }
         }
