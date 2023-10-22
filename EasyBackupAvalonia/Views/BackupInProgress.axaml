@@ -1,0 +1,92 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d"
+             d:DesignWidth="800"
+             d:DesignHeight="450"
+             x:Class="EasyBackupAvalonia.Views.BackupInProgress">
+    <Grid RowDefinitions="Auto, *, Auto, Auto, Auto"
+          ColumnDefinitions="*">
+        <Label Grid.Column="0"
+               Grid.ColumnSpan="2"
+               Content="Easy Backup"
+               HorizontalAlignment="Center"
+               Grid.Row="0"
+               FontSize="24"
+               FontWeight="Bold"
+               Margin="0,0,0,0" />
+        <DataGrid Grid.Row="1"
+                  ItemsSource="{Binding ItemProgressData}"
+                  Name="PathsDataGrid"
+                  AutoGenerateColumns="False"
+                  Background="Transparent">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Path"
+                                        IsReadOnly="True"
+                                        Width="*"
+                                        CanUserReorder="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}"
+                                       TextTrimming="CharacterEllipsis" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Size"
+                                    Binding="{Binding UserReadableBytesToCopy}"
+                                    IsReadOnly="True"
+                                    CanUserReorder="False" />
+                <DataGridTextColumn Header="Bytes Copied"
+                                    Binding="{Binding UserReadableBytesCopied}"
+                                    IsReadOnly="True"
+                                    CanUserReorder="False" />
+                <DataGridTemplateColumn Header="Progress"
+                                        IsReadOnly="True"
+                                        CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ProgressBar Value="{Binding Progress, Mode=OneWay}" />
+                                <TextBlock Foreground="White"
+                                           HorizontalAlignment="Center"
+                                           VerticalAlignment="Center"
+                                           FontWeight="Bold">
+                                    <Run Text="{Binding ProgressString, Mode=OneWay}" />%
+                                </TextBlock>
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridCheckBoxColumn Header="Finished?"
+                                            Binding="{Binding IsFinishedCopying}"
+                                            IsReadOnly="True"
+                                            Width="100"
+                                            CanUserReorder="False" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBlock Grid.Column="0"
+                       Grid.ColumnSpan="2"
+                       Grid.Row="2"
+                       Text="{Binding Status}"
+                       HorizontalAlignment="Center"
+                       FontSize="18"
+                       FontWeight="Bold"
+                       Margin="0,5,0,5"
+                       TextWrapping="Wrap"
+                       Foreground="{Binding StatusColor}" />
+            <TextBlock Grid.Row="3"
+                       HorizontalAlignment="Center"
+                       FontWeight="Bold"
+                       FontSize="24"
+                       Margin="0,0,0,0">
+            Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}" />% 
+            (<Run Text="{Binding RunningLabel, Mode=OneWay}" /> for <Run Text="{Binding CurrentTimeString, Mode=OneWay}" />)
+        </TextBlock>
+            <Button Grid.Row="4"
+                    Content="{Binding FinishButtonTitle}"
+                    Width="150"
+                    Command="{Binding CancelBackup}"
+                    Margin="0,10,0,10" />
+        </Grid>
+    </UserControl>
