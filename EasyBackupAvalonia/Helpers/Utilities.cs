@@ -78,5 +78,16 @@ namespace EasyBackupAvalonia.Helpers
                 return Path.Combine(folder, "settings.json");
             }
         }
+
+        public static bool IsSymbolicLink(string path)
+        {
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+            FileInfo file = new FileInfo(path);
+            return file.LinkTarget != null;
+        }
+
     }
 }
