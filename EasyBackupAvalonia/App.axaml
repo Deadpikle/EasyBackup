@@ -8,6 +8,7 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
     </Application.Styles>
     <Application.DataTemplates>
         <DataTemplate DataType="{x:Type viewModels:SetupBackupViewModel}">

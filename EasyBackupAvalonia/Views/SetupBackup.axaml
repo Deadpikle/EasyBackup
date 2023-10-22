@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
@@ -175,7 +176,13 @@
                 Command="{Binding CancelCheckingBackupSize}"
                 Margin="0,0,10,5"
                 IsEnabled="{Binding IsCancelCheckBackupSizeEnabled}" />
-        <!-- <mahapps:ProgressRing Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" IsLarge="False" IsActive="{Binding IsCheckingBackupSize}" Width="40" Height="40"/> -->
+        <progRing:ProgressRing Width="40" 
+                           Height="40"
+                           IsActive="{Binding IsCheckingBackupSize}"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           Foreground="{DynamicResource SystemAccentColor}"
+                           Margin="10,20,0,0"/>
     </StackPanel>
     <Label Grid.Column="0"
            Grid.ColumnSpan="2"
