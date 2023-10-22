@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 namespace EasyBackup.Helpers
 {
     // TODO: add option to not always overwrite and use an existing backup (essentially adding new/updated files)
+    // TODO: https://stackoverflow.com/a/1281638 -- check access control on dirs instead of doing the symbolic link check
     class BackupPerformer
     {
         // // // Events and Delegates // // //
