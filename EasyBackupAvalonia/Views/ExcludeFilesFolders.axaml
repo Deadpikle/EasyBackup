@@ -6,23 +6,13 @@
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="EasyBackupAvalonia.Views.ExcludeFilesFolders">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
+    <Grid RowDefinitions="Auto, Auto, *, Auto"
+          ColumnDefinitions="*, Auto">
         <Button Grid.Row="0"
                 Grid.ColumnSpan="2"
                 Content="Cancel"
                 Margin="5,5,0,5"
                 Command="{Binding CancelChangeExclusions}"
-                Width="100"
                 HorizontalAlignment="Left" />
         <Label Grid.Row="0"
                Grid.Column="0"
@@ -97,8 +87,8 @@
                 Grid.ColumnSpan="2"
                 Content="Save"
                 Margin="5"
+                Background="{DynamicResource SystemAccentColor}"
                 Command="{Binding SaveExclusions}"
-                Width="100"
                 HorizontalAlignment="Center" />
     </Grid>
 </UserControl>

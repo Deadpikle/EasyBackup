@@ -47,7 +47,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <Grid>
-                                <ProgressBar Value="{Binding Progress, Mode=OneWay}" />
+                                <ProgressBar Value="{Binding Progress, Mode=OneWay}"
+                                            Height="20" /> 
                                 <TextBlock Foreground="White"
                                            HorizontalAlignment="Center"
                                            VerticalAlignment="Center"
@@ -83,10 +84,10 @@
             Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}" />% 
             (<Run Text="{Binding RunningLabel, Mode=OneWay}" /> for <Run Text="{Binding CurrentTimeString, Mode=OneWay}" />)
         </TextBlock>
-            <Button Grid.Row="4"
-                    Content="{Binding FinishButtonTitle}"
-                    Width="150"
-                    Command="{Binding CancelBackup}"
-                    Margin="0,10,0,10" />
-        </Grid>
-    </UserControl>
+        <Button Grid.Row="4"
+                Content="{Binding FinishButtonTitle}"
+                HorizontalAlignment="Center"
+                Command="{Binding CancelBackup}"
+                Margin="0,10,0,10" />
+    </Grid>
+</UserControl>

@@ -123,7 +123,7 @@
                       Margin="0,5,0,5"
                       IsChecked="{Binding PlaysSoundsOnComplete}"
                       FontSize="14" />
-            <CheckBox x:Name="SaveToCompressed"
+            <!-- <CheckBox x:Name="SaveToCompressed"
                       Content="Save to Compressed File"
                       Margin="0,5,0,5"
                       IsChecked="{Binding SavesToCompressedFile}"
@@ -133,14 +133,14 @@
                       Margin="0,5,0,5"
                       IsChecked="{Binding CompressedFileUsesPassword}"
                       FontSize="14"
-                      IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" />
+                      IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" /> -->
             <!-- <PasswordBox x:Name="PasswordInput" Margin="0,5,0,5"
                       IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
             <PasswordBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
                       IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/> -->
-            <Button Content="About Easy Backup"
+            <!-- <Button Content="About Easy Backup"
                     Margin="0,5,0,5"
-                    Command="{Binding ShowAboutWindow}" />
+                    Command="{Binding ShowAboutWindow}" /> -->
         </StackPanel>
         <Button Grid.Column="0"
                 Grid.ColumnSpan="2"
@@ -200,6 +200,7 @@
             Content="Run Backup"
             HorizontalAlignment="Center"
             Width="100"
+            Background="{DynamicResource SystemAccentColor}"
             Command="{Binding PerformBackup}"
             Margin="0,0,0,5" />
 </Grid>
