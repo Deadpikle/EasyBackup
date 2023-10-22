@@ -81,7 +81,7 @@ namespace EasyBackupAvalonia.Helpers
 
         public static bool IsSymbolicLink(string path)
         {
-            if (!File.Exists(path))
+            if (!File.Exists(path) && !Directory.Exists(path))
             {
                 return false;
             }
