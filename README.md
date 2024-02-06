@@ -24,7 +24,7 @@ Features include:
 
 ## Features/Updates to Come
 
-* Option to update a previous backup instead of creating an entirely new backup (only adds new files and updates modified files based on a hash; does NOT delete old files that have been removed)
+* Option to update a previous backup instead of creating an entirely new backup (only adds new files and updates modified files based on a hash; does NOT delete old files that have been removed) — finished and working in Avalonia version/branch
 
 ## Can I help contribute?
 
