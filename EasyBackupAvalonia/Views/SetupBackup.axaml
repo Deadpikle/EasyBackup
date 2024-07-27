@@ -2,13 +2,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:EasyBackupAvalonia.ViewModels;assembly=EasyBackupAvalonia"
+             xmlns:models="clr-namespace:EasyBackupAvalonia.Models;assembly=EasyBackupAvalonia"
              xmlns:progRing="clr-namespace:AvaloniaProgressRing;assembly=AvaloniaProgressRing"
              mc:Ignorable="d"
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="EasyBackupAvalonia.Views.SetupBackup"
              Name="SetupBackupUserControl"
-             DragDrop.AllowDrop="True">
+             DragDrop.AllowDrop="True"
+             x:DataType="vm:SetupBackupViewModel">
     <Grid RowDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto, Auto"
           ColumnDefinitions="*, Auto">
         <Label Grid.Column="0"
@@ -81,9 +84,9 @@
                                         CanUserResize="False"
                                         Width="175">
                     <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
+                        <DataTemplate x:DataType="models:FolderFileItem">
                             <Button Content="Exclude Files/Folders"
-                                    Command="{Binding ElementName=SetupBackupUserControl, Path=DataContext.EditDirectoryExclusions}"
+                                    Command="{Binding ElementName=SetupBackupUserControl, Path=((vm:SetupBackupViewModel)DataContext).EditDirectoryExclusions}"
                                     CommandParameter="{Binding}"
                                     IsVisible="{Binding CanEditFolderExclusions}" />
                         </DataTemplate>
