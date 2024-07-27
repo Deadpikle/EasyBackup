@@ -31,6 +31,9 @@ namespace EasyBackupAvalonia.Helpers
         public delegate void CalculatedBytesOfItemHandler(FolderFileItem item, ulong bytes);
         public event CopiedBytesOfItemHandler CalculatedBytesOfItem;
 
+        public delegate void ProcessingFileHandler(string path);
+        public event ProcessingFileHandler AboutToProcessFile;
+
         // // // // // // // // // // // // //
 
         public bool IsRunning;
@@ -46,6 +49,7 @@ namespace EasyBackupAvalonia.Helpers
         private List<string> _directoryPathsSeen;
         private bool _isCalculatingFileSize;
         private ulong _currentDirectorySize;
+        private Dictionary<string, bool> _pathsCopiedTo;
 
         private EnumerationOptions _enumerationOptions;
 
@@ -66,6 +70,7 @@ namespace EasyBackupAvalonia.Helpers
                 MatchType = MatchType.Win32,
                 AttributesToSkip = 0,
             };
+            _pathsCopiedTo = new Dictionary<string, bool>();
         }
 
         public void Cancel()
@@ -135,6 +140,7 @@ namespace EasyBackupAvalonia.Helpers
                 bool shouldAllow = ShouldAllowPath(excludedPaths, file.FullName);
                 if (_isCalculatingFileSize && shouldAllow)
                 {
+                    AboutToProcessFile?.Invoke(file.FullName);
                     _currentDirectorySize += (ulong)file.Length;
                 }
                 else if (shouldAllow)
@@ -220,13 +226,25 @@ namespace EasyBackupAvalonia.Helpers
 
         public string HashFile(string filePath)
         {
-            using (SHA256 sha256 = SHA256.Create())
+            try 
             {
-                using (FileStream fileStream = File.OpenRead(filePath))
+                if (File.Exists(filePath))
                 {
-                    return BitConverter.ToString(sha256.ComputeHash(fileStream)).Replace("-", "");
+                    if (Utilities.IsSymbolicLink(filePath) && !Utilities.SymbolicLinkFileExists(filePath))
+                    {
+                        return "";
+                    }
+                    using (SHA256 sha256 = SHA256.Create())
+                    {
+                        using (FileStream fileStream = File.OpenRead(filePath))
+                        {
+                            return BitConverter.ToString(sha256.ComputeHash(fileStream)).Replace("-", "");
+                        }
+                    }
                 }
             }
+            catch {}
+            return "";
         }
 
         // Modified from https://stackoverflow.com/a/33726939/3938401
@@ -234,21 +252,33 @@ namespace EasyBackupAvalonia.Helpers
         {
             if (File.Exists(source))
             {
+                if (Utilities.IsSymbolicLink(source) && !Utilities.SymbolicLinkFileExists(source))
+                {
+                    _pathsCopiedTo.Add(destination, false);
+                    return;
+                }
                 if (HasBeenCanceled)
                 {
+                    _pathsCopiedTo.Add(destination, false);
                     return;
                 }
                 if (UsesCompressedFile)
                 {
+                    _pathsCopiedTo.Add(destination, false);
                 }
                 else
                 {
+                    AboutToProcessFile?.Invoke(source);
                     var needsToCopy = true;
                     if (IsIncremental && File.Exists(destination))
                     {
                         var sourceHash = HashFile(source);
                         var outputHash = HashFile(destination);
                         needsToCopy = sourceHash != outputHash;
+                    }
+                    if (_pathsCopiedTo.ContainsKey(destination))
+                    {
+                        needsToCopy = false; // have already processed this file (fixes any symlink fun)
                     }
                     if (needsToCopy)
                     {
@@ -260,21 +290,35 @@ namespace EasyBackupAvalonia.Helpers
                             // TODO: one improvement/setting could be to retain old files for X number of days.
                             File.Move(destination, destination + ".old");                            
                         }
+                        // TODO: increase buffer size
+                        // todo: see if better way to copy w/cancel
+                        // see: https://stackoverflow.com/questions/7680640/how-to-copy-a-file-with-the-ability-to-cancel-the-copy
+                        // https://stackoverflow.com/questions/7680640/how-to-copy-a-file-with-the-ability-to-cancel-the-copy
+                        // https://stackoverflow.com/questions/882686/asynchronous-file-copy-move-in-c-sharp
                         using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
                         {
                             using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
                             {
-                                int buffer_size = 10240;
+                                int buffer_size = 5 * 10240;
                                 byte[] buffer = new byte[buffer_size];
                                 long total_read = 0;
                                 while (total_read < inStream.Length)
                                 {
                                     if (HasBeenCanceled)
                                     {
+                                        // stop copying file and erase anything in progress
+                                        // TODO: test
+                                        inStream.Close();
+                                        outStream.Close();
+                                        if (File.Exists(destination))
+                                        {
+                                            File.Delete(destination);
+                                        }
                                         break;
                                     }
                                     int read = inStream.Read(buffer, 0, buffer_size);
                                     outStream.Write(buffer, 0, read);
+                                    // TODO: write async w/await?
                                     CopiedBytesOfItem(itemBeingCopied, (ulong)read);
                                     total_read += read;
                                 }
@@ -284,12 +328,18 @@ namespace EasyBackupAvalonia.Helpers
                         {
                             File.Delete(destination + ".old"); // remove old file now that new one is in place
                         }
+                        _pathsCopiedTo.Add(destination, true);
                     }
                     else
                     {
                         CopiedBytesOfItem(itemBeingCopied, (ulong)new FileInfo(source).Length);
+                        _pathsCopiedTo.Add(destination, true);
                     }
                 }
+            }
+            else
+            {
+                _pathsCopiedTo.Add(destination, false);
             }
         }
 
@@ -377,6 +427,7 @@ namespace EasyBackupAvalonia.Helpers
                 {
                     didStartCompressingFile = true;
                     currentFilePath = e.Data.Substring(2);
+                    AboutToProcessFile?.Invoke(currentFilePath);
                     if (currentItem != null && remainingBytes > 0)
                     {
                         CopiedBytesOfItem(currentItem, remainingBytes);
@@ -576,7 +627,9 @@ namespace EasyBackupAvalonia.Helpers
                                     {
                                         if (_isCalculatingFileSize)
                                         {
-                                            CalculatedBytesOfItem?.Invoke(item, (ulong)new FileInfo(latestFile.FullName).Length);
+                                            var fileInfo = new FileInfo(latestFile.FullName);
+                                            AboutToProcessFile?.Invoke(fileInfo.FullName);
+                                            CalculatedBytesOfItem?.Invoke(item, (ulong)fileInfo.Length);
                                         }
                                         else
                                         {

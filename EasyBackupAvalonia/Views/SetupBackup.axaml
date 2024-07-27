@@ -9,127 +9,127 @@
              x:Class="EasyBackupAvalonia.Views.SetupBackup"
              Name="SetupBackupUserControl"
              DragDrop.AllowDrop="True">
-	<Grid RowDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto"
+    <Grid RowDefinitions="Auto, *, Auto, Auto, Auto, Auto, Auto, Auto"
           ColumnDefinitions="*, Auto">
-		<Label Grid.Column="0"
+        <Label Grid.Column="0"
                Grid.ColumnSpan="2"
                Content="Easy Backup"
                HorizontalAlignment="Center"
                FontSize="24"
                FontWeight="Bold"
                Margin="0,0,0,0" />
-		<DataGrid ItemsSource="{Binding Items}"
-			      Name="PathsDataGrid"
-			      Grid.Row="1"
-			      Grid.ColumnSpan="1"
-			      VerticalScrollBarVisibility="Visible"
-			      VerticalAlignment="Stretch"
-			      AutoGenerateColumns="False"
-			      SelectionMode="Extended"
-			      GridLinesVisibility="All"
-			      DragDrop.AllowDrop="True"
-			      Background="Transparent"
-			      SelectedItem="{Binding SelectedItem}">
-			<DataGrid.Columns>
-				<DataGridTemplateColumn Header="Path"
-										IsReadOnly="True"
-										Width="*"
-										CanUserReorder="False">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<TextBlock Text="{Binding Path}"
-									   TextWrapping="Wrap"
-									   Margin="2" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Directory?"
-										CanUserReorder="False"
-										Width="Auto">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<CheckBox IsChecked="{Binding IsDirectory}"
-									  IsEnabled="False"
-									  HorizontalAlignment="Center" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Copy Subdirectories?"
-										CanUserReorder="False"
-										Width="Auto">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<CheckBox IsChecked="{Binding IsRecursive}"
-									  IsEnabled="{Binding IsDirectory}"
-									  HorizontalAlignment="Center" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header="Only Copy Latest File"
-										CanUserReorder="False"
-										CanUserResize="False"
-										Width="Auto">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<CheckBox IsChecked="{Binding OnlyCopiesLatestFile}"
-									  IsEnabled="{Binding CanEnableOnlyCopiesLatestFile}"
-									  HorizontalAlignment="Center" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-				<DataGridTemplateColumn Header=""
-										CanUserResize="False"
-										Width="175">
-					<DataGridTemplateColumn.CellTemplate>
-						<DataTemplate>
-							<Button Content="Exclude Files/Folders"
-									Command="{Binding ElementName=SetupBackupUserControl, Path=DataContext.EditDirectoryExclusions}"
-									CommandParameter="{Binding}"
-									IsVisible="{Binding CanEditFolderExclusions}" />
-						</DataTemplate>
-					</DataGridTemplateColumn.CellTemplate>
-				</DataGridTemplateColumn>
-			</DataGrid.Columns>
-		</DataGrid>
-		<StackPanel Grid.Column="1"
+        <DataGrid ItemsSource="{Binding Items}"
+                  Name="PathsDataGrid"
+                  Grid.Row="1"
+                  Grid.ColumnSpan="1"
+                  VerticalScrollBarVisibility="Visible"
+                  VerticalAlignment="Stretch"
+                  AutoGenerateColumns="False"
+                  SelectionMode="Extended"
+                  GridLinesVisibility="All"
+                  DragDrop.AllowDrop="True"
+                  Background="Transparent"
+                  SelectedItem="{Binding SelectedItem}">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Path"
+                                        IsReadOnly="True"
+                                        Width="*"
+                                        CanUserReorder="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}"
+                                       TextWrapping="Wrap"
+                                       Margin="2" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Directory?"
+                                        CanUserReorder="False"
+                                        Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsDirectory}"
+                                      IsEnabled="False"
+                                      HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Copy Subdirectories?"
+                                        CanUserReorder="False"
+                                        Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding IsRecursive}"
+                                      IsEnabled="{Binding IsDirectory}"
+                                      HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header="Only Copy Latest File"
+                                        CanUserReorder="False"
+                                        CanUserResize="False"
+                                        Width="Auto">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <CheckBox IsChecked="{Binding OnlyCopiesLatestFile}"
+                                      IsEnabled="{Binding CanEnableOnlyCopiesLatestFile}"
+                                      HorizontalAlignment="Center" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTemplateColumn Header=""
+                                        CanUserResize="False"
+                                        Width="175">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Button Content="Exclude Files/Folders"
+                                    Command="{Binding ElementName=SetupBackupUserControl, Path=DataContext.EditDirectoryExclusions}"
+                                    CommandParameter="{Binding}"
+                                    IsVisible="{Binding CanEditFolderExclusions}" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+        <StackPanel Grid.Column="1"
                     Grid.Row="0"
                     Grid.RowSpan="3"
                     Orientation="Vertical"
                     Margin="5">
-			<Button Content="Add File"
+            <Button Content="Add File"
                     Margin="0,5,0,5"
                     Command="{Binding AddFile}" />
-			<Button Content="Add Folder"
+            <Button Content="Add Folder"
                     Margin="0,5,0,5"
                     Command="{Binding AddFolder}" />
-			<Button Content="Remove File/Folder"
+            <Button Content="Remove File/Folder"
                     Margin="0,5,0,5"
                     CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}"
                     Command="{Binding RemoveItem}"
                     IsEnabled="{Binding IsItemSelected}" />
-			<Button Content="Remove All Items"
+            <Button Content="Remove All Items"
                     Margin="0,5,0,5"
                     Command="{Binding RemoveAllItems}" />
-			<Button Content="Load Backup Template"
+            <Button Content="Load Backup Template"
                     Margin="0,10,0,5"
                     Command="{Binding LoadTemplate}" />
-			<Button Content="Save Backup Template"
+            <Button Content="Save Backup Template"
                     Margin="0,10,0,5"
                     Command="{Binding SaveTemplate}" />
-			<CheckBox Content="Incremental Backup"
+            <CheckBox Content="Incremental Backup"
                       Margin="0,5,0,5"
                       IsChecked="{Binding IsIncremental}"
                       FontSize="14" />
-			<Rectangle Fill="DarkGray"
+            <Rectangle Fill="DarkGray"
                        Height="2" />
-			<!-- <Button Content="Settings"
+            <!-- <Button Content="Settings"
                     Margin="0,5,0,5"
                     IsVisible="False" /> -->
-			<CheckBox Content="Play Sounds When Finished"
+            <CheckBox Content="Play Sounds When Finished"
                       Margin="0,5,0,5"
                       IsChecked="{Binding PlaysSoundsOnComplete}"
                       FontSize="14" />
-			<!-- <CheckBox x:Name="SaveToCompressed"
+            <!-- <CheckBox x:Name="SaveToCompressed"
                       Content="Save to Compressed File"
                       Margin="0,5,0,5"
                       IsChecked="{Binding SavesToCompressedFile}"
@@ -140,74 +140,80 @@
                       IsChecked="{Binding CompressedFileUsesPassword}"
                       FontSize="14"
                       IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" /> -->
-			<!-- <PasswordBox x:Name="PasswordInput" Margin="0,5,0,5"
+            <!-- <PasswordBox x:Name="PasswordInput" Margin="0,5,0,5"
                       IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
             <PasswordBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
                       IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/> -->
-			<!-- <Button Content="About Easy Backup"
+            <!-- <Button Content="About Easy Backup"
                     Margin="0,5,0,5"
                     Command="{Binding ShowAboutWindow}" /> -->
-		</StackPanel>
-		<Button Grid.Column="0"
+        </StackPanel>
+        <Button Grid.Column="0"
                 Grid.ColumnSpan="2"
                 Grid.Row="2"
-				Grid.RowSpan="1"
+                Grid.RowSpan="1"
                 Content="Choose Backup Location"
                 HorizontalAlignment="Center"
                 Command="{Binding ChooseBackupLocation}"
                 Margin="0,5,0,0" />
-		<TextBlock Grid.Column="0"
+        <TextBlock Grid.Column="0"
                    Grid.ColumnSpan="2"
                    Grid.Row="3"
                    HorizontalAlignment="Center"
                    Margin="0,5,0,5"
                    FontSize="14">
 			Backup location: <Run Text="{Binding BackupLocation}" />
-		</TextBlock>
-		<Button Grid.Column="0"
+    </TextBlock>
+    <Button Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.Row="4"
+            Content="Check Backup Size"
+            HorizontalAlignment="Center"
+            Command="{Binding CheckBackupSize}"
+            Margin="0,0,0,5"
+            IsVisible="{Binding IsCheckBackupSizeEnabled}" />
+    <StackPanel Grid.Column="0"
                 Grid.ColumnSpan="2"
                 Grid.Row="4"
-                Content="Check Backup Size"
                 HorizontalAlignment="Center"
-                Command="{Binding CheckBackupSize}"
-                Margin="0,0,0,5"
-                IsVisible="{Binding IsCheckBackupSizeEnabled}" />
-		<StackPanel Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Grid.Row="4"
-                    HorizontalAlignment="Center"
-                    IsVisible="{Binding IsCheckingBackupSize}"
-                    Orientation="Horizontal">
-			<Button Content="Cancel Check Backup Size"
-                    Width="150"
-                    Command="{Binding CancelCheckingBackupSize}"
-                    Margin="0,0,10,5"
-                    IsEnabled="{Binding IsCancelCheckBackupSizeEnabled}" />
-			<progRing:ProgressRing Width="40"
+                IsVisible="{Binding IsCheckingBackupSize}"
+                Orientation="Horizontal">
+        <Button Content="Cancel Check Backup Size"
+                Command="{Binding CancelCheckingBackupSize}"
+                Margin="0,0,10,5"
+                IsEnabled="{Binding IsCancelCheckBackupSizeEnabled}" />
+        <progRing:ProgressRing Width="40"
                                Height="40"
                                IsActive="{Binding IsCheckingBackupSize}"
                                HorizontalAlignment="Left"
                                VerticalAlignment="Top"
                                Foreground="{DynamicResource SystemAccentColor}"
-                               Margin="10,20,0,0"/>
-		</StackPanel>
-		<Label Grid.Column="0"
-               Grid.ColumnSpan="2"
-               Grid.Row="5"
-               Margin="0,0,0,5"
-               Content="{Binding CheckBackupSizeStatus}"
-               VerticalAlignment="Center"
-               FontSize="16"
-               HorizontalAlignment="Center"
-               Foreground="{Binding CheckBackupSizeBrush}"
-               IsVisible="{Binding IsCheckBackupSizeStatusVisible}" />
-		<Button Grid.Column="0"
-                Grid.ColumnSpan="2"
-                Grid.Row="6"
-                Content="Run Backup"
-                HorizontalAlignment="Center"
-                Background="{DynamicResource SystemAccentColor}"
-                Command="{Binding PerformBackup}"
-                Margin="0,0,0,5" />
-	</Grid>
+                               Margin="10,20,0,0" />
+    </StackPanel>
+    <TextBlock Text="{Binding BackupSizeScanFilePath}"
+                FontSize="12"
+                TextWrapping="Wrap"
+                Margin="2"
+                Grid.Row="5"
+                Grid.Column="0"
+                Grid.ColumnSpan="2" />
+    <Label Grid.Column="0"
+           Grid.ColumnSpan="2"
+           Grid.Row="6"
+           Margin="0,0,0,5"
+           Content="{Binding CheckBackupSizeStatus}"
+           VerticalAlignment="Center"
+           FontSize="16"
+           HorizontalAlignment="Center"
+           Foreground="{Binding CheckBackupSizeBrush}"
+           IsVisible="{Binding IsCheckBackupSizeStatusVisible}" />
+    <Button Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.Row="7"
+            Content="Run Backup"
+            HorizontalAlignment="Center"
+            Background="{DynamicResource SystemAccentColor}"
+            Command="{Binding PerformBackup}"
+            Margin="0,0,0,5" />
+</Grid>
 </UserControl>

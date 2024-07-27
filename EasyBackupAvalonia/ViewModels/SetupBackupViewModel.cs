@@ -31,6 +31,7 @@ namespace EasyBackupAvalonia.ViewModels
         private string _backupLocation;
         private ulong _totalBackupSize;
         private bool _isIncremental;
+        private string _backupSizeScanFilePath;
 
         private string _checkBackupSizeStatus;
         private bool _isCheckBackupSizeStatusVisible;
@@ -174,6 +175,12 @@ namespace EasyBackupAvalonia.ViewModels
             set { _confirmPassword = value; NotifyPropertyChanged(); }
         }
 
+        public string BackupSizeScanFilePath
+        {
+            get => _backupSizeScanFilePath;
+            set { _backupSizeScanFilePath = value; NotifyPropertyChanged(); }
+        }
+
         #endregion
 
         public ICommand AddFile => new RelayCommand(o => ChooseFile());
@@ -186,6 +193,7 @@ namespace EasyBackupAvalonia.ViewModels
         public ICommand CheckBackupSize => new RelayCommand(o => ScanBackupAndCheckSize());
         public ICommand PerformBackup => new RelayCommand(o => StartBackup());
         public ICommand EditDirectoryExclusions => new RelayCommand(o => ShowEditDirectoryExclusionsScreen(o as FolderFileItem));
+        public ICommand CancelCheckingBackupSize => new RelayCommand(o => StopScanningBackupSize());
 
         public async void ChooseFolder()
         {
@@ -405,6 +413,7 @@ namespace EasyBackupAvalonia.ViewModels
             ulong freeDriveBytes = 0;
             _backupSizeChecker = new BackupPerformer();
             _backupSizeChecker.CalculatedBytesOfItem += BackupPerformer_CalculatedBytesOfItem;
+            _backupSizeChecker.AboutToProcessFile += BackupPerformer_AboutToProcessFile;
             IsCancelCheckBackupSizeEnabled = true;
             var redBrush = new SolidColorBrush(Colors.Red);
             bool didFail = false;
@@ -456,6 +465,11 @@ namespace EasyBackupAvalonia.ViewModels
         private void BackupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
         {
             _totalBackupSize += bytes;
+        }
+
+        private void BackupPerformer_AboutToProcessFile(string path)
+        {
+            BackupSizeScanFilePath = path;
         }
 
         private void StopScanningBackupSize()
