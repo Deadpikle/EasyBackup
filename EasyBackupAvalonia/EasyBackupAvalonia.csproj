@@ -7,6 +7,8 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>false</AvaloniaUseCompiledBindingsByDefault>
+    <Product>EasyBackup</Product>
+    <Version>0.9.0</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Update="Sounds/*" CopyToOutputDirectory="PreserveNewest" />

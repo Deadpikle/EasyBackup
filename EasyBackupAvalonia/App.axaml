@@ -3,7 +3,8 @@
              x:Class="EasyBackupAvalonia.App"
              xmlns:views="clr-namespace:EasyBackupAvalonia.Views"
              xmlns:viewModels="clr-namespace:EasyBackupAvalonia.ViewModels"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Default"
+             Name="EasyBackup">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
     <Application.Styles>
         <FluentTheme />
@@ -21,4 +22,9 @@
             <views:BackupInProgress/>
         </DataTemplate>
     </Application.DataTemplates>
+	<NativeMenu.Menu>
+		<NativeMenu>
+			<!-- <NativeMenuItem Header="About EasyBackup" /> -->
+		</NativeMenu>
+	</NativeMenu.Menu>
 </Application>
