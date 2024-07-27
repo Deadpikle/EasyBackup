@@ -89,5 +89,15 @@ namespace EasyBackupAvalonia.Helpers
             return file.LinkTarget != null;
         }
 
+
+        public static bool SymbolicLinkFileExists(string path)
+        {
+            if (!File.Exists(path) && !Directory.Exists(path))
+            {
+                return false;
+            }
+            FileInfo file = new FileInfo(path);
+            return File.Exists(Path.Combine(Path.GetDirectoryName(path), file.LinkTarget)) || File.Exists(file.LinkTarget);
+        }
     }
 }
