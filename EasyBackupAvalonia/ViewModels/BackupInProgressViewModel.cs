@@ -30,6 +30,7 @@ namespace EasyBackupAvalonia.ViewModels
         private List<FolderFileCopyProgress> _itemProgressData;
         private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
         private double _currentProgress;
+        private string _currentPath;
 
         private bool _playsSounds;
         //private SoundPlayer _successSoundPlayer;
@@ -71,6 +72,7 @@ namespace EasyBackupAvalonia.ViewModels
             _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
             _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
             _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
+            _backupPerformer.AboutToProcessFile += _backupPerformer_AboutToProcessFile;
             _playsSounds = Settings.PlaySoundsOnComplete;
             if (_playsSounds)
             {
@@ -145,6 +147,12 @@ namespace EasyBackupAvalonia.ViewModels
         {
             get { return _runningLabel; }
             set { _runningLabel = value; NotifyPropertyChanged(); }
+        }
+
+        public string CurrentPath
+        {
+            get => _currentPath;
+            set { _currentPath = value; NotifyPropertyChanged(); }
         }
 
         #endregion
@@ -280,6 +288,11 @@ namespace EasyBackupAvalonia.ViewModels
         {
             TellUserBackupFailed("Backup failed. Error: " + e.Message);
             StatusColor = _redBrush;
+        }
+
+        private void _backupPerformer_AboutToProcessFile(string path)
+        {
+            CurrentPath = path;
         }
 
         #endregion
