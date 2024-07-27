@@ -1,0 +1,15 @@
+TODO (Avalonia build which is the new stuff going forward)
+====================
+-Test on Windows
+-7zip compression
+-Use newer symlink functionality stuff on Windows since this runs .NET 8 now
+-Test symlinks on macOS
+-Use better dialog functionality instead of popup windows
+-Add incremental backup option
+    *-on copy file check hash if file exists. if hash same don't copy file anew
+    *-use hardcoded folder name since it is incremental
+    *-always keep files in backup that aren't in original anymore (maybe eventually add option to remove but that is removing people's backup sooo. maybe better option is to move them to a separate dir for handling there manually by user.)
+    -add incremental compatibility with 7z files (unknown if possible at this point in time
+
+=== Eventually ===
+-move old files to another dir for manual user cleanup

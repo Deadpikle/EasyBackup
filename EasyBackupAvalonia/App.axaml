@@ -1,0 +1,24 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="EasyBackupAvalonia.App"
+             xmlns:views="clr-namespace:EasyBackupAvalonia.Views"
+             xmlns:viewModels="clr-namespace:EasyBackupAvalonia.ViewModels"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+        <StyleInclude Source="avares://AvaloniaProgressRing/Styles/ProgressRing.xaml"/>
+    </Application.Styles>
+    <Application.DataTemplates>
+        <DataTemplate DataType="{x:Type viewModels:SetupBackupViewModel}">
+            <views:SetupBackup/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:ExcludeFilesFoldersViewModel}">
+            <views:ExcludeFilesFolders/>
+        </DataTemplate>
+        <DataTemplate DataType="{x:Type viewModels:BackupInProgressViewModel}">
+            <views:BackupInProgress/>
+        </DataTemplate>
+    </Application.DataTemplates>
+</Application>
