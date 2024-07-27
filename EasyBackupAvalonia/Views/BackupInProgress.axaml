@@ -6,7 +6,7 @@
              d:DesignWidth="800"
              d:DesignHeight="450"
              x:Class="EasyBackupAvalonia.Views.BackupInProgress">
-    <Grid RowDefinitions="Auto, *, Auto, Auto, Auto"
+    <Grid RowDefinitions="Auto, *, Auto, Auto, Auto, Auto"
           ColumnDefinitions="*">
         <Label Grid.Column="0"
                Grid.ColumnSpan="2"
@@ -84,7 +84,12 @@
             Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}" />% 
             (<Run Text="{Binding RunningLabel, Mode=OneWay}" /> for <Run Text="{Binding CurrentTimeString, Mode=OneWay}" />)
         </TextBlock>
-        <Button Grid.Row="4"
+        <TextBlock Text="{Binding CurrentPath}"
+                   FontSize="12"
+                   Grid.Row="4"
+                   TextWrapping="Wrap"
+                   Margin="2" />
+        <Button Grid.Row="5"
                 Content="{Binding FinishButtonTitle}"
                 HorizontalAlignment="Center"
                 Command="{Binding CancelBackup}"
