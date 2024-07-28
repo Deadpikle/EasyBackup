@@ -2,6 +2,7 @@
 [msbuild]
 project = "EasyBackupAvalonia/EasyBackupAvalonia.csproj"
 configuration = "Release"
+branches = ["main"] # all the branches that can be tagged with a version
 [msbuild.properties]
 PublishReadyToRun = false # Disable PublishReadyToRun
 PublishTrimmed = true
