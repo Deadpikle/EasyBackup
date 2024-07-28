@@ -1,6 +1,6 @@
 # Easy Backup
 
-Easy Backup is a small Windows utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. 
+Easy Backup is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup.
 
 Features include:
 
@@ -13,9 +13,13 @@ Features include:
 * View backup progress as it happens
 * Optional sounds when backup succeeds or fails
 * Cancel backup at any time
-* Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location.
+* Windows legacy build only: Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location.
 
-## Screenshots
+## Note
+
+For now, you may need to run `chmod +x` on the download in macOS/Linux in order to get things running properly. In the future, we'd like to publish an actual macOS app.
+
+## Screenshots (Legacy Windows-only version)
 
 <div align="center">
     <img alt="Setup" src="./screenshots/setup-backup.png">
@@ -29,6 +33,8 @@ Features include:
 ## Can I help contribute?
 
 Glad you asked! There are always things that can be done on an open-source project: fix bugs, add new features, and more! Check out the issues tab of this repository and take a look at what bugs have been reported and which features have been requested. If you'd like to request a feature or file a bug, by all means, please do so!
+
+Basically, this repo is not actively developed unless the author needs something for it, but contributions are welcome and accepted.
 
 ## License
 
