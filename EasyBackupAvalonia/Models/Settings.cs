@@ -14,24 +14,6 @@ namespace EasyBackupAvalonia.Models
     {
         public static int VersionNumber => 2;
 
-        private class SettingsData
-        {
-            public int LastSeenVersionNumber { get; set; }
-            public string LastUsedBackupTemplatePath { get; set; }
-            public bool PlaySoundsOnComplete { get; set; }
-            public bool SavesToCompressedFile { get; set; }
-            public bool CompressedFileUsesPassword { get; set; }
-
-            public SettingsData()
-            {
-                LastSeenVersionNumber = Settings.VersionNumber;
-                LastUsedBackupTemplatePath = "";
-                PlaySoundsOnComplete = true;
-                SavesToCompressedFile = false;
-                CompressedFileUsesPassword = false;
-            }
-        }
-
         private static SettingsData _settings;
 
         private Settings()
@@ -89,11 +71,13 @@ namespace EasyBackupAvalonia.Models
             if (File.Exists(path))
             {
                 var json = File.ReadAllText(path);
-                _settings = JsonSerializer.Deserialize<SettingsData>(json);
+                _settings = JsonSerializer.Deserialize<SettingsData>(json, SourceGenerationContext.Default.SettingsData);
+                // In future, this is where we'd migrate data as needed.
+                _settings.LastSeenVersionNumber = VersionNumber;
             }
             else
             {
-                _settings = new SettingsData();
+                _settings = new SettingsData() { LastSeenVersionNumber = VersionNumber };
             }
         }
 
@@ -101,7 +85,7 @@ namespace EasyBackupAvalonia.Models
         {
             var path = Utilities.SaveFileLocation;
             using FileStream fileStream = File.Create(path);
-            await JsonSerializer.SerializeAsync<SettingsData>(fileStream, _settings);
+            await JsonSerializer.SerializeAsync<SettingsData>(fileStream, _settings, SourceGenerationContext.Default.SettingsData);
             await fileStream.DisposeAsync();
         }
     }

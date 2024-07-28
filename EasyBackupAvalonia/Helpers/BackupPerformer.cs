@@ -372,10 +372,12 @@ namespace EasyBackupAvalonia.Helpers
             }
             var is64BitOS = Utilities.Is64BitOS();
             Process process = new Process();
-            var currentDir = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
-            var exePath = is64BitOS ? currentDir + "/tools/x64/7za.exe" : currentDir + "/tools/x86/7za.exe";
+            var currentDir = AppContext.BaseDirectory;
+            var exePath = is64BitOS 
+                ? Path.Combine(currentDir, "/tools/x64/7za.exe") 
+                : Path.Combine(currentDir, "/tools/x86/7za.exe");
             process.StartInfo.FileName = exePath;
-            process.StartInfo.WorkingDirectory = Directory.GetParent(Assembly.GetExecutingAssembly().Location).FullName;
+            process.StartInfo.WorkingDirectory = AppContext.BaseDirectory;
 
             // https://stackoverflow.com/a/6522928/3938401
             process.StartInfo.UseShellExecute = false;

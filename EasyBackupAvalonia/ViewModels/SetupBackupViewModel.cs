@@ -282,7 +282,7 @@ namespace EasyBackupAvalonia.ViewModels
                         IsIncremental = IsIncremental 
                     };
                     using FileStream createStream = File.Create(result.Path.LocalPath);
-                    await JsonSerializer.SerializeAsync<BackupTemplate>(createStream, backupTemplate);
+                    await JsonSerializer.SerializeAsync<BackupTemplate>(createStream, backupTemplate, SourceGenerationContext.Default.BackupTemplate);
                     await createStream.DisposeAsync();
                     UpdateLastUsedBackupPath(result.Path.LocalPath);
                 }
@@ -327,7 +327,7 @@ namespace EasyBackupAvalonia.ViewModels
             if (File.Exists(path))
             {
                 var json = File.ReadAllText(path);
-                var backupTemplate = JsonSerializer.Deserialize<BackupTemplate>(json);
+                var backupTemplate = JsonSerializer.Deserialize<BackupTemplate>(json, SourceGenerationContext.Default.BackupTemplate);
                 if (backupTemplate != null)
                 {
                     Items = new ObservableCollection<FolderFileItem>(backupTemplate.Paths);
