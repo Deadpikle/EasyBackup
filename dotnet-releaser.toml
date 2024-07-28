@@ -4,10 +4,15 @@ project = "EasyBackupAvalonia/EasyBackupAvalonia.csproj"
 configuration = "Release"
 [msbuild.properties]
 PublishReadyToRun = false # Disable PublishReadyToRun
+PublishTrimmed = true
+PublishSingleFile = true
+SelfContained = true
 [github]
 user = "Deadpikle"
 repo = "EasyBackup"
 branches = ["main"]
+[nuget]
+publish = false
 [test]
 enable = false # no tests available atm
 [coverage]
@@ -20,3 +25,10 @@ kinds = []
 publish = false
 rid = ["rhel-x64"]
 kinds = []
+[[pack]]
+publish = false
+rid = ["linux-arm","linux-x64","linux-arm64"]
+kinds = []
+[[pack]]
+rid = ["osx-x64", "osx-arm64"]
+kinds = ["zip"]
