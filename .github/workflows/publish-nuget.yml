@@ -1,0 +1,26 @@
+name: Build and publish to release
+on:
+  push:
+    branches:
+      - main # Used for stable releases
+      - develop # Used for preview releases
+jobs:
+  publish:
+    name: Build check for all branches
+    runs-on: macos-latest
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4.1.7
+          with:
+            fetch-depth: 0
+        - name: Setup .NET 8.0
+          uses: actions/setup-dotnet@v4.0.1
+          with:
+            dotnet-version: 8.0.x
+        
+        - name: Build, Tests, Cover, Pack and Publish (on push tag)
+          shell: bash
+          run: |
+            dotnet tool install --global dotnet-releaser
+            dotnet-releaser run --github-token "${{secrets.GITHUB_TOKEN}}" ${{ github.workspace }}/dotnet-releaser.toml
+            

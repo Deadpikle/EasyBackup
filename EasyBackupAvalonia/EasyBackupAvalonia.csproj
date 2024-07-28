@@ -12,6 +12,12 @@
     <IsTrimmable>true</IsTrimmable>
     <TrimMode>partial</TrimMode>
     <IsAotCompatible>true</IsAotCompatible>
+    <Copyright>Deadpikle</Copyright>
+    <Authors>Deadpikle</Authors>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <None Update="Sounds/*" CopyToOutputDirectory="PreserveNewest" />
@@ -29,5 +35,9 @@
     <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
     <PackageReference Include="System.Text.Json" Version="8.0.4" />
     <PackageReference Include="NetCoreAudio" Version="2.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
+    <None Include="..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 </Project>

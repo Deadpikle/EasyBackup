@@ -1,0 +1,22 @@
+# configuration file for dotnet-releaser
+[msbuild]
+project = "EasyBackupAvalonia/EasyBackupAvalonia.csproj"
+configuration = "Release"
+[msbuild.properties]
+PublishReadyToRun = false # Disable PublishReadyToRun
+[github]
+user = "Deadpikle"
+repo = "EasyBackup"
+branches = ["main"]
+[test]
+enable = false # no tests available atm
+[coverage]
+enable = false
+[[pack]]
+publish = false
+rid = ["win-arm", "win-arm64"]
+kinds = []
+[[pack]]
+publish = false
+rid = ["rhel-x64"]
+kinds = []
