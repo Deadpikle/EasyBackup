@@ -20,6 +20,13 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <Description>A simple backup program built with Avalonia</Description> 
+    <PackageTags>backup;avalonia;crossplatform</PackageTags>
+    <PackageReleaseNotes>See https://github.com/Deadpikle/EasyBackup for the latest changes.</PackageReleaseNotes>
+    <!-- <PackageIcon>$(AssemblyName).png</PackageIcon> -->
+    <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
+    <!-- <PackageLicenseExpression>mIT</PackageLicenseExpression> -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
   <ItemGroup>
     <None Update="Sounds/*" CopyToOutputDirectory="PreserveNewest" />
