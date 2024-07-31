@@ -53,6 +53,8 @@ namespace EasyBackupAvalonia.Helpers
 
         private EnumerationOptions _enumerationOptions;
 
+        private string _backupDirectory;
+
         public BackupPerformer()
         {
             IsRunning = false;
@@ -71,6 +73,7 @@ namespace EasyBackupAvalonia.Helpers
                 AttributesToSkip = 0,
             };
             _pathsCopiedTo = new Dictionary<string, bool>();
+            _backupDirectory = "";
         }
 
         public void Cancel()
@@ -161,6 +164,10 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
+                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && !subDir.FullName.StartsWith(_backupDirectory))
+                        {
+                            continue; // don't back up backup directory
+                        }
                         string temppath = Path.Combine(destDirName, subDir.Name);
                         if (ShouldAllowPath(excludedPaths, subDir.FullName))
                         {
@@ -209,6 +216,10 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
+                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && !subDir.FullName.StartsWith(_backupDirectory))
+                        {
+                            continue; // don't back up backup directory
+                        }
                         if (ShouldAllowPath(excludedPaths, subDir.FullName))
                         {
                             var additionalFileInfo = GetFilePathsAndSizesInDirectory(subDir.FullName, searchSubDirs);
@@ -582,6 +593,7 @@ namespace EasyBackupAvalonia.Helpers
                             throw new Exception("Couldn't create backup directory (directory already exists)");
                         }
                     }
+                    _backupDirectory = backupDirectory;
                     // ok, start copying the files if not using compressed file.
                     if (!UsesCompressedFile || _isCalculatingFileSize)
                     {
@@ -602,7 +614,6 @@ namespace EasyBackupAvalonia.Helpers
                             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) || 
                                      RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                             {
-                                // Do something
                                 if (directoryName.StartsWith(pathRoot))
                                 {
                                     directoryName = directoryName.Substring(1);
