@@ -37,3 +37,5 @@ rid = ["osx-x64", "osx-arm64"]
 kinds = ["zip"]
 [brew]
 publish = false
+[scoop]
+publish = false
