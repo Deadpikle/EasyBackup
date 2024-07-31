@@ -22,6 +22,13 @@ namespace EasyBackupAvalonia.Helpers
             {
                 folderName += '\\';
             }
+            var dirInfo = new DirectoryInfo(folderName);
+            if (dirInfo.Parent == null)
+            {
+                // this is a root directory
+                DriveInfo driveRoot = new DriveInfo(folderName);
+                return (ulong)driveRoot.AvailableFreeSpace;
+            }
             FileInfo file = new FileInfo(folderName);
             DriveInfo drive = new DriveInfo(file.Directory.Root.FullName);
 
