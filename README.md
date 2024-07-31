@@ -1,6 +1,6 @@
 # Easy Backup
 
-Easy Backup is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup.
+Easy Backup is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. It's basically a fancy copy+paste utility.
 
 Features include:
 
@@ -13,22 +13,25 @@ Features include:
 * View backup progress as it happens
 * Optional sounds when backup succeeds or fails
 * Cancel backup at any time
+* Incremental backups (only backups up latest files that have been changed; old files that are now gone are not deleted from the backup location)
 * Windows legacy build only: Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location.
 
-## Note
+EasyBackup isn't the most fancy backup software out there, but it works well enough for simple backups. 
+
+**USE AT YOUR OWN RISK. YOU MAY WANT TO VERIFY YOUR BACKUP MANUALLY AFTER COMPLETION. THE AUTHORS OF THIS SOFTWARE TAKE NO RESPONSBILITY IF SOMETHING FAILS.**
+
+## Note on Unix platforms for version 0.10.0+
 
 For now, you may need to run `chmod +x` on the download in macOS/Linux in order to get things running properly. In the future, we'd like to publish an actual macOS app.
 
 ## Screenshots (Legacy Windows-only version)
 
+_The newer, cross-platform software looks very similar, so these screenshots should give you a good idea of how things work._
+
 <div align="center">
     <img alt="Setup" src="./screenshots/setup-backup.png">
     <img alt="Backing up data" src="./screenshots/backing-up.png">
 </div>
-
-## Features/Updates to Come
-
-* Option to update a previous backup instead of creating an entirely new backup (only adds new files and updates modified files based on a hash; does NOT delete old files that have been removed) — finished and working in Avalonia version/branch
 
 ## Can I help contribute?
 
