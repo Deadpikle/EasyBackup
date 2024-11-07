@@ -16,7 +16,6 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Copyright>Deadpikle</Copyright>
     <Authors>Deadpikle</Authors>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
@@ -25,7 +24,7 @@
     <PackageReleaseNotes>See https://github.com/Deadpikle/EasyBackup for the latest changes.</PackageReleaseNotes>
     <!-- <PackageIcon>$(AssemblyName).png</PackageIcon> -->
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
-    <!-- <PackageLicenseExpression>MIT</PackageLicenseExpression> -->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
   <PropertyGroup>
