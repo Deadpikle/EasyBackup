@@ -181,7 +181,7 @@ namespace EasyBackupAvalonia.ViewModels
                                                 ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
                         TellUserBackupFailed(error);
                     }
-                    else
+                    else if (!_backupPerformer.HadError /* in calculating file size */)
                     {
                         Status = "Performing backup...";
                         _backupPerformer.PerformBackup(Items, BackupLocation);
