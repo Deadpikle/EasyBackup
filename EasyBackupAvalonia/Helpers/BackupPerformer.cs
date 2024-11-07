@@ -164,7 +164,7 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
-                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && !subDir.FullName.StartsWith(_backupDirectory))
+                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && subDir.FullName.StartsWith(_backupDirectory))
                         {
                             continue; // don't back up backup directory
                         }
@@ -216,7 +216,7 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     if (!_directoryPathsSeen.Contains(subDir.FullName))
                     {
-                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && !subDir.FullName.StartsWith(_backupDirectory))
+                        if (!string.IsNullOrWhiteSpace(_backupDirectory) && subDir.FullName.StartsWith(_backupDirectory))
                         {
                             continue; // don't back up backup directory
                         }
