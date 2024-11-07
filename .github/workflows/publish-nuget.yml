@@ -1,9 +1,11 @@
 name: Build and publish to release
 on:
   push:
-    #branches:
-    #  - main # Used for stable releases
-    #  - develop # Used for preview releases
+    branches:
+      - main # Used for stable releases
+      - develop # Used for preview releases
+    tags:
+      - '*'
 jobs:
   publish:
     name: Build check for all branches
