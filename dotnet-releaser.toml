@@ -13,6 +13,8 @@ user = "Deadpikle"
 repo = "EasyBackup"
 version_prefix = ""
 branches = ["main"]
+[changelog]
+owners = "Deadpikle"
 [nuget]
 publish = false
 [test]
