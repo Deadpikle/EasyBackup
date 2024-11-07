@@ -8,7 +8,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Product>EasyBackup</Product>
-    <Version>0.10.2</Version>
+    <Version>0.10.3</Version>
     <PublishSingleFile>false</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
     <IsTrimmable>true</IsTrimmable>
@@ -31,7 +31,7 @@
     <CFBundleName>EasyBackup</CFBundleName> <!-- Also defines .app file name -->
     <CFBundleDisplayName>EasyBackup</CFBundleDisplayName>
     <ApplicationId>com.pikleproductions.easybackup</ApplicationId>
-    <CFBundleVersion>0.10.2</CFBundleVersion>
+    <CFBundleVersion>0.10.3</CFBundleVersion>
     <CFBundlePackageType>APPL</CFBundlePackageType>
     <!-- <CFBundleSignature>????</CFBundleSignature> -->
     <CFBundleExecutable>EasyBackup</CFBundleExecutable>
