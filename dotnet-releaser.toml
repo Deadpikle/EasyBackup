@@ -20,7 +20,7 @@ enable = false # no tests available atm
 [coverage]
 enable = false
 [[pack]]
-publish = false
+publish = true
 rid = ["win-arm", "win-arm64"]
 kinds = []
 [[pack]]
