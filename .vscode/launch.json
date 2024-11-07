@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/EasyBackupAvalonia/bin/Debug/net8.0/EasyBackupAvalonia",
+            "program": "${workspaceFolder}/EasyBackupAvalonia/bin/Debug/net9.0/EasyBackupAvalonia",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
