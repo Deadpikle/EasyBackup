@@ -25,7 +25,7 @@
     <PackageReleaseNotes>See https://github.com/Deadpikle/EasyBackup for the latest changes.</PackageReleaseNotes>
     <!-- <PackageIcon>$(AssemblyName).png</PackageIcon> -->
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
-    <!-- <PackageLicenseExpression>mIT</PackageLicenseExpression> -->
+    <!-- <PackageLicenseExpression>MIT</PackageLicenseExpression> -->
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
   <PropertyGroup>
