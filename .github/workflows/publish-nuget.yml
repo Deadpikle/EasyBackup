@@ -14,9 +14,12 @@ jobs:
           with:
             fetch-depth: 0
         - name: Setup .NET 9.0
-          uses: actions/setup-dotnet@v4.0.1
+          uses: actions/setup-dotnet@v4.1.0
           with:
-            dotnet-version: 9.0.x
+            dotnet-version:  |
+              7.0.x
+              8.0.x
+              9.0.x
         
         - name: Build, Tests, Cover, Pack and Publish (on push tag)
           shell: bash
