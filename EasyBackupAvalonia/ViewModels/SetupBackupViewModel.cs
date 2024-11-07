@@ -296,11 +296,14 @@ namespace EasyBackupAvalonia.ViewModels
             if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
             {
                 var lastSaveExists = File.Exists(_lastSaveFilePath);
-                var lastPath = lastSaveExists ? Path.GetFileName(_lastSaveFilePath) : "";
+                var lastFileName = lastSaveExists ? Path.GetFileName(_lastSaveFilePath) : "";
+                var lastPath = lastSaveExists ? _lastSaveFilePath : "";
+                var lastPathDirName = Path.GetDirectoryName(lastPath);
+                var suggestedStartLocation = await provider.TryGetFolderFromPathAsync(lastPathDirName);
                 var results = await provider.OpenFilePickerAsync(new FilePickerOpenOptions()
                 {
                     Title = "Choose EasyBackup File",
-                    SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(lastPath),
+                    SuggestedStartLocation = suggestedStartLocation,
                     AllowMultiple = false,
                     FileTypeFilter = new List<FilePickerFileType>()
                     {
@@ -344,10 +347,12 @@ namespace EasyBackupAvalonia.ViewModels
         {
             if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
             {
+                var startLocation = !string.IsNullOrWhiteSpace(BackupLocation) ? await provider.TryGetFolderFromPathAsync(BackupLocation) : null;
                 var results = await provider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
                 {
                     Title = "Choose backup folder...",
                     AllowMultiple = false,
+                    SuggestedStartLocation = startLocation
                 });
                 if (results.Count == 1)
                 {
