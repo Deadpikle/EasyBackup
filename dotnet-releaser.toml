@@ -5,7 +5,7 @@ configuration = "Release"
 [msbuild.properties]
 PublishReadyToRun = false # Disable PublishReadyToRun
 PublishTrimmed = true
-PublishSingleFile = true
+PublishSingleFile = false
 SelfContained = true
 UseAppHost = true
 [github]
