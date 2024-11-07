@@ -21,6 +21,7 @@ jobs:
         - name: Build, Tests, Cover, Pack and Publish (on push tag)
           shell: bash
           run: |
+            sudo xcode-select -switch /Applications/Xcode_16.1.app/Contents/Developer
             dotnet workload restore
             dotnet tool install --global dotnet-releaser
             dotnet-releaser run --github-token "${{secrets.GITHUB_TOKEN}}" ${{ github.workspace }}/dotnet-releaser.toml
