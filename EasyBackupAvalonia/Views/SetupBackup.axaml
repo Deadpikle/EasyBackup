@@ -105,7 +105,7 @@
             <Button Content="Add Folder"
                     Margin="0,5,0,5"
                     Command="{Binding AddFolder}" />
-            <Button Content="Remove File/Folder"
+            <Button Content="Remove File/Folder(s)"
                     Margin="0,5,0,5"
                     CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}"
                     Command="{Binding RemoveItem}"

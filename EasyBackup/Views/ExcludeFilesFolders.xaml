@@ -68,7 +68,7 @@
         <StackPanel Grid.Column="1" Grid.Row="2" Orientation="Vertical" Margin="5">
             <Button Content="Add File" Margin="0,5,0,5" Command="{Binding AddFile}"/>
             <Button Content="Add Folder" Margin="0,5,0,5" Command="{Binding AddFolder}"/>
-            <Button Content="Remove File/Folder" Margin="0,5,0,5" CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}" 
+            <Button Content="Remove File/Folder(s)" Margin="0,5,0,5" CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}" 
                     Command="{Binding RemoveItem}" IsEnabled="{Binding IsItemSelected}"/>
             <Button Content="Remove All Items" Margin="0,5,0,5" Command="{Binding RemoveAllItems}"/>
         </StackPanel>

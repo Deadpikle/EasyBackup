@@ -243,8 +243,8 @@ namespace EasyBackupAvalonia.ViewModels
             if (items != null)
             {
                 System.Collections.IList list = (System.Collections.IList)items;
-                var selection = list?.Cast<FolderFileItem>();
-                for (int i = 0; i < selection.Count(); i++)
+                var selection = list?.Cast<FolderFileItem>().ToArray();
+                for (int i = 0; i < selection.Length; i++)
                 {
                     Items.Remove(selection.ElementAt(i));
                 }
