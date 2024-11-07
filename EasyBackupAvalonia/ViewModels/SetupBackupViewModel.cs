@@ -256,13 +256,15 @@ namespace EasyBackupAvalonia.ViewModels
             if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
             {
                 var lastSaveExists = File.Exists(_lastSaveFilePath);
-                var lastPath = lastSaveExists ? Path.GetFileName(_lastSaveFilePath) : "";
-                var lastFileName = lastSaveExists ? _lastSaveFilePath : "";
+                var lastFileName = lastSaveExists ? Path.GetFileName(_lastSaveFilePath) : "";
+                var lastPath = lastSaveExists ? _lastSaveFilePath : "";
+                var lastPathDirName = Path.GetDirectoryName(lastPath);
+                var suggestedStartLocation = await provider.TryGetFolderFromPathAsync(lastPathDirName);
                 var result = await provider.SaveFilePickerAsync(new FilePickerSaveOptions()
                 {
                     Title = "Choose Save Location",
-                    SuggestedStartLocation = await provider.TryGetFolderFromPathAsync(lastPath),
-                    SuggestedFileName = lastPath,
+                    SuggestedStartLocation = suggestedStartLocation,
+                    SuggestedFileName = lastFileName,
                     DefaultExtension = "*.ebf",
                     FileTypeChoices = new List<FilePickerFileType>()
                     {
