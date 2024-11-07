@@ -303,36 +303,35 @@ namespace EasyBackupAvalonia.Helpers
                         }
                         // TODO: increase buffer size
                         // todo: see if better way to copy w/cancel
-                        // see: https://stackoverflow.com/questions/7680640/how-to-copy-a-file-with-the-ability-to-cancel-the-copy
                         // https://stackoverflow.com/questions/7680640/how-to-copy-a-file-with-the-ability-to-cancel-the-copy
                         // https://stackoverflow.com/questions/882686/asynchronous-file-copy-move-in-c-sharp
-                        using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read))
+                        var fileOptions = /*FileOptions.Asynchronous | */ FileOptions.SequentialScan;
+                        var bufferSize = 0; // no buffer
+                        using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize, fileOptions))
+                        using (var outStream = new FileStream(destination, FileMode.CreateNew, FileAccess.Write, FileShare.Read, bufferSize, fileOptions))
                         {
-                            using (var inStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read))
+                            int buffer_size = 5 * 1024 * 1024; // 5 MB
+                            byte[] buffer = new byte[buffer_size];
+                            long total_read = 0;
+                            while (total_read < inStream.Length)
                             {
-                                int buffer_size = 5 * 10240;
-                                byte[] buffer = new byte[buffer_size];
-                                long total_read = 0;
-                                while (total_read < inStream.Length)
+                                if (HasBeenCanceled)
                                 {
-                                    if (HasBeenCanceled)
+                                    // stop copying file and erase anything in progress
+                                    // TODO: test
+                                    inStream.Close();
+                                    outStream.Close();
+                                    if (File.Exists(destination))
                                     {
-                                        // stop copying file and erase anything in progress
-                                        // TODO: test
-                                        inStream.Close();
-                                        outStream.Close();
-                                        if (File.Exists(destination))
-                                        {
-                                            File.Delete(destination);
-                                        }
-                                        break;
+                                        File.Delete(destination);
                                     }
-                                    int read = inStream.Read(buffer, 0, buffer_size);
-                                    outStream.Write(buffer, 0, read);
-                                    // TODO: write async w/await?
-                                    CopiedBytesOfItem(itemBeingCopied, (ulong)read);
-                                    total_read += read;
+                                    break;
                                 }
+                                int read = inStream.Read(buffer, 0, buffer_size);
+                                outStream.Write(buffer, 0, read);
+                                // TODO: write async w/await?
+                                CopiedBytesOfItem(itemBeingCopied, (ulong)read);
+                                total_read += read;
                             }
                         }
                         if (IsIncremental && File.Exists(destination + ".old"))
