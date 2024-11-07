@@ -21,6 +21,7 @@ jobs:
         - name: Build, Tests, Cover, Pack and Publish (on push tag)
           shell: bash
           run: |
+            dotnet workload restore
             dotnet tool install --global dotnet-releaser
             dotnet-releaser run --github-token "${{secrets.GITHUB_TOKEN}}" ${{ github.workspace }}/dotnet-releaser.toml
             
