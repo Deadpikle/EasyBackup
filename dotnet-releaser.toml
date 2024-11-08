@@ -22,8 +22,12 @@ enable = false # no tests available atm
 enable = false
 [[pack]]
 publish = true
+rid = ["win-x64"]
+kinds = ["zip"]
+[[pack]]
+publish = true
 rid = ["win-arm", "win-arm64"]
-kinds = []
+kinds = ["zip"]
 [[pack]]
 publish = false
 rid = ["rhel-x64"]
