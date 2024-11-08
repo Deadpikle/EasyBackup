@@ -27,7 +27,7 @@ kinds = ["zip"]
 [[pack]]
 publish = false
 rid = ["win-arm", "win-arm64"]
-kinds = ["zip"]
+kinds = []
 [[pack]]
 publish = false
 rid = ["rhel-x64"]
