@@ -104,6 +104,12 @@ namespace EasyBackupAvalonia.Helpers
                     return false;
                 }
             }
+            if (path.Contains(".imovielibrary/.fcpcache"))
+            {
+                // TODO: fix infinite syncing with iMovie; need to add a better fix for this 
+                // somewhere and/or disallow alias as option for folder 
+                return false; 
+            }
             return true;
         }
 
