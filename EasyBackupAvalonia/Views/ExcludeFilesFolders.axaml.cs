@@ -24,11 +24,15 @@ namespace EasyBackupAvalonia.Views
 
         private void Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files) && DataContext is ExcludeFilesFoldersViewModel effvm)
+            if (e.DataTransfer.Contains(DataFormat.File) && DataContext is ExcludeFilesFoldersViewModel effvm)
             {
-                foreach (var fileName in e.Data.GetFiles())
+                foreach (var fileName in e.DataTransfer.Items)
                 {
-                    effvm.AddPath(fileName.Path.LocalPath);
+                    var file = fileName.TryGetFile();
+                    if (file != null)
+                    {
+                        effvm.AddPath(file.Path.LocalPath);
+                    }
                 }
             }
         }

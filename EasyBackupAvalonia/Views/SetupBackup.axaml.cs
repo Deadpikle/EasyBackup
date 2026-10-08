@@ -1,13 +1,9 @@
 ﻿using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Markup.Xaml;
 using EasyBackupAvalonia.ViewModels;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace EasyBackupAvalonia.Views
 {
@@ -24,11 +20,15 @@ namespace EasyBackupAvalonia.Views
 
         private void Drop(object sender, DragEventArgs e)
         {
-            if (e.Data.Contains(DataFormats.Files) && DataContext is SetupBackupViewModel sbvm)
+            if (e.DataTransfer.Contains(DataFormat.File) && DataContext is SetupBackupViewModel sbvm)
             {
-                foreach (var fileName in e.Data.GetFiles())
+                foreach (var fileName in e.DataTransfer.Items)
                 {
-                    sbvm.AddPath(fileName.Path.LocalPath);
+                    var file = fileName.TryGetFile();
+                    if (file != null)
+                    {
+                        sbvm.AddPath(file.Path.LocalPath);
+                    }
                 }
             }
         }

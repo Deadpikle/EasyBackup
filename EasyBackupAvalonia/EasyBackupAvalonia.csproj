@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net9.0;net9.0-macos</TargetFrameworks>
+    <TargetFrameworks>net10.0;net10.0-macos</TargetFrameworks>
     <Nullable>disable</Nullable>
     <UseAppHost>true</UseAppHost>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Product>EasyBackup</Product>
-    <Version>0.10.3</Version>
+    <Version>0.11.0</Version>
     <PublishSingleFile>false</PublishSingleFile>
     <PublishTrimmed>true</PublishTrimmed>
     <IsTrimmable>true</IsTrimmable>
@@ -28,10 +28,12 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
   <PropertyGroup>
+    <!-- Other properties that can/should be set here if making app via dotnet publish? -->
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion>
     <CFBundleName>EasyBackup</CFBundleName> <!-- Also defines .app file name -->
     <CFBundleDisplayName>EasyBackup</CFBundleDisplayName>
-    <ApplicationId>com.pikleproductions.easybackup</ApplicationId>
-    <CFBundleVersion>0.10.3</CFBundleVersion>
+    <ApplicationId>com.quickityquackproductions.easybackup</ApplicationId>
+    <CFBundleVersion>0.11.0</CFBundleVersion>
     <CFBundlePackageType>APPL</CFBundlePackageType>
     <!-- <CFBundleSignature>????</CFBundleSignature> -->
     <CFBundleExecutable>EasyBackup</CFBundleExecutable>
@@ -40,20 +42,30 @@
     <NSHighResolutionCapable>true</NSHighResolutionCapable>
   </PropertyGroup>
   <ItemGroup>
-    <None Update="Sounds/*" CopyToOutputDirectory="PreserveNewest" PublishFolderType="Resource"/>
+    <Content Include="Assets\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <TrimmerRootAssembly Include="Avalonia.Controls.DataGrid" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Desktop" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Themes.Fluent" Version="$(AvaloniaVersion)" />
     <PackageReference Include="Avalonia.Fonts.Inter" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Avalonia.Controls.DataGrid" Version="$(AvaloniaVersion)" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="11.3.13" />
     <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)" />
-    <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.8" />
+    <PackageReference Include="Avalonia.Diagnostics" Version="$(AvaloniaVersion)">
+      <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+      <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Tmds.DBus.Protocol" Version="0.21.3" />
+    <PackageReference Include="Deadpikle.AvaloniaProgressRing" Version="0.10.11-preview20251127001" />
     <PackageReference Include="ByteSize" Version="2.1.2" />
-    <PackageReference Include="MessageBox.Avalonia" Version="3.1.5.1" />
-    <PackageReference Include="NetCoreAudio" Version="2.0.0" />
+    <PackageReference Include="MessageBox.Avalonia" Version="3.3.1.1" />
+    <PackageReference Include="NetCoreAudio" Version="2.0.1" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\LICENSE.md" Pack="true" PackagePath="\" />
