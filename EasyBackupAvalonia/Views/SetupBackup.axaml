@@ -143,14 +143,18 @@
                     IsChecked="{Binding CompressedFileUsesPassword}"
                     FontSize="14"
                     IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" />
+            <Label Content="Password" 
+                   IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
             <TextBox x:Name="PasswordInput" Margin="0,5,0,5"
                     IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
                     PasswordChar="*"
-                    Watermark="Password" />
+                    Watermark="MyPassword" />
+            <Label Content="Confirm Password" 
+                   IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
             <TextBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
                     IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
                     PasswordChar="*"
-                    Watermark="Confirm Password"/>
+                    Watermark="MyPassword"/>
                 <!-- <Button Content="About Easy Backup"
                         Margin="0,5,0,5"
                         Command="{Binding ShowAboutWindow}" /> -->
