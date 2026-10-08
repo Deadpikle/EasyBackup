@@ -33,8 +33,6 @@ namespace EasyBackupAvalonia.ViewModels
         private string _currentPath;
 
         private bool _playsSounds;
-        //private SoundPlayer _successSoundPlayer;
-        //private SoundPlayer _failureSoundPlayer;
         private Player _soundPlayer;
         private string _successSoundPath;
         private string _failureSoundPath;
@@ -77,8 +75,22 @@ namespace EasyBackupAvalonia.ViewModels
             if (_playsSounds)
             {
                 _soundPlayer = new Player();
-                _successSoundPath = "Sounds/success.wav";
-                _failureSoundPath = "Sounds/failure-tbone.wav";
+                var processDir = Path.GetDirectoryName(Environment.ProcessPath) ?? "";
+                if (File.Exists(Path.Combine(processDir, "Assets/sounds/failure-tbone.wav")))
+                {
+                    _failureSoundPath = Path.Combine(processDir, "Assets/sounds/failure-tbone.wav");
+                    _successSoundPath = Path.Combine(processDir, "Assets/sounds/success.wav");
+                }
+                if (File.Exists(Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav")))
+                {
+                    _failureSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav");
+                    _successSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/success.wav");
+                }
+                if (File.Exists("../Resources/Assets/sounds/failure-tbone.wav"))
+                {
+                    _failureSoundPath = "../Resources/Assets/sounds/failure-tbone.wav";
+                    _successSoundPath = "../Resources/Assets/sounds/success.wav";
+                }
             }
             if (compressesOutput)
             {
