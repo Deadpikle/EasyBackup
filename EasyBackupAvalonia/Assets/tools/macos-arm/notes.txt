@@ -1,0 +1,1 @@
+Grabbed from homebrew, not sure if will work OK everywhere or on future OS past Sequoia; really need another/better solution. The 7zz download from 7zip themselves is not notarized. -_-
