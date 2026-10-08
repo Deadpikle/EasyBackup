@@ -132,24 +132,28 @@
                       Margin="0,5,0,5"
                       IsChecked="{Binding PlaysSoundsOnComplete}"
                       FontSize="14" />
-            <!-- <CheckBox x:Name="SaveToCompressed"
-                      Content="Save to Compressed File"
-                      Margin="0,5,0,5"
-                      IsChecked="{Binding SavesToCompressedFile}"
-                      FontSize="14" />
-            <CheckBox x:Name="UsePassword"
-                      Content="Use Password"
-                      Margin="0,5,0,5"
-                      IsChecked="{Binding CompressedFileUsesPassword}"
-                      FontSize="14"
-                      IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" /> -->
-            <!-- <PasswordBox x:Name="PasswordInput" Margin="0,5,0,5"
-                      IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
-            <PasswordBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
-                      IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/> -->
-            <!-- <Button Content="About Easy Backup"
+            <CheckBox x:Name="SaveToCompressed"
+                    Content="Save to Compressed File"
                     Margin="0,5,0,5"
-                    Command="{Binding ShowAboutWindow}" /> -->
+                    IsChecked="{Binding SavesToCompressedFile}"
+                    FontSize="14" />
+            <CheckBox x:Name="UsePassword"
+                    Content="Use Password"
+                    Margin="0,5,0,5"
+                    IsChecked="{Binding CompressedFileUsesPassword}"
+                    FontSize="14"
+                    IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" />
+            <TextBox x:Name="PasswordInput" Margin="0,5,0,5"
+                    IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
+                    PasswordChar="*"
+                    Watermark="Password" />
+            <TextBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
+                    IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
+                    PasswordChar="*"
+                    Watermark="Confirm Password"/>
+                <!-- <Button Content="About Easy Backup"
+                        Margin="0,5,0,5"
+                        Command="{Binding ShowAboutWindow}" /> -->
         </StackPanel>
         <Button Grid.Column="0"
                 Grid.ColumnSpan="2"
