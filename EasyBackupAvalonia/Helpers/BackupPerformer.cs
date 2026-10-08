@@ -397,6 +397,10 @@ namespace EasyBackupAvalonia.Helpers
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                if (Directory.Exists("Assets"))
+                {
+                    return Path.Combine(processPath, "Assets/tools/macos/7zz");
+                }
                 return Path.Combine(processPath, "../Resources/Assets/tools/macos/7zz");
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
@@ -428,9 +432,9 @@ namespace EasyBackupAvalonia.Helpers
             var is64BitOS = Utilities.Is64BitOS();
             Process process = new Process();
             var currentDir = AppContext.BaseDirectory;
-            var exePath = GetBackupToolPath(Environment.ProcessPath);
+            var exePath = GetBackupToolPath(Path.GetDirectoryName(Environment.ProcessPath));
             process.StartInfo.FileName = exePath;
-            process.StartInfo.WorkingDirectory = AppContext.BaseDirectory;
+            process.StartInfo.WorkingDirectory = Path.GetDirectoryName(Environment.ProcessPath);//AppContext.BaseDirectory;
 
             // https://stackoverflow.com/a/6522928/3938401
             process.StartInfo.UseShellExecute = false;
