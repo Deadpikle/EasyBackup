@@ -378,6 +378,45 @@ namespace EasyBackupAvalonia.Helpers
         // Delegate type to be used as the Handler Routine for SCCH
         delegate Boolean ConsoleCtrlDelegate(uint CtrlType);
 
+        private string GetBackupToolPath(string processPath)
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (RuntimeInformation.OSArchitecture == Architecture.X86)
+                {
+                    return Path.Combine(processPath, "Assets/tools/win-x86/7za.exe");
+                }
+                else if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                {
+                    return Path.Combine(processPath, "Assets/tools/win-x64/7za.exe");
+                }
+                else if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+                {
+                    return Path.Combine(processPath, "Assets/tools/win-arm64/7za.exe");
+                }
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return Path.Combine(processPath, "../Resources/Assets/tools/macos/7zz");
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (RuntimeInformation.OSArchitecture == Architecture.X86)
+                {
+                    return Path.Combine(processPath, "Assets/tools/linux-x86/7zzs");
+                }
+                else if (RuntimeInformation.OSArchitecture == Architecture.X64)
+                {
+                    return Path.Combine(processPath, "Assets/tools/linux-x64/7zzs");
+                }
+                else if (RuntimeInformation.OSArchitecture == Architecture.Arm64)
+                {
+                    return Path.Combine(processPath, "Assets/tools/linux-arm64/7zzs");
+                }
+            }
+            return null;
+        }
+
         private void BackupToCompressedFile(string destination, List<string> filePaths, 
             Dictionary<string, FolderFileItem> pathsToFolderFileItem, Dictionary<string, ulong> pathsToFileSize)
         {
@@ -389,9 +428,7 @@ namespace EasyBackupAvalonia.Helpers
             var is64BitOS = Utilities.Is64BitOS();
             Process process = new Process();
             var currentDir = AppContext.BaseDirectory;
-            var exePath = is64BitOS 
-                ? Path.Combine(currentDir, "/tools/x64/7za.exe") 
-                : Path.Combine(currentDir, "/tools/x86/7za.exe");
+            var exePath = GetBackupToolPath(Environment.ProcessPath);
             process.StartInfo.FileName = exePath;
             process.StartInfo.WorkingDirectory = AppContext.BaseDirectory;
 
