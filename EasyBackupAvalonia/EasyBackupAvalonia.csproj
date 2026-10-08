@@ -46,6 +46,38 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
+    <Content Include="Assets\sounds\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\linux-arm64\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\linux-x64\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\linux-x86\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\macos\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\win-arm64\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\win-x64\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
+    <Content Include="Assets\tools\win-x86\*.*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <PublishFolderType>Resource</PublishFolderType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <TrimmerRootAssembly Include="Avalonia.Controls.DataGrid" />
