@@ -70,8 +70,30 @@ namespace EasyBackup.ViewModels
             _playsSounds = Properties.Settings.Default.PlaySoundsWhenFinished;
             if (_playsSounds)
             {
-                _failureSoundPlayer = new SoundPlayer("Sounds/failure-tbone.wav");
-                _successSoundPlayer = new SoundPlayer("Sounds/success.wav");
+                _failureSoundPlayer = new SoundPlayer("Assets/sounds/failure-tbone.wav");
+                _successSoundPlayer = new SoundPlayer("Assets/sounds/success.wav");
+                // TODO: find sound files if in .app file and sounds are in Resources folder
+                // Directory.GetCurrentDirectory(); <--- use this to figure out where we are, maybe?
+                // maybe just need Resources/Sounds
+                // something weird is happening with the MonoGame folder when using publish to create .app
+                // ......maybe we should just make our own .app file and call it a day -_-
+                // TODO: try Environment.ProcessPath, then work our way back to Resources folder from there (../Resources)
+                var processDir = Path.GetDirectoryName(Environment.ProcessPath) ?? "";
+                if (File.Exists(Path.Combine(processDir, "Assets/sounds/failure-tbone.wav")))
+                {
+                    _failureSoundPlayer = new SoundPlayer(Path.Combine(processDir, "Assets/sounds/failure-tbone.wav"));
+                    _successSoundPlayer = new SoundPlayer(Path.Combine(processDir, "Assets/sounds/success.wav"));
+                }
+                if (File.Exists(Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav")))
+                {
+                    _failureSoundPlayer = new SoundPlayer(Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav"));
+                    _successSoundPlayer = new SoundPlayer(Path.Combine(processDir, "../Resources/Assets/sounds/success.wav"));
+                }
+                if (File.Exists("../Resources/Assets/sounds/failure-tbone.wav"))
+                {
+                    _failureSoundPlayer = new SoundPlayer("../Resources/Assets/sounds/failure-tbone.wav");
+                    _successSoundPlayer = new SoundPlayer("../Resources/Assets/sounds/success.wav");
+                }
             }
             if (compressesOutput)
             {
