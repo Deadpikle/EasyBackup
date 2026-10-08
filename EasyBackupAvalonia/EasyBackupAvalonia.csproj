@@ -50,31 +50,31 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-arm64\*.*">
+    <Content Include="Assets\tools\linux-arm64\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-x64\*.*">
+    <Content Include="Assets\tools\linux-x64\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-x86\*.*">
+    <Content Include="Assets\tools\linux-x86\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\macos\*.*">
+    <Content Include="Assets\tools\macos\*.*" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-arm64\*.*">
+    <Content Include="Assets\tools\win-arm64\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-x64\*.*">
+    <Content Include="Assets\tools\win-x64\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-x86\*.*">
+    <Content Include="Assets\tools\win-x86\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
