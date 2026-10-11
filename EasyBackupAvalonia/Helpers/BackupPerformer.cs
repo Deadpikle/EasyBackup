@@ -116,7 +116,7 @@ namespace EasyBackupAvalonia.Helpers
         }
 
         // Modified from https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories
-        private void CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs, List<string> excludedPaths = null)
+        private async Task CopyDirectory(FolderFileItem itemBeingCopied, string sourceDirName, string destDirName, bool copySubDirs, List<string> excludedPaths = null)
         {
             if (HasBeenCanceled)
             {
@@ -156,7 +156,7 @@ namespace EasyBackupAvalonia.Helpers
                 }
                 else if (shouldAllow)
                 {
-                    CopySingleFile(itemBeingCopied, file.FullName, tempPath);
+                    await CopySingleFile(itemBeingCopied, file.FullName, tempPath);
                 }
             }
 
@@ -179,7 +179,7 @@ namespace EasyBackupAvalonia.Helpers
                         string temppath = Path.Combine(destDirName, subDir.Name);
                         if (ShouldAllowPath(excludedPaths, subDir.FullName))
                         {
-                            CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs, excludedPaths);
+                            await CopyDirectory(itemBeingCopied, subDir.FullName, temppath, copySubDirs, excludedPaths);
                         }
                         _directoryPathsSeen.Add(subDir.FullName);
                     }
@@ -253,13 +253,9 @@ namespace EasyBackupAvalonia.Helpers
                     {
                         return "";
                     }
-                    using (SHA256 sha256 = SHA256.Create())
-                    {
-                        using (FileStream fileStream = File.OpenRead(filePath))
-                        {
-                            return BitConverter.ToString(sha256.ComputeHash(fileStream)).Replace("-", "");
-                        }
-                    }
+                    using SHA256 sha256 = SHA256.Create();
+                    using FileStream fileStream = File.OpenRead(filePath);
+                    return BitConverter.ToString(sha256.ComputeHash(fileStream)).Replace("-", "");
                 }
             }
             catch {}
@@ -267,7 +263,7 @@ namespace EasyBackupAvalonia.Helpers
         }
 
         // Modified from https://stackoverflow.com/a/33726939/3938401
-        private void CopySingleFile(FolderFileItem itemBeingCopied, string source, string destination)
+        private async Task CopySingleFile(FolderFileItem itemBeingCopied, string source, string destination)
         {
             if (File.Exists(source))
             {
@@ -335,9 +331,8 @@ namespace EasyBackupAvalonia.Helpers
                                     }
                                     break;
                                 }
-                                int read = inStream.Read(buffer, 0, buffer_size);
-                                outStream.Write(buffer, 0, read);
-                                // TODO: write async w/await?
+                                int read = await inStream.ReadAsync(buffer.AsMemory(0, buffer_size));
+                                await outStream.WriteAsync(buffer.AsMemory(0, read));
                                 CopiedBytesOfItem(itemBeingCopied, (ulong)read);
                                 total_read += read;
                             }
@@ -423,7 +418,7 @@ namespace EasyBackupAvalonia.Helpers
             return null;
         }
 
-        private void BackupToCompressedFile(string destination, List<string> filePaths, 
+        private async Task BackupToCompressedFile(string destination, List<string> filePaths, 
             Dictionary<string, FolderFileItem> pathsToFolderFileItem, Dictionary<string, ulong> pathsToFileSize)
         {
             var quotedFilePaths = new List<string>();
@@ -632,7 +627,7 @@ namespace EasyBackupAvalonia.Helpers
             var wipLine = "";
             var receivingDeleteChars = false;
             // TODO: async this somehow so UI updates work
-            while ((cch = outputStream.Read(buffer, 0, buffer.Length)) > 0)
+            while ((cch = await outputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
             {
                 // use file numbers to see if this is the start of a new file or continuing progress on a file we have
                 // already started looking at.
@@ -720,7 +715,7 @@ namespace EasyBackupAvalonia.Helpers
             }
         }
 
-        private void IterateOverFiles(List<FolderFileItem> paths, string backupDirectory)
+        private async Task IterateOverFiles(List<FolderFileItem> paths, string backupDirectory)
         {
             try
             {
@@ -743,7 +738,7 @@ namespace EasyBackupAvalonia.Helpers
                     else if (!_isCalculatingFileSize && !IsIncremental)
                     {
                         // ok, somehow they started two backups within the same second >_> wait 1 second and start again
-                        Task.Delay(1000);
+                        await Task.Delay(1000);
                         backupName = "backup-" + DateTime.Now.ToString("yyyy-MM-dd-H-mm-ss");
                         backupDirectory = Path.Combine(backupDirectory, "easy-backup", backupName);
                         if (!Directory.Exists(backupDirectory))
@@ -819,7 +814,7 @@ namespace EasyBackupAvalonia.Helpers
                                                 break;
                                             }
                                             var outputPath = Path.Combine(outputBackupDirectory, Path.GetFileName(latestFile.FullName));
-                                            CopySingleFile(item, latestFile.FullName, outputPath);
+                                            await CopySingleFile(item, latestFile.FullName, outputPath);
                                         }
                                     }
                                 }
@@ -831,7 +826,7 @@ namespace EasyBackupAvalonia.Helpers
                                     }
                                     _currentDirectorySize = 0;
                                     var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                    CopyDirectory(item, item.Path, outputPath, item.IsRecursive, item.ExcludedPaths);
+                                    await CopyDirectory(item, item.Path, outputPath, item.IsRecursive, item.ExcludedPaths);
                                     if (_isCalculatingFileSize)
                                     {
                                         CalculatedBytesOfItem?.Invoke(item, _currentDirectorySize);
@@ -847,7 +842,7 @@ namespace EasyBackupAvalonia.Helpers
                                 else
                                 {
                                     var outputPath = Path.Combine(outputDirectoryPath, Path.GetFileName(item.Path));
-                                    CopySingleFile(item, item.Path, outputPath);
+                                    await CopySingleFile(item, item.Path, outputPath);
                                 }
                             }
                             if (!HasBeenCanceled && !_isCalculatingFileSize)
@@ -914,7 +909,7 @@ namespace EasyBackupAvalonia.Helpers
                         if (!HasBeenCanceled)
                         {
                             // ok, we can do le copy now
-                            BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths, pathsToFolderFileItem, pathToFileSize);
+                            await BackupToCompressedFile(Path.Combine(backupDirectory, backupName + ".7z"), filePaths, pathsToFolderFileItem, pathToFileSize);
                             if (HasBeenCanceled)
                             {
                                 try
@@ -944,18 +939,18 @@ namespace EasyBackupAvalonia.Helpers
             }
         }
 
-        public void CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
+        public async Task CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
         {
             _directoryPathsSeen = new List<string>();
             _isCalculatingFileSize = true;
-            IterateOverFiles(paths, backupDirectory);
+            await IterateOverFiles(paths, backupDirectory);
             _isCalculatingFileSize = false;
         }
 
-        public void PerformBackup(List<FolderFileItem> paths, string backupDirectory)
+        public async Task PerformBackup(List<FolderFileItem> paths, string backupDirectory)
         {
             _directoryPathsSeen = new List<string>();
-            IterateOverFiles(paths, backupDirectory);
+            await IterateOverFiles(paths, backupDirectory);
         }
     }
 }

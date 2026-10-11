@@ -175,7 +175,7 @@ namespace EasyBackupAvalonia.ViewModels
         {
             _stopwatch.Start();
             _dispatcherTimer.Start();
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 FinishButtonTitle = "Cancel Backup";
                 Status = "Getting backup size...";
@@ -185,7 +185,7 @@ namespace EasyBackupAvalonia.ViewModels
                 }
                 else
                 {
-                    _backupPerformer.CalculateBackupSize(Items, BackupLocation);
+                    await _backupPerformer.CalculateBackupSize(Items, BackupLocation);
                     ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
                     if (_totalBackupSize > freeDriveBytes)
                     {
@@ -196,7 +196,7 @@ namespace EasyBackupAvalonia.ViewModels
                     else if (!_backupPerformer.HadError /* in calculating file size */)
                     {
                         Status = "Performing backup...";
-                        _backupPerformer.PerformBackup(Items, BackupLocation);
+                        await _backupPerformer.PerformBackup(Items, BackupLocation);
                         if (!_backupPerformer.HadError) // if error, message already handled
                         {
                             if (_backupPerformer.HasBeenCanceled)

@@ -424,7 +424,7 @@ namespace EasyBackupAvalonia.ViewModels
             IsCancelCheckBackupSizeEnabled = true;
             var redBrush = new SolidColorBrush(Colors.Red);
             bool didFail = false;
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 try
                 {
@@ -436,7 +436,7 @@ namespace EasyBackupAvalonia.ViewModels
                     }
                     else
                     {
-                        _backupSizeChecker.CalculateBackupSize(Items.ToList(), BackupLocation);
+                        await _backupSizeChecker.CalculateBackupSize(Items.ToList(), BackupLocation);
                         freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
                     }
                 }
