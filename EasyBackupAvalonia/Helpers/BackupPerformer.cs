@@ -5,10 +5,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EasyBackupAvalonia.Helpers
@@ -397,7 +399,7 @@ namespace EasyBackupAvalonia.Helpers
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                if (Directory.Exists("Assets"))
+                if (Directory.Exists(Path.Combine(processPath, "Assets")))
                 {
                     return Path.Combine(processPath, "Assets/tools/macos/7zz");
                 }
@@ -445,8 +447,9 @@ namespace EasyBackupAvalonia.Helpers
             //process.StartInfo.RedirectStandardError = true;
             process.EnableRaisingEvents = true;
             var didError = false;
-            var sizeInBytes = 0UL;
+            var itemSizeInBytes = 0UL;
             var remainingBytes = 0UL;
+            var totalBytesToAdd = 0UL;
             var didStartCompressingFile = false;
             var lastPercent = 0.0;
             string currentFilePath = "";
@@ -455,8 +458,11 @@ namespace EasyBackupAvalonia.Helpers
             var didFinishCancel = false;
             var nextMessageIsError = false;
             string errorMessage = "";
-            process.OutputDataReceived += new DataReceivedEventHandler(delegate (object sender, DataReceivedEventArgs e) {
-                if (string.IsNullOrWhiteSpace(e.Data) || didFinishCancel) // in case more events come through
+            ulong currentFileNumber = 0;
+            void HandleLine(string line)
+            {
+                // Console.WriteLine("Handling data: " + line);
+                if (string.IsNullOrWhiteSpace(line) || didFinishCancel) // in case more events come through
                 {
                     return;
                 }
@@ -482,13 +488,31 @@ namespace EasyBackupAvalonia.Helpers
                         return;
                     }
                 }
-                if (e.Data.StartsWith("+ ") && e.Data.Trim() != "+")
+                if (totalBytesToAdd == 0 && line.Contains("files") && line.Contains("bytes"))
+                {
+                    // line format:  13 files, 158632881 bytes (152 MiB)
+                    var regex = @"(\d+)\s*(?:files,\s*)(\d+)\s*(?:bytes)\s*\((\d+)(?:\s*\S+)";
+                    // group 1: files, group 2: bytes, group 3: MiB (or probably other sizing, unused by this code)
+                    var match = Regex.Match(line, regex);
+                    if (match.Groups.Count >= 3)
+                    {
+                        ulong.TryParse(match.Groups[2].ToString(), out totalBytesToAdd);
+                        // Console.WriteLine("total bytes to add is: {0}", totalBytesToAdd);
+                    }
+                }
+                else if (line.Contains('+') && line.Trim() != "+")
                 {
                     didStartCompressingFile = true;
-                    currentFilePath = e.Data.Substring(2);
+                    currentFilePath = line.Substring(line.IndexOf('+')).Substring(2).Trim();
                     AboutToProcessFile?.Invoke(currentFilePath);
+                    //Console.WriteLine("Handling line with + in it");
+                    //Console.WriteLine("Curr file path {0}", currentFilePath);
+                    //Console.WriteLine("Curr item {0}", currentItem?.Path);
+                    //Console.WriteLine("Curr item is dir {0}", currentItem?.IsDirectory);
+                    //Console.WriteLine("Curr item byte size {0}", currentItem?.ByteSize);
                     if (currentItem != null && remainingBytes > 0)
                     {
+                        // cleanup previous item since we've moved on to something else (previous one is done)
                         CopiedBytesOfItem(currentItem, remainingBytes);
                         bytesCopiedForItem[currentItem] += remainingBytes;
                         if (!currentItem.IsDirectory)
@@ -497,7 +521,8 @@ namespace EasyBackupAvalonia.Helpers
                         }
                         else
                         {
-                            if (bytesCopiedForItem[currentItem] == currentItem.ByteSize)
+                            // ... >= just in case....paranoia...should be fine...
+                            if (bytesCopiedForItem[currentItem] >= currentItem.ByteSize)
                             {
                                 FinishedCopyingItem?.Invoke(currentItem);
                             }
@@ -517,19 +542,34 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     if (pathsToFileSize.ContainsKey(currentFilePath))
                     {
-                        sizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];
+                        itemSizeInBytes = remainingBytes = pathsToFileSize[currentFilePath];
                     }
                     else
                     {
-                        sizeInBytes = remainingBytes = 0;
+                        itemSizeInBytes = remainingBytes = 0;
                     }
                 }
-                else if (e.Data.Contains("%") && didStartCompressingFile)
+                else if (line.Contains('%') && didStartCompressingFile)
                 {
-                    var percent = double.Parse(e.Data.Trim().Split('%')[0]);
-                    var actualPercent = percent - lastPercent;
+                    var percentAndFileNumberParts = line.Split('%');
+                    var prevCurrFileNumber = currentFileNumber;
+                    if (percentAndFileNumberParts.Length > 1 && !string.IsNullOrWhiteSpace(percentAndFileNumberParts[1]))
+                    {
+                        currentFileNumber = ulong.Parse(percentAndFileNumberParts[1].Trim());
+                    }
+                    else
+                    {
+                        currentFileNumber = 0;
+                    }
+                    var percent = double.Parse(percentAndFileNumberParts[0].Trim());
+                    // percent is an overall percentage of all bytes to copy, not % of individual item
+                    // (at least, so it seems!)
+                    var percentCopiedSinceLastUpdate = percent - lastPercent;
+                    // Console.WriteLine("Processing % with currentFileNumber {0}; percent copied = {1}",
+                    //     currentFileNumber, percentCopiedSinceLastUpdate);
                     lastPercent = percent;
-                    var copiedBytes = Math.Floor((actualPercent / 100.0) * sizeInBytes); // floor -- would rather underestimate than overestimate
+                     // use floor for number of copied bytes -- would rather underestimate than overestimate
+                    var copiedBytes = Math.Floor(percentCopiedSinceLastUpdate / 100.0 * totalBytesToAdd);
                     if (currentItem != null)
                     {
                         CopiedBytesOfItem(currentItem, (ulong)copiedBytes);
@@ -537,17 +577,17 @@ namespace EasyBackupAvalonia.Helpers
                     }
                     remainingBytes -= (ulong)copiedBytes;
                 }
-                else if (e.Data.Contains("Error:"))
+                else if (line.Contains("Error:"))
                 {
                     nextMessageIsError = true;
                 }
                 else if (nextMessageIsError)
                 {
-                    errorMessage = e.Data;
+                    errorMessage = line;
                     didError = true;
                     nextMessageIsError = false;
                 }
-            });
+            }
             /**
              * Command line params:
              * -y (yes to prompts)
@@ -581,7 +621,83 @@ namespace EasyBackupAvalonia.Helpers
             args = "a " + args + " \"" + destination + "\" @\"" + tmpFileName + "\""; // a = add file
             process.StartInfo.Arguments = args;
             process.Start();
-            process.BeginOutputReadLine();
+
+            // because 7zip writes output without newlines for file-based progress percentages, 
+            // we must stream and handle all data ourselves.
+            // see also: https://stackoverflow.com/q/33716580/3938401
+            var outputStream = process.StandardOutput;
+            char[] buffer = new char[256];
+            int cch;
+
+            var wipLine = "";
+            var receivingDeleteChars = false;
+            // TODO: async this somehow so UI updates work
+            while ((cch = outputStream.Read(buffer, 0, buffer.Length)) > 0)
+            {
+                // use file numbers to see if this is the start of a new file or continuing progress on a file we have
+                // already started looking at.
+                // that will let us know what progress is.
+                // for getting lines, see also: https://stackoverflow.com/a/34055661/3938401
+                var str = new string(buffer, 0, cch);
+                str = str.Replace( "\r\r\n", "\r\n");
+                // str = str.Replace("\b", "").Trim();
+
+                char? prev = null;
+                foreach (var ch in str)
+                {
+                    // TODO: handle newlines on other OS
+                    if (receivingDeleteChars && ch != '\b')
+                    {
+                        receivingDeleteChars = false;
+                        // Console.WriteLine("stopped receiving del chars; line is: " + wipLine);
+                        HandleLine(wipLine.Trim());
+                        wipLine = "";
+                    }
+                    //if (ch == '\r')
+                    //{
+                    //    // Console.WriteLine("return carraige");
+                    //}
+                    if (ch == '\b' && !receivingDeleteChars)
+                    {
+                        // Console.WriteLine("delete char, line is : {0}", wipLine);
+                        receivingDeleteChars = true;
+                        // check current line. are we just a % and a file number?
+                        // if so, get our file number and see if we are working
+                        // on a file we've already seen (we saw the + symbol and the path),
+                        // aka progress on a large file,
+                        // or if it's info on a new file.
+                        // for progress on file, looks like:
+                        // 18% 11       + /MyBigFile.pdf
+                        // (builds string...)
+                        // deleting characters found with existing string: 23% 12
+                        // (note the increment of the file number!)
+                        // continue;
+
+                        // if (wipLine.Contains('%'))
+                        // {
+                        //     var parts = wipLine.Split('%');
+                        //     var percent = parts[0].Trim();
+                        //     var fileNumber = parts[1].Trim();
+                        // }
+                    }
+                    if (ch == '\n')
+                    {
+                        // Console.WriteLine("line feed");
+                        // this is a newline, cut off string and send to processor
+                        HandleLine(wipLine.Trim());
+                        wipLine = "";
+                    }
+                    else if (ch != '\b')
+                    {
+                        wipLine += ch; // build up current string line
+                    }
+                    prev = ch;
+                }
+            }
+            // handle final line/any remaining text
+            HandleLine(wipLine);
+
+            // process.BeginOutputReadLine();
             //process.BeginErrorReadLine();
             process.WaitForExit();
             // make sure last item is handled properly
