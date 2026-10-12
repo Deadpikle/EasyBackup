@@ -15,322 +15,304 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
-namespace EasyBackupAvalonia.ViewModels
+namespace EasyBackupAvalonia.ViewModels;
+
+class BackupInProgressViewModel : BaseViewModel
 {
-    class BackupInProgressViewModel : BaseViewModel
+    #region Private Members
+
+    private BackupPerformer _backupPerformer;
+    private string _status;
+    private Brush _statusColor;
+    private string _finishButtonTitle;
+    private ulong _totalBackupSize;
+    private ulong _bytesCopiedSoFar;
+    private List<FolderFileCopyProgress> _itemProgressData;
+    private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
+    private double _currentProgress;
+    private string _currentPath;
+
+    private bool _playsSounds;
+    private Player _soundPlayer;
+    private string _successSoundPath;
+    private string _failureSoundPath;
+
+    private SolidColorBrush _redBrush = new SolidColorBrush(Colors.Red);
+    private SolidColorBrush _greenBrush = new SolidColorBrush(Colors.Green);
+
+    private DispatcherTimer _dispatcherTimer;
+    private Stopwatch _stopwatch;
+    private string _currentTimeString;
+    private string _runningLabel;
+
+    #endregion
+
+    public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, 
+        string backupLocation, bool compressesOutput = false, SecureString compressedPassword = null,
+        bool isIncremental = false) : base(viewModelChanger)
     {
-        #region Private Members
-
-        private BackupPerformer _backupPerformer;
-        private string _status;
-        private Brush _statusColor;
-        private string _finishButtonTitle;
-        private ulong _totalBackupSize;
-        private ulong _bytesCopiedSoFar;
-        private List<FolderFileCopyProgress> _itemProgressData;
-        private Dictionary<FolderFileItem, FolderFileCopyProgress> _copyDataToProgressMap; // for easy lookup on progress updates
-        private double _currentProgress;
-        private string _currentPath;
-
-        private bool _playsSounds;
-        private Player _soundPlayer;
-        private string _successSoundPath;
-        private string _failureSoundPath;
-
-        private SolidColorBrush _redBrush = new SolidColorBrush(Colors.Red);
-        private SolidColorBrush _greenBrush = new SolidColorBrush(Colors.Green);
-
-        private DispatcherTimer _dispatcherTimer;
-        private Stopwatch _stopwatch;
-        private string _currentTimeString;
-        private string _runningLabel;
-
-        #endregion
-
-        public BackupInProgressViewModel(IChangeViewModel viewModelChanger, List<FolderFileItem> items, 
-            string backupLocation, bool compressesOutput = false, SecureString compressedPassword = null,
-            bool isIncremental = false) : base(viewModelChanger)
+        Items = items;
+        BackupLocation = backupLocation;
+        _currentProgress = 0;
+        _backupPerformer = new BackupPerformer();
+        Status = "Running backup";
+        StatusColor = new SolidColorBrush(Colors.Black);
+        ItemProgressData = [];
+        _copyDataToProgressMap = [];
+        foreach (FolderFileItem item in Items)
         {
-            Items = items;
-            BackupLocation = backupLocation;
-            _currentProgress = 0;
-            _backupPerformer = new BackupPerformer();
-            Status = "Running backup";
-            StatusColor = new SolidColorBrush(Colors.Black);
-            ItemProgressData = new List<FolderFileCopyProgress>();
-            _copyDataToProgressMap = new Dictionary<FolderFileItem, FolderFileCopyProgress>();
-            foreach (FolderFileItem item in Items)
+            var progress = new FolderFileCopyProgress(item.Path);
+            _copyDataToProgressMap.Add(item, progress);
+            ItemProgressData.Add(progress);
+        }
+        _backupPerformer.StartedCopyingItem += _backupPerformer_StartedCopyingItem;
+        _backupPerformer.FinishedCopyingItem += _backupPerformer_FinishedCopyingItem;
+        _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
+        _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
+        _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
+        _backupPerformer.AboutToProcessFile += _backupPerformer_AboutToProcessFile;
+        _playsSounds = Settings.PlaySoundsOnComplete;
+        if (_playsSounds)
+        {
+            _soundPlayer = new Player();
+            var processDir = Path.GetDirectoryName(Environment.ProcessPath) ?? "";
+            if (File.Exists(Path.Combine(processDir, "Assets/sounds/failure-tbone.wav")))
             {
-                var progress = new FolderFileCopyProgress(item.Path);
-                _copyDataToProgressMap.Add(item, progress);
-                ItemProgressData.Add(progress);
+                _failureSoundPath = Path.Combine(processDir, "Assets/sounds/failure-tbone.wav");
+                _successSoundPath = Path.Combine(processDir, "Assets/sounds/success.wav");
             }
-            _backupPerformer.StartedCopyingItem += _backupPerformer_StartedCopyingItem;
-            _backupPerformer.FinishedCopyingItem += _backupPerformer_FinishedCopyingItem;
-            _backupPerformer.CopiedBytesOfItem += _backupPerformer_CopiedBytesOfItem;
-            _backupPerformer.BackupFailed += _backupPerformer_BackupFailed;
-            _backupPerformer.CalculatedBytesOfItem += _backupPerformer_CalculatedBytesOfItem;
-            _backupPerformer.AboutToProcessFile += _backupPerformer_AboutToProcessFile;
-            _playsSounds = Settings.PlaySoundsOnComplete;
-            if (_playsSounds)
+            if (File.Exists(Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav")))
             {
-                _soundPlayer = new Player();
-                var processDir = Path.GetDirectoryName(Environment.ProcessPath) ?? "";
-                if (File.Exists(Path.Combine(processDir, "Assets/sounds/failure-tbone.wav")))
-                {
-                    _failureSoundPath = Path.Combine(processDir, "Assets/sounds/failure-tbone.wav");
-                    _successSoundPath = Path.Combine(processDir, "Assets/sounds/success.wav");
-                }
-                if (File.Exists(Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav")))
-                {
-                    _failureSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav");
-                    _successSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/success.wav");
-                }
-                if (File.Exists("../Resources/Assets/sounds/failure-tbone.wav"))
-                {
-                    _failureSoundPath = "../Resources/Assets/sounds/failure-tbone.wav";
-                    _successSoundPath = "../Resources/Assets/sounds/success.wav";
-                }
+                _failureSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/failure-tbone.wav");
+                _successSoundPath = Path.Combine(processDir, "../Resources/Assets/sounds/success.wav");
             }
-            if (compressesOutput)
+            if (File.Exists("../Resources/Assets/sounds/failure-tbone.wav"))
             {
-                _backupPerformer.UsesCompressedFile = true;
-                if (compressedPassword != null)
-                {
-                    _backupPerformer.UsesPasswordForCompressedFile = true;
-                    _backupPerformer.CompressedFilePassword = compressedPassword;
-                }
+                _failureSoundPath = "../Resources/Assets/sounds/failure-tbone.wav";
+                _successSoundPath = "../Resources/Assets/sounds/success.wav";
             }
-            _backupPerformer.IsIncremental = isIncremental;
-
-            _dispatcherTimer = new DispatcherTimer();
-            _stopwatch = new Stopwatch();
-            CurrentTimeString = "00:00:00";
-            RunningLabel = "Running";
-            _dispatcherTimer.Tick += new EventHandler(BackupLengthDispatcherTimerTick);
-            _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 1);
-
-            RunBackup();
         }
-
-        #region Properties
-
-        public List<FolderFileItem> Items { get; set; }
-
-        public string BackupLocation { get; set; }
-
-        public string CurrentProgressString
+        if (compressesOutput)
         {
-            // formatting the double without rounding: https://stackoverflow.com/a/2453982/3938401
-            get { return string.Format("{0:N2}", _currentProgress); }
-        }
-
-        public string Status
-        {
-            get { return _status; }
-            set { _status = value; NotifyPropertyChanged(); }
-        }
-
-        public List<FolderFileCopyProgress> ItemProgressData
-        {
-            get { return _itemProgressData; }
-            set { _itemProgressData = value; NotifyPropertyChanged(); }
-        }
-
-        public string FinishButtonTitle
-        {
-            get { return _finishButtonTitle; }
-            set { _finishButtonTitle = value; NotifyPropertyChanged(); }
-        }
-
-        public Brush StatusColor
-        {
-            get { return _statusColor; }
-            set { _statusColor = value; NotifyPropertyChanged(); }
-        }
-
-        public string CurrentTimeString
-        {
-            get { return _currentTimeString; }
-            set { _currentTimeString = value; NotifyPropertyChanged(); }
-        }
-
-        public string RunningLabel
-        {
-            get { return _runningLabel; }
-            set { _runningLabel = value; NotifyPropertyChanged(); }
-        }
-
-        public string CurrentPath
-        {
-            get => _currentPath;
-            set { _currentPath = value; NotifyPropertyChanged(); }
-        }
-
-        #endregion
-
-        #region Running Backup
-
-        private void RunBackup()
-        {
-            _stopwatch.Start();
-            _dispatcherTimer.Start();
-            Task.Run(async () =>
+            _backupPerformer.UsesCompressedFile = true;
+            if (compressedPassword != null)
             {
-                FinishButtonTitle = "Cancel Backup";
-                Status = "Getting backup size...";
-                if (!Directory.Exists(BackupLocation))
+                _backupPerformer.UsesPasswordForCompressedFile = true;
+                _backupPerformer.CompressedFilePassword = compressedPassword;
+            }
+        }
+        _backupPerformer.IsIncremental = isIncremental;
+
+        _dispatcherTimer = new DispatcherTimer();
+        _stopwatch = new Stopwatch();
+        CurrentTimeString = "00:00:00";
+        RunningLabel = "Running";
+        _dispatcherTimer.Tick += new EventHandler(BackupLengthDispatcherTimerTick);
+        _dispatcherTimer.Interval = new TimeSpan(0, 0, 0, 1);
+
+        RunBackup();
+    }
+
+    #region Properties
+
+    public List<FolderFileItem> Items { get; set; }
+
+    public string BackupLocation { get; set; }
+
+    public string CurrentProgressString
+    {
+        // formatting the double without rounding: https://stackoverflow.com/a/2453982/3938401
+        get { return string.Format("{0:N2}", _currentProgress); }
+    }
+
+    public string Status
+    {
+        get { return _status; }
+        set { _status = value; NotifyPropertyChanged(); }
+    }
+
+    public List<FolderFileCopyProgress> ItemProgressData
+    {
+        get { return _itemProgressData; }
+        set { _itemProgressData = value; NotifyPropertyChanged(); }
+    }
+
+    public string FinishButtonTitle
+    {
+        get { return _finishButtonTitle; }
+        set { _finishButtonTitle = value; NotifyPropertyChanged(); }
+    }
+
+    public Brush StatusColor
+    {
+        get { return _statusColor; }
+        set { _statusColor = value; NotifyPropertyChanged(); }
+    }
+
+    public string CurrentTimeString
+    {
+        get { return _currentTimeString; }
+        set { _currentTimeString = value; NotifyPropertyChanged(); }
+    }
+
+    public string RunningLabel
+    {
+        get { return _runningLabel; }
+        set { _runningLabel = value; NotifyPropertyChanged(); }
+    }
+
+    public string CurrentPath
+    {
+        get => _currentPath;
+        set { _currentPath = value; NotifyPropertyChanged(); }
+    }
+
+    #endregion
+
+    #region Running Backup
+
+    private async void RunBackup()
+    {
+        _stopwatch.Start();
+        _dispatcherTimer.Start();
+        FinishButtonTitle = "Cancel Backup";
+        Status = "Getting backup size...";
+        if (!Directory.Exists(BackupLocation))
+        {
+            TellUserBackupResult(false, "Error: Backup directory doesn't exist");
+        }
+        else
+        {
+            await _backupPerformer.CalculateBackupSize(Items, BackupLocation);
+            ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+            if (_totalBackupSize > freeDriveBytes)
+            {
+                var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
+                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
+                TellUserBackupResult(false, error);
+            }
+            else if (!_backupPerformer.HadError /* in calculating file size */)
+            {
+                Status = "Performing backup...";
+                await _backupPerformer.PerformBackup(Items, BackupLocation);
+                if (!_backupPerformer.HadError) // if error, message already handled
                 {
-                    TellUserBackupFailed("Error: Backup directory doesn't exist");
-                }
-                else
-                {
-                    await _backupPerformer.CalculateBackupSize(Items, BackupLocation);
-                    ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-                    if (_totalBackupSize > freeDriveBytes)
+                    if (_backupPerformer.HasBeenCanceled)
                     {
-                        var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
-                                                ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
-                        TellUserBackupFailed(error);
+                        TellUserBackupResult(false, "Backup was canceled");
                     }
-                    else if (!_backupPerformer.HadError /* in calculating file size */)
+                    else
                     {
-                        Status = "Performing backup...";
-                        await _backupPerformer.PerformBackup(Items, BackupLocation);
-                        if (!_backupPerformer.HadError) // if error, message already handled
-                        {
-                            if (_backupPerformer.HasBeenCanceled)
-                            {
-                                TellUserBackupFailed("Backup was canceled");
-                            }
-                            else
-                            {
-                                TellUserBackupSucceeded("Backup successfully finished");
-                            }
-                        }
+                        TellUserBackupResult(true, "Backup successfully finished");
                     }
                 }
-            });
-        }
-
-        void BackupLengthDispatcherTimerTick(object sender, EventArgs e)
-        {
-            if (_stopwatch.IsRunning)
-            {
-                TimeSpan ts = _stopwatch.Elapsed;
-                CurrentTimeString = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
             }
         }
+    }
 
-        private async void TellUserBackupSucceeded(string message)
+    void BackupLengthDispatcherTimerTick(object sender, EventArgs e)
+    {
+        if (_stopwatch.IsRunning)
         {
-            RunningLabel = "Ran";
-            _stopwatch.Stop();
-            _dispatcherTimer.Stop();
-            Status = message;
-            StatusColor = _greenBrush;
-            if (_playsSounds)
-            {
-                await _soundPlayer.Play(_successSoundPath);
-            }
-            FinishButtonTitle = "Finish Backup";
+            TimeSpan ts = _stopwatch.Elapsed;
+            CurrentTimeString = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
         }
+    }
 
-        private async void TellUserBackupFailed(string message)
+    private async void TellUserBackupResult(bool didSucceed, string message)
+    {
+        RunningLabel = "Ran";
+        _stopwatch.Stop();
+        _dispatcherTimer.Stop();
+        Status = message;
+        StatusColor = didSucceed ? _greenBrush : _redBrush;
+        if (_playsSounds)
         {
-            RunningLabel = "Ran";
-            _stopwatch.Stop();
-            _dispatcherTimer.Stop();
-            Status = message;
-            StatusColor = _redBrush;
-            if (_playsSounds)
-            {
-                await _soundPlayer.Play(_failureSoundPath);
-            }
-            FinishButtonTitle = "Finish Backup";
+            await _soundPlayer.Play(didSucceed ? _successSoundPath : _failureSoundPath);
         }
+        FinishButtonTitle = "Finish Backup";
+    }
 
-        #endregion
+    #endregion
 
-        #region Backup Performer -- Callbacks
+    #region Backup Performer -- Callbacks
 
-        private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
+    private void _backupPerformer_CalculatedBytesOfItem(FolderFileItem item, ulong bytes)
+    {
+        if (_copyDataToProgressMap.ContainsKey(item))
         {
-            if (_copyDataToProgressMap.ContainsKey(item))
-            {
-                item.ByteSize = bytes;
-                var progressInfo = _copyDataToProgressMap[item];
-                progressInfo.TotalBytesToCopy = bytes;
-                _totalBackupSize += bytes;
-            }
+            item.ByteSize = bytes;
+            var progressInfo = _copyDataToProgressMap[item];
+            progressInfo.TotalBytesToCopy = bytes;
+            _totalBackupSize += bytes;
         }
+    }
 
-        private void _backupPerformer_StartedCopyingItem(FolderFileItem item)
+    private void _backupPerformer_StartedCopyingItem(FolderFileItem item)
+    {
+        if (_copyDataToProgressMap.ContainsKey(item))
         {
-            if (_copyDataToProgressMap.ContainsKey(item))
-            {
-                var progressInfo = _copyDataToProgressMap[item];
-                progressInfo.IsCopyInProgress = true;
-            }
+            var progressInfo = _copyDataToProgressMap[item];
+            progressInfo.IsCopyInProgress = true;
         }
+    }
 
-        private void _backupPerformer_FinishedCopyingItem(FolderFileItem item)
+    private void _backupPerformer_FinishedCopyingItem(FolderFileItem item)
+    {
+        if (_copyDataToProgressMap.ContainsKey(item))
         {
-            if (_copyDataToProgressMap.ContainsKey(item))
-            {
-                var progressInfo = _copyDataToProgressMap[item];
-                progressInfo.IsCopyInProgress = false;
-                progressInfo.IsFinishedCopying = true;
-            }
+            var progressInfo = _copyDataToProgressMap[item];
+            progressInfo.IsCopyInProgress = false;
+            progressInfo.IsFinishedCopying = true;
         }
+    }
 
-        private void _backupPerformer_CopiedBytesOfItem(FolderFileItem item, ulong bytes)
+    private void _backupPerformer_CopiedBytesOfItem(FolderFileItem item, ulong bytes)
+    {
+        if (_copyDataToProgressMap.ContainsKey(item))
         {
-            if (_copyDataToProgressMap.ContainsKey(item))
-            {
-                var progressInfo = _copyDataToProgressMap[item];
-                progressInfo.BytesCopied += bytes;
-                _bytesCopiedSoFar += bytes;
-                _currentProgress = Math.Min((double)_bytesCopiedSoFar / (double)_totalBackupSize * 100, 100);
-                NotifyPropertyChanged(nameof(CurrentProgressString));
-            }
+            var progressInfo = _copyDataToProgressMap[item];
+            progressInfo.BytesCopied += bytes;
+            _bytesCopiedSoFar += bytes;
+            _currentProgress = Math.Min((double)_bytesCopiedSoFar / (double)_totalBackupSize * 100, 100);
+            NotifyPropertyChanged(nameof(CurrentProgressString));
         }
+    }
 
-        private void _backupPerformer_BackupFailed(Exception e)
+    private void _backupPerformer_BackupFailed(Exception e)
+    {
+        TellUserBackupResult(false, "Backup failed. Error: " + e.Message);
+        StatusColor = _redBrush;
+    }
+
+    private void _backupPerformer_AboutToProcessFile(string path)
+    {
+        CurrentPath = path;
+    }
+
+    #endregion
+
+    public ICommand CancelBackup => new RelayCommand(o => StopBackup());
+
+    private async void StopBackup()
+    {
+        if (_backupPerformer.IsRunning)
         {
-            TellUserBackupFailed("Backup failed. Error: " + e.Message);
-            StatusColor = _redBrush;
+            await _backupPerformer.CancelAsync();
         }
-
-        private void _backupPerformer_AboutToProcessFile(string path)
+        else
         {
-            CurrentPath = path;
+            PopToSetupView();
         }
+    }
 
-        #endregion
-
-        public ICommand CancelBackup => new RelayCommand(o => StopBackup());
-
-        private async void StopBackup()
-        {
-            if (_backupPerformer.IsRunning)
-            {
-                await _backupPerformer.CancelAsync();
-            }
-            else
-            {
-                PopToSetupView();
-            }
-        }
-
-        private void PopToSetupView()
-        {
-            _backupPerformer.StartedCopyingItem -= _backupPerformer_StartedCopyingItem;
-            _backupPerformer.FinishedCopyingItem -= _backupPerformer_FinishedCopyingItem;
-            _backupPerformer.CopiedBytesOfItem -= _backupPerformer_CopiedBytesOfItem;
-            _backupPerformer.BackupFailed -= _backupPerformer_BackupFailed;
-            _backupPerformer.CalculatedBytesOfItem -= _backupPerformer_CalculatedBytesOfItem;
-            PopViewModel();
-        }
+    private void PopToSetupView()
+    {
+        _backupPerformer.StartedCopyingItem -= _backupPerformer_StartedCopyingItem;
+        _backupPerformer.FinishedCopyingItem -= _backupPerformer_FinishedCopyingItem;
+        _backupPerformer.CopiedBytesOfItem -= _backupPerformer_CopiedBytesOfItem;
+        _backupPerformer.BackupFailed -= _backupPerformer_BackupFailed;
+        _backupPerformer.CalculatedBytesOfItem -= _backupPerformer_CalculatedBytesOfItem;
+        PopViewModel();
     }
 }

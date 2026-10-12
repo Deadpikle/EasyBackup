@@ -5,105 +5,105 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EasyBackupAvalonia.Models
+namespace EasyBackupAvalonia.Models;
+
+class FolderFileItem : ChangeNotifier
 {
-    class FolderFileItem : ChangeNotifier
+    private string _path;
+    private bool _isDirectory;
+    private bool _isRecursive;
+    private bool _onlyCopiesLatestFile;
+    private ulong _byteSize;
+
+    private List<string> _excludedPaths;
+
+    public FolderFileItem()
     {
-        private string _path;
-        private bool _isDirectory;
-        private bool _isRecursive;
-        private bool _onlyCopiesLatestFile;
-        private ulong _byteSize;
+        ExcludedPaths = new List<string>();
+    }
 
-        private List<string> _excludedPaths;
+    public string Path
+    {
+        get { return _path; }
+        set { _path = value; NotifyPropertyChanged(); }
+    }
 
-        public FolderFileItem()
+    public bool IsDirectory
+    {
+        get { return _isDirectory; }
+        set
         {
-            ExcludedPaths = new List<string>();
+            _isDirectory = value;
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(CanEditFolderExclusions));
         }
+    }
 
-        public string Path
+    public bool IsRecursive
+    {
+        get { return _isRecursive; }
+        set
         {
-            get { return _path; }
-            set { _path = value; NotifyPropertyChanged(); }
+            _isRecursive = value;
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(CanEnableOnlyCopiesLatestFile));
+            NotifyPropertyChanged(nameof(CanEditFolderExclusions));
         }
+    }
 
-        public bool IsDirectory
+    public bool CanEnableOnlyCopiesLatestFile
+    {
+        get { return _isDirectory && !IsRecursive; }
+    }
+
+    public bool OnlyCopiesLatestFile
+    {
+        get { return _onlyCopiesLatestFile; }
+        set
         {
-            get { return _isDirectory; }
-            set
+            _onlyCopiesLatestFile = value;
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(CanEditFolderExclusions));
+        }
+    }
+
+    public ulong ByteSize
+    {
+        get { return _byteSize; }
+        set { _byteSize = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableByteSize)); }
+    }
+
+    public string UserReadableByteSize
+    {
+        get
+        {
+            return Utilities.BytesToString(ByteSize);
+        }
+    }
+
+    public bool CanEditFolderExclusions
+    {
+        get
+        {
+            return IsDirectory && (!OnlyCopiesLatestFile || IsRecursive);
+        }
+    }
+
+    public List<string> ExcludedPaths
+    {
+        get
+        {
+            if (CanEditFolderExclusions)
             {
-                _isDirectory = value;
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(CanEditFolderExclusions));
+                return _excludedPaths;
+            }
+            else
+            {
+                // return empty list; this way we can always access ExcludedPaths 
+                // when backing up without having to check CanEditFolderExclusions
+                return []; 
             }
         }
-
-        public bool IsRecursive
-        {
-            get { return _isRecursive; }
-            set
-            {
-                _isRecursive = value;
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(CanEnableOnlyCopiesLatestFile));
-                NotifyPropertyChanged(nameof(CanEditFolderExclusions));
-            }
-        }
-
-        public bool CanEnableOnlyCopiesLatestFile
-        {
-            get { return _isDirectory && !IsRecursive; }
-        }
-
-        public bool OnlyCopiesLatestFile
-        {
-            get { return _onlyCopiesLatestFile; }
-            set
-            {
-                _onlyCopiesLatestFile = value;
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(CanEditFolderExclusions));
-            }
-        }
-
-        public ulong ByteSize
-        {
-            get { return _byteSize; }
-            set { _byteSize = value; NotifyPropertyChanged(); NotifyPropertyChanged(nameof(UserReadableByteSize)); }
-        }
-
-        public string UserReadableByteSize
-        {
-            get
-            {
-                return Utilities.BytesToString(ByteSize);
-            }
-        }
-
-        public bool CanEditFolderExclusions
-        {
-            get
-            {
-                return IsDirectory && (!OnlyCopiesLatestFile || IsRecursive);
-            }
-        }
-
-        public List<string> ExcludedPaths
-        {
-            get
-            {
-                if (CanEditFolderExclusions)
-                {
-                    return _excludedPaths;
-                }
-                else
-                {
-                    // return empty list; this way we can always access ExcludedPaths when backing up without having to check CanEditFolderExclusions
-                    return new List<string>() { }; 
-                }
-            }
-            set { _excludedPaths = value; NotifyPropertyChanged(); }
-        }
+        set { _excludedPaths = value; NotifyPropertyChanged(); }
     }
 }

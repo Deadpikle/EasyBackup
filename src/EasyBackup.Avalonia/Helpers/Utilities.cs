@@ -7,104 +7,103 @@ using System.Security;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EasyBackupAvalonia.Helpers
+namespace EasyBackupAvalonia.Helpers;
+
+class Utilities
 {
-    class Utilities
+    public static ulong DriveFreeBytes(string folderName)
     {
-        public static ulong DriveFreeBytes(string folderName)
+        if (string.IsNullOrEmpty(folderName))
         {
-            if (string.IsNullOrEmpty(folderName))
-            {
-                return 0;
-            }
-
-            if (!folderName.EndsWith("\\"))
-            {
-                folderName += '\\';
-            }
-            var dirInfo = new DirectoryInfo(folderName);
-            if (dirInfo.Parent == null)
-            {
-                // this is a root directory
-                DriveInfo driveRoot = new DriveInfo(folderName);
-                return (ulong)driveRoot.AvailableFreeSpace;
-            }
-            FileInfo file = new FileInfo(folderName);
-            DriveInfo drive = new DriveInfo(file.Directory.Root.FullName);
-
-            // Calculating free space of drive: https://stackoverflow.com/a/6815482/3938401
-            // and https://stackoverflow.com/a/3066845/3938401
-            return (ulong)drive.AvailableFreeSpace;
+            return 0;
         }
 
-        public static string BytesToString(ulong bytes)
+        if (!folderName.EndsWith("\\"))
         {
-            if (bytes == 0)
-            {
-                return "-";
-            }
-            var byteSize = ByteSizeLib.ByteSize.FromBytes(bytes);
-            return byteSize.ToString();
+            folderName += '\\';
         }
-
-        // https://stackoverflow.com/a/12169099/3938401
-        public static bool Is64BitOS()
+        var dirInfo = new DirectoryInfo(folderName);
+        if (dirInfo.Parent == null)
         {
-            return Environment.Is64BitOperatingSystem;
+            // this is a root directory
+            DriveInfo driveRoot = new DriveInfo(folderName);
+            return (ulong)driveRoot.AvailableFreeSpace;
         }
+        FileInfo file = new FileInfo(folderName);
+        DriveInfo drive = new DriveInfo(file.Directory.Root.FullName);
 
-        // https://stackoverflow.com/a/819705
-        public static string SecureStringToString(SecureString value)
+        // Calculating free space of drive: https://stackoverflow.com/a/6815482/3938401
+        // and https://stackoverflow.com/a/3066845/3938401
+        return (ulong)drive.AvailableFreeSpace;
+    }
+
+    public static string BytesToString(ulong bytes)
+    {
+        if (bytes == 0)
         {
-            IntPtr valuePtr = IntPtr.Zero;
-            try
-            {
-                valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
-                return Marshal.PtrToStringUni(valuePtr);
-            }
-            catch { }
-            finally
-            {
-                Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
-            }
-            return "";
+            return "-";
         }
+        var byteSize = ByteSizeLib.ByteSize.FromBytes(bytes);
+        return byteSize.ToString();
+    }
 
-        public static string SaveFileLocation
+    // https://stackoverflow.com/a/12169099/3938401
+    public static bool Is64BitOS()
+    {
+        return Environment.Is64BitOperatingSystem;
+    }
+
+    // https://stackoverflow.com/a/819705
+    public static string SecureStringToString(SecureString value)
+    {
+        IntPtr valuePtr = IntPtr.Zero;
+        try
         {
-            get
-            {
-                var folder = Path.Combine(Environment.GetFolderPath(
-                        Environment.SpecialFolder.ApplicationData, 
-                        Environment.SpecialFolderOption.DoNotVerify), 
-                    "EasyBackup");
-                if (!Directory.Exists(folder))
-                {
-                    Directory.CreateDirectory(folder);
-                }
-                return Path.Combine(folder, "settings.json");
-            }
+            valuePtr = Marshal.SecureStringToGlobalAllocUnicode(value);
+            return Marshal.PtrToStringUni(valuePtr);
         }
-
-        public static bool IsSymbolicLink(string path)
+        catch { }
+        finally
         {
-            if (!File.Exists(path) && !Directory.Exists(path))
-            {
-                return false;
-            }
-            FileInfo file = new FileInfo(path);
-            return file.LinkTarget != null;
+            Marshal.ZeroFreeGlobalAllocUnicode(valuePtr);
         }
+        return "";
+    }
 
-
-        public static bool SymbolicLinkFileExists(string path)
+    public static string SaveFileLocation
+    {
+        get
         {
-            if (!File.Exists(path) && !Directory.Exists(path))
+            var folder = Path.Combine(Environment.GetFolderPath(
+                    Environment.SpecialFolder.ApplicationData, 
+                    Environment.SpecialFolderOption.DoNotVerify), 
+                "EasyBackup");
+            if (!Directory.Exists(folder))
             {
-                return false;
+                Directory.CreateDirectory(folder);
             }
-            FileInfo file = new FileInfo(path);
-            return File.Exists(Path.Combine(Path.GetDirectoryName(path), file.LinkTarget)) || File.Exists(file.LinkTarget);
+            return Path.Combine(folder, "settings.json");
         }
+    }
+
+    public static bool IsSymbolicLink(string path)
+    {
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            return false;
+        }
+        var file = new FileInfo(path);
+        return file.LinkTarget != null;
+    }
+
+
+    public static bool SymbolicLinkFileExists(string path)
+    {
+        if (!File.Exists(path) && !Directory.Exists(path))
+        {
+            return false;
+        }
+        var file = new FileInfo(path);
+        return File.Exists(Path.Combine(Path.GetDirectoryName(path), file.LinkTarget)) || File.Exists(file.LinkTarget);
     }
 }

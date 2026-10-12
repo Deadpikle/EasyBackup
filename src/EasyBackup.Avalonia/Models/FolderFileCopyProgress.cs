@@ -1,102 +1,101 @@
 ﻿using ByteSizeLib;
 using EasyBackupAvalonia.Helpers;
 
-namespace EasyBackupAvalonia.Models
+namespace EasyBackupAvalonia.Models;
+
+class FolderFileCopyProgress : ChangeNotifier
 {
-    class FolderFileCopyProgress : ChangeNotifier
+    private string _path;
+    private bool _isCopyInProgress;
+    private bool _isFinishedCopying;
+    private ulong _bytesCopied;
+    private ulong _totalBytesToCopy;
+
+    public FolderFileCopyProgress(string path)
     {
-        private string _path;
-        private bool _isCopyInProgress;
-        private bool _isFinishedCopying;
-        private ulong _bytesCopied;
-        private ulong _totalBytesToCopy;
+        Path = path;
+        IsCopyInProgress = false;
+        IsFinishedCopying = false;
+        BytesCopied = 0;
+    }
 
-        public FolderFileCopyProgress(string path)
+    public string Path
+    {
+        get { return _path; }
+        set { _path = value; NotifyPropertyChanged(); }
+    }
+
+    public bool IsCopyInProgress
+    {
+        get { return _isCopyInProgress; }
+        set { _isCopyInProgress = value; NotifyPropertyChanged(); }
+    }
+
+    public bool IsFinishedCopying
+    {
+        get { return _isFinishedCopying; }
+        set { _isFinishedCopying = value; NotifyPropertyChanged(); }
+    }
+
+    public ulong BytesCopied
+    {
+        get { return _bytesCopied; }
+        set
         {
-            Path = path;
-            IsCopyInProgress = false;
-            IsFinishedCopying = false;
-            BytesCopied = 0;
+            _bytesCopied = value;
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(UserReadableBytesCopied));
+            NotifyPropertyChanged(nameof(Progress));
+            NotifyPropertyChanged(nameof(ProgressString));
         }
+    }
 
-        public string Path
+    public string UserReadableBytesCopied
+    {
+        get
         {
-            get { return _path; }
-            set { _path = value; NotifyPropertyChanged(); }
+            return Utilities.BytesToString(BytesCopied);
         }
+    }
 
-        public bool IsCopyInProgress
+    public ulong TotalBytesToCopy
+    {
+        get { return _totalBytesToCopy; }
+        set
         {
-            get { return _isCopyInProgress; }
-            set { _isCopyInProgress = value; NotifyPropertyChanged(); }
+            _totalBytesToCopy = value;
+            NotifyPropertyChanged();
+            NotifyPropertyChanged(nameof(UserReadableBytesToCopy));
+            NotifyPropertyChanged(nameof(Progress));
+            NotifyPropertyChanged(nameof(ProgressString));
         }
+    }
 
-        public bool IsFinishedCopying
+    public string UserReadableBytesToCopy
+    {
+        get
         {
-            get { return _isFinishedCopying; }
-            set { _isFinishedCopying = value; NotifyPropertyChanged(); }
+            return Utilities.BytesToString(TotalBytesToCopy);
         }
+    }
 
-        public ulong BytesCopied
+    public double Progress
+    {
+        get
         {
-            get { return _bytesCopied; }
-            set
+            if (TotalBytesToCopy == 0)
             {
-                _bytesCopied = value;
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(UserReadableBytesCopied));
-                NotifyPropertyChanged(nameof(Progress));
-                NotifyPropertyChanged(nameof(ProgressString));
+                return 0;
             }
+            return (double)BytesCopied / (double)TotalBytesToCopy * 100;
         }
+    }
 
-        public string UserReadableBytesCopied
+    public string ProgressString
+    {
+        get
         {
-            get
-            {
-                return Utilities.BytesToString(BytesCopied);
-            }
-        }
-
-        public ulong TotalBytesToCopy
-        {
-            get { return _totalBytesToCopy; }
-            set
-            {
-                _totalBytesToCopy = value;
-                NotifyPropertyChanged();
-                NotifyPropertyChanged(nameof(UserReadableBytesToCopy));
-                NotifyPropertyChanged(nameof(Progress));
-                NotifyPropertyChanged(nameof(ProgressString));
-            }
-        }
-
-        public string UserReadableBytesToCopy
-        {
-            get
-            {
-                return Utilities.BytesToString(TotalBytesToCopy);
-            }
-        }
-
-        public double Progress
-        {
-            get
-            {
-                if (TotalBytesToCopy == 0)
-                {
-                    return 0;
-                }
-                return (double)BytesCopied / (double)TotalBytesToCopy * 100;
-            }
-        }
-
-        public string ProgressString
-        {
-            get
-            {
-                return string.Format("{0:N2}", Progress);
-            }
+            return string.Format("{0:N2}", Progress);
         }
     }
 }

@@ -4,12 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace EasyBackupAvalonia.Interfaces
+namespace EasyBackupAvalonia.Interfaces;
+
+interface IChangeViewModel
 {
-    interface IChangeViewModel
-    {
-        void PushViewModel(BaseViewModel model);
-        void PopViewModel();
-        TopLevel GetTopLevel();
-    }
+    void PushViewModel(BaseViewModel model);
+    void PopViewModel();
+    TopLevel GetTopLevel();
 }
