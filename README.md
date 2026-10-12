@@ -14,7 +14,7 @@ Features include:
 * Optional sounds when backup succeeds or fails
 * Cancel backup at any time
 * Incremental backups (only backups up latest files that have been changed; old files that are now gone are not deleted from the backup location)
-* Windows legacy build only: Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location.
+* Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location. (Not compatible with incremental backups)
 
 EasyBackup isn't the most fancy backup software out there, but it works well enough for simple backups. 
 
