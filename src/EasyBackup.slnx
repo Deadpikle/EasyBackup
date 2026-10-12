@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="src/EasyBackup.Legacy/EasyBackup.Legacy.csproj" />
+  <Project Path="src/EasyBackup.Avalonia/EasyBackup.Avalonia.csproj" />
+</Solution>

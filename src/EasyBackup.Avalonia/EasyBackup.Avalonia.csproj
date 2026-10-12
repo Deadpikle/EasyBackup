@@ -16,6 +16,8 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Copyright>Deadpikle</Copyright>
     <Authors>Deadpikle</Authors>
+    <AssemblyName>EasyBackupAvalonia</AssemblyName>
+    <RootNamespace>EasyBackupAvalonia</RootNamespace>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>

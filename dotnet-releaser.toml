@@ -1,6 +1,6 @@
 # configuration file for dotnet-releaser
 [msbuild]
-project = "EasyBackupAvalonia/EasyBackupAvalonia.csproj"
+project = "src/EasyBackup.Avalonia/EasyBackup.Avalonia.csproj"
 configuration = "Release"
 [msbuild.properties]
 PublishReadyToRun = false # Disable PublishReadyToRun
