@@ -9,7 +9,7 @@ on:
 jobs:
   publish:
     name: Build check for all branches
-    runs-on: macos-15
+    runs-on: macos-latest
     steps:
         - name: Checkout
           uses: actions/checkout@v7.0.1
