@@ -550,7 +550,7 @@ class BackupPerformer
                 var prevCurrFileNumber = currentFileNumber;
                 if (percentAndFileNumberParts.Length > 1 && !string.IsNullOrWhiteSpace(percentAndFileNumberParts[1]))
                 {
-                    currentFileNumber = ulong.Parse(percentAndFileNumberParts[1].Trim());
+                    ulong.TryParse(Regex.Replace(percentAndFileNumberParts[1], @"\s+", ""), out currentFileNumber);
                 }
                 else
                 {
@@ -929,6 +929,8 @@ class BackupPerformer
         }
         catch (Exception e)
         {
+            Console.WriteLine(e.Message);
+            Console.WriteLine(e.StackTrace);
             HadError = true;
             BackupFailed?.Invoke(e);
         }
