@@ -9,8 +9,10 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Product>EasyBackup</Product>
     <Version>0.11.0</Version>
-    <PublishSingleFile>false</PublishSingleFile>
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
+    <PublishAot Condition="'$(Configuration)' != 'Debug'">true</PublishAot>
     <IsTrimmable>true</IsTrimmable>
     <TrimMode>partial</TrimMode>
     <IsAotCompatible>true</IsAotCompatible>
