@@ -39,6 +39,8 @@ Glad you asked! There are always things that can be done on an open-source proje
 
 Basically, this repo is not actively developed unless the author needs something for it, but contributions are welcome and accepted.
 
+Contributions made using AI tools will not be merged.
+
 ## License
 
 The core EasyBackup code is under the MIT License. Thanks for using this software!
