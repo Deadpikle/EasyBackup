@@ -626,7 +626,6 @@ class BackupPerformer
 
         var wipLine = "";
         var receivingDeleteChars = false;
-        // TODO: async this somehow so UI updates work
         while ((cch = await outputStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
         {
             // use file numbers to see if this is the start of a new file or continuing progress on a file we have
@@ -694,7 +693,7 @@ class BackupPerformer
 
         // process.BeginOutputReadLine();
         //process.BeginErrorReadLine();
-        process.WaitForExit();
+        await process.WaitForExitAsync();
         // make sure last item is handled properly
         if (!HasBeenCanceled && currentItem != null && remainingBytes > 0)
         {
@@ -941,7 +940,7 @@ class BackupPerformer
 
     public async Task CalculateBackupSize(List<FolderFileItem> paths, string backupDirectory)
     {
-        _directoryPathsSeen = new List<string>();
+        _directoryPathsSeen = [];
         _isCalculatingFileSize = true;
         await IterateOverFiles(paths, backupDirectory);
         _isCalculatingFileSize = false;
@@ -949,7 +948,7 @@ class BackupPerformer
 
     public async Task PerformBackup(List<FolderFileItem> paths, string backupDirectory)
     {
-        _directoryPathsSeen = new List<string>();
+        _directoryPathsSeen = [];
         await IterateOverFiles(paths, backupDirectory);
     }
 }
