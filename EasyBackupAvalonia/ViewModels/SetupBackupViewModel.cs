@@ -256,7 +256,7 @@ namespace EasyBackupAvalonia.ViewModels
             if (GetTopLevel()?.StorageProvider is IStorageProvider { CanOpen: true } provider)
             {
                 var lastSaveExists = File.Exists(_lastSaveFilePath);
-                var lastFileName = lastSaveExists ? Path.GetFileName(_lastSaveFilePath) : "";
+                var lastFileName = lastSaveExists ? Path.GetFileNameWithoutExtension(_lastSaveFilePath) : "";
                 var lastPath = lastSaveExists ? _lastSaveFilePath : "";
                 var lastPathDirName = Path.GetDirectoryName(lastPath);
                 var suggestedStartLocation = await provider.TryGetFolderFromPathAsync(lastPathDirName);
