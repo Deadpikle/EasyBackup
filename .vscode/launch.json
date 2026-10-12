@@ -5,11 +5,11 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "Launch debug .NET 10",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/EasyBackupAvalonia/bin/Debug/net9.0/EasyBackupAvalonia",
+            "program": "${workspaceFolder}/src/EasyBackup.Avalonia/bin/Debug/net10.0/EasyBackupAvalonia",
             "args": [],
             "cwd": "${workspaceFolder}",
             "console": "internalConsole",
