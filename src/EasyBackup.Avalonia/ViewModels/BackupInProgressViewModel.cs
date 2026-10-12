@@ -183,30 +183,33 @@ class BackupInProgressViewModel : BaseViewModel
         }
         else
         {
-            await _backupPerformer.CalculateBackupSize(Items, BackupLocation);
-            ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-            if (_totalBackupSize > freeDriveBytes)
+            await Task.Run(async () =>
             {
-                var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
-                                        ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
-                TellUserBackupResult(false, error);
-            }
-            else if (!_backupPerformer.HadError /* in calculating file size */)
-            {
-                Status = "Performing backup...";
-                await _backupPerformer.PerformBackup(Items, BackupLocation);
-                if (!_backupPerformer.HadError) // if error, message already handled
+                await _backupPerformer.CalculateBackupSize(Items, BackupLocation);
+                ulong freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+                if (_totalBackupSize > freeDriveBytes)
                 {
-                    if (_backupPerformer.HasBeenCanceled)
+                    var error = string.Format("Can't perform backup: not enough free space -- need {0} but only have {1}",
+                                            ByteSize.FromBytes(_totalBackupSize), ByteSize.FromBytes(freeDriveBytes)); ;
+                    TellUserBackupResult(false, error);
+                }
+                else if (!_backupPerformer.HadError /* in calculating file size */)
+                {
+                    Status = "Performing backup...";
+                    await _backupPerformer.PerformBackup(Items, BackupLocation);
+                    if (!_backupPerformer.HadError) // if error, message already handled
                     {
-                        TellUserBackupResult(false, "Backup was canceled");
-                    }
-                    else
-                    {
-                        TellUserBackupResult(true, "Backup successfully finished");
+                        if (_backupPerformer.HasBeenCanceled)
+                        {
+                            TellUserBackupResult(false, "Backup was canceled");
+                        }
+                        else
+                        {
+                            TellUserBackupResult(true, "Backup successfully finished");
+                        }
                     }
                 }
-            }
+            });
         }
     }
 

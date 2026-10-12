@@ -426,26 +426,29 @@ class SetupBackupViewModel : BaseViewModel
         IsCancelCheckBackupSizeEnabled = true;
         var redBrush = new SolidColorBrush(Colors.Red);
         bool didFail = false;
-        try
+        await Task.Run(async () =>
         {
-            if (!Directory.Exists(BackupLocation))
+            try
             {
-                CheckBackupSizeBrush = redBrush;
-                CheckBackupSizeStatus = "Backup directory doesn't exist";
+                if (!Directory.Exists(BackupLocation))
+                {
+                    CheckBackupSizeBrush = redBrush;
+                    CheckBackupSizeStatus = "Backup directory doesn't exist";
+                    didFail = true;
+                }
+                else
+                {
+                    await _backupSizeChecker.CalculateBackupSize(Items.ToList(), BackupLocation);
+                    freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
+                }
+            }
+            catch (Exception e)
+            {
+                CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
+                CheckBackupSizeStatus = string.Format("Failed to check size of backup -- {0}", e.Message);
                 didFail = true;
             }
-            else
-            {
-                await _backupSizeChecker.CalculateBackupSize(Items.ToList(), BackupLocation);
-                freeDriveBytes = Utilities.DriveFreeBytes(BackupLocation);
-            }
-        }
-        catch (Exception e)
-        {
-            CheckBackupSizeBrush = new SolidColorBrush(Colors.Red);
-            CheckBackupSizeStatus = string.Format("Failed to check size of backup -- {0}", e.Message);
-            didFail = true;
-        }
+        });
         if (!_backupSizeChecker.HasBeenCanceled && !didFail)
         {
             if (_totalBackupSize > freeDriveBytes)
