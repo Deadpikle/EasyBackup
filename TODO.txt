@@ -8,7 +8,6 @@ TODO (Avalonia build which is the new stuff going forward)
         *-works but no progress reported, TODO debug progress and such
         *-fixed overall progress but individual item progress not working yet (for large file)
         -need to test with just items and no folders
--probably don't need Task.Run in view models now that backup performer is async but...if it works it works...
 -re-add about window and OSS licenses to Avalonia version
 -Use newer symlink functionality stuff on Windows since this runs .NET 8+ now
 -Test symlinks on macOS
