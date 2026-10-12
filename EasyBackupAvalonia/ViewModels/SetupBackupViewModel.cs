@@ -400,7 +400,9 @@ namespace EasyBackupAvalonia.ViewModels
                 if (canProceed)
                 {
                     PushViewModel(new BackupInProgressViewModel(ViewModelChanger, Items.ToList(), BackupLocation,
-                        SavesToCompressedFile, CompressedFileUsesPassword ? Password : null, IsIncremental));
+                        IsIncremental ? false : SavesToCompressedFile, 
+                        IsIncremental ? null : (CompressedFileUsesPassword ? Password : null), 
+                        IsIncremental));
                 }
             }
         }

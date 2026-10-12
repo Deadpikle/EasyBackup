@@ -98,63 +98,60 @@
                     Grid.Row="0"
                     Grid.RowSpan="3"
                     Orientation="Vertical"
-                    Margin="5">
+                    Margin="5"
+                    Spacing="6">
             <Button Content="Add File"
-                    Margin="0,5,0,5"
                     Command="{Binding AddFile}" />
             <Button Content="Add Folder"
-                    Margin="0,5,0,5"
                     Command="{Binding AddFolder}" />
             <Button Content="Remove File/Folder(s)"
-                    Margin="0,5,0,5"
                     CommandParameter="{Binding ElementName=PathsDataGrid, Path=SelectedItems}"
                     Command="{Binding RemoveItem}"
                     IsEnabled="{Binding IsItemSelected}" />
             <Button Content="Remove All Items"
-                    Margin="0,5,0,5"
                     Command="{Binding RemoveAllItems}" />
             <Button Content="Load Backup Template"
-                    Margin="0,10,0,5"
                     Command="{Binding LoadTemplate}" />
             <Button Content="Save Backup Template"
-                    Margin="0,10,0,5"
                     Command="{Binding SaveTemplate}" />
-            <CheckBox Content="Incremental Backup"
-                      Margin="0,5,0,5"
-                      IsChecked="{Binding IsIncremental}"
-                      FontSize="14" />
             <Rectangle Fill="DarkGray"
                        Height="2" />
+            <CheckBox Content="Incremental Backup"
+                      Name="IsIncremental"
+                      IsChecked="{Binding IsIncremental}"
+                      FontSize="14"
+                      ToolTip.Tip="Does not work when saving to compressed files" />
             <!-- <Button Content="Settings"
                     Margin="0,5,0,5"
                     IsVisible="False" /> -->
             <CheckBox Content="Play Sounds When Finished"
-                      Margin="0,5,0,5"
                       IsChecked="{Binding PlaysSoundsOnComplete}"
                       FontSize="14" />
             <CheckBox x:Name="SaveToCompressed"
                     Content="Save to Compressed File"
-                    Margin="0,5,0,5"
                     IsChecked="{Binding SavesToCompressedFile}"
-                    FontSize="14" />
+                    FontSize="14" 
+                    IsEnabled="{Binding !#IsIncremental.IsChecked}" />
             <CheckBox x:Name="UsePassword"
                     Content="Use Password"
-                    Margin="0,5,0,5"
                     IsChecked="{Binding CompressedFileUsesPassword}"
                     FontSize="14"
-                    IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}" />
+                    IsVisible="{Binding ElementName=SaveToCompressed, Path=IsChecked}"
+                    IsEnabled="{Binding !#IsIncremental.IsChecked}" />
             <Label Content="Password" 
                    IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
-            <TextBox x:Name="PasswordInput" Margin="0,5,0,5"
+            <TextBox x:Name="PasswordInput" 
                     IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
                     PasswordChar="*"
-                    Watermark="MyPassword" />
+                    Watermark="MyPassword"
+                    IsEnabled="{Binding !#IsIncremental.IsChecked}" />
             <Label Content="Confirm Password" 
                    IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"/>
-            <TextBox x:Name="ConfirmPasswordInput" Margin="0,5,0,5"
+            <TextBox x:Name="ConfirmPasswordInput" 
                     IsVisible="{Binding ElementName=UsePassword, Path=IsChecked}"
                     PasswordChar="*"
-                    Watermark="MyPassword"/>
+                    Watermark="MyPassword"
+                    IsEnabled="{Binding !#IsIncremental.IsChecked}"/>
                 <!-- <Button Content="About Easy Backup"
                         Margin="0,5,0,5"
                         Command="{Binding ShowAboutWindow}" /> -->
