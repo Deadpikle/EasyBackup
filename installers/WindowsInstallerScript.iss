@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "YasashiiBackup"
-#define MyAppVersion "0.9.0"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "Quickity Quack Productions"
 #define MyAppExeName "YasashiiBackup.exe"              
 #define MyAppExeBuildName "YasashiiBackup.Avalonia.exe"

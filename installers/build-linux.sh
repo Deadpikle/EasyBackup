@@ -1,6 +1,6 @@
 #!/bin/bash
 
-VERSION="0.9.0"
+VERSION="1.0.0"
 NAME="YasashiiBackup"
 SRC_DIR="src/YasashiiBackup.Avalonia" # user ran script from main folder
 if [ ! -d "$SRC_DIR" ]; then
