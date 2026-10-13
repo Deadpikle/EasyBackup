@@ -279,12 +279,14 @@ namespace YasashiiBackup.ViewModels
 
         private void SaveItemsToDisk()
         {
-            var saveFileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog();
-            saveFileDialog.AddExtension = true;
-            saveFileDialog.Filter = "YasashiiBackup Files | *.ysbf";
-            saveFileDialog.DefaultExt = "ysbf";
-            saveFileDialog.OverwritePrompt = true;
-            saveFileDialog.Title = "Choose Save Location";
+            var saveFileDialog = new Ookii.Dialogs.Wpf.VistaSaveFileDialog
+            {
+                AddExtension = true,
+                Filter = "YasashiiBackup Files | *.ysbf",
+                DefaultExt = "ysbf",
+                OverwritePrompt = true,
+                Title = "Choose Save Location"
+            };
             if (File.Exists(_lastSaveFilePath))
             {
                 saveFileDialog.FileName = _lastSaveFilePath;

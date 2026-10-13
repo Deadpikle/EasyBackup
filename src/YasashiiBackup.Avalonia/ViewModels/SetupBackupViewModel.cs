@@ -268,9 +268,9 @@ class SetupBackupViewModel : BaseViewModel
                 DefaultExtension = "*.ysbf",
                 FileTypeChoices = new List<FilePickerFileType>()
                 {
-                    new FilePickerFileType("YasashiiBackup Files | *.ysbf")
+                    new FilePickerFileType("YasashiiBackup Files | *.ysbf, *.ebf")
                     {
-                        Patterns = new List<string>() { "*.ysbf" }
+                        Patterns = new List<string>() { "*.ysbf", "*.ebf" }
                     }
                 },
                 ShowOverwritePrompt = true
@@ -307,9 +307,9 @@ class SetupBackupViewModel : BaseViewModel
                 AllowMultiple = false,
                 FileTypeFilter = new List<FilePickerFileType>()
                 {
-                    new FilePickerFileType("YasashiiBackup Files | *.ysbf")
+                    new FilePickerFileType("YasashiiBackup Files | *.ysbf, *.ebf")
                     {
-                        Patterns = new List<string>() { "*.ysbf" }
+                        Patterns = new List<string>() { "*.ysbf", "*.ebf" }
                     }
                 }
             });
