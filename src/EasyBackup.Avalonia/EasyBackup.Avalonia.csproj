@@ -55,31 +55,31 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-arm64\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <Content Include="Assets\tools\linux-arm64\*.*" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-x64\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <Content Include="Assets\tools\linux-x64\*.*" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\linux-x86\*.*" Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <Content Include="Assets\tools\linux-x86\*.*" Condition="$(RuntimeIdentifier.StartsWith('linux'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\macos\*.*" Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <Content Include="Assets\tools\macos\*.*" Condition="$(RuntimeIdentifier.StartsWith('osx'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-arm64\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Content Include="Assets\tools\win-arm64\*.*" Condition="$(RuntimeIdentifier.StartsWith('win'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-x64\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Content Include="Assets\tools\win-x64\*.*" Condition="$(RuntimeIdentifier.StartsWith('win'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
-    <Content Include="Assets\tools\win-x86\*.*" Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <Content Include="Assets\tools\win-x86\*.*" Condition="$(RuntimeIdentifier.StartsWith('win'))">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <PublishFolderType>Resource</PublishFolderType>
     </Content>
