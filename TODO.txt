@@ -11,7 +11,6 @@ TODO (Avalonia build which is the new stuff going forward)
 -re-add about window and OSS licenses to Avalonia version
 -Use newer symlink functionality stuff on Windows since this runs .NET 8+ now
 -Test symlinks on macOS
--avalonia version needs icon and actual publishing
 -Use better dialog functionality instead of popup windows via DialogHost.Avalonia or similar
 
 === Eventually ===
