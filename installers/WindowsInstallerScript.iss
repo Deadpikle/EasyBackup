@@ -33,7 +33,7 @@ OutputBaseFilename=Install {#MyAppName} {#MyAppVersion}
 SolidCompression=yes
 WizardStyle=modern dynamic
 SetupIconFile=../graphics/BackupIcon.ico
-OutputDir=..\src\bin
+OutputDir=..\src\YasashiiBackup.Avalonia\bin
 VersionInfoVersion={#MyAppVersion}
 
 [Languages]
