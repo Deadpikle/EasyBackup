@@ -1,6 +1,6 @@
 # YasashiiBackup
 
-YasashiiBackup (Yasashii is Japanese for "easy" or "plain") is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. It's basically a fancy copy+paste utility.
+YasashiiBackup, formerly known as `EasyBackup`, (Yasashii is Japanese for "easy" or "plain") is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. It's basically a fancy copy+paste utility.
 
 Features include:
 
