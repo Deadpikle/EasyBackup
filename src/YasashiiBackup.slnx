@@ -6,7 +6,7 @@
   </Configurations>
   <Project Path="src/YasashiiBackup.Legacy/YasashiiBackup.Legacy.csproj" />
   <Folder Name="/YasashiiBackup.Avalonia/">
-    <Project Path="YasashiiBackup.Avalonia/YasashiiBackup.Legacy.csproj" />
+    <Project Path="YasashiiBackup.Avalonia/YasashiiBackup.Avalonia.csproj" />
   </Folder>
   <Project Path="src/YasashiiBackup.Avalonia/YasashiiBackup.Avalonia.csproj" />
 </Solution>
