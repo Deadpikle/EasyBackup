@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>net10.0;net10.0-macos</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <Nullable>disable</Nullable> <!-- TODO: Enable nullable -->
     <UseAppHost>true</UseAppHost>
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Product>EasyBackup</Product>
-    <Version>0.11.0</Version>
+    <Version>0.9.0</Version>
     <PublishSingleFile>true</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <PublishTrimmed>true</PublishTrimmed>
@@ -23,13 +23,14 @@
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <Description>A simple backup program built with Avalonia</Description> 
+    <Description>A simple cross-platform backup program built with Avalonia</Description> 
     <PackageTags>backup;avalonia;crossplatform</PackageTags>
     <PackageReleaseNotes>See https://github.com/Deadpikle/EasyBackup for the latest changes.</PackageReleaseNotes>
     <!-- <PackageIcon>$(AssemblyName).png</PackageIcon> -->
     <PackageProjectUrl>https://github.com/Deadpikle/EasyBackup</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <ApplicationIcon>Assets/graphics/BackupIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Other properties that can/should be set here if making app via dotnet publish? -->
