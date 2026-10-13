@@ -1,10 +1,10 @@
 #!/bin/bash
 
 VERSION="0.9.0"
-NAME="EasyBackup"
-SRC_DIR="src/EasyBackup.Avalonia" # user ran script from main folder
+NAME="YasashiiBackup"
+SRC_DIR="src/YasashiiBackup.Avalonia" # user ran script from main folder
 if [ ! -d "$SRC_DIR" ]; then
-    SRC_DIR= "../src/EasyBackup.Avalonia" # try 
+    SRC_DIR= "../src/YasashiiBackup.Avalonia" # try 
 fi
 if [ ! -d "$SRC_DIR" ]; then
     echo "Please run from "installers" dir or from main repo directory"

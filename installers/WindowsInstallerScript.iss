@@ -2,11 +2,11 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 ; Non-commercial use only
 
-#define MyAppName "EasyBackup"
+#define MyAppName "YasashiiBackup"
 #define MyAppVersion "0.9.0"
 #define MyAppPublisher "Quickity Quack Productions"
-#define MyAppExeName "EasyBackup.exe"              
-#define MyAppExeBuildName "EasyBackup.Avalonia.exe"
+#define MyAppExeName "YasashiiBackup.exe"              
+#define MyAppExeBuildName "YasashiiBackup.Avalonia.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -43,11 +43,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "..\src\EasyBackup.Avalonia\bin\Release\net10.0\win-x64\publish\{#MyAppExeBuildName}"; DestDir: "{app}"; Flags: ignoreversion; DestName: "{#MyAppExeName}"
-Source: "..\src\EasyBackup.Avalonia\bin\Release\net10.0\win-x64\publish\av_libglesv2.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\EasyBackup.Avalonia\bin\Release\net10.0\win-x64\publish\libHarfBuzzSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\EasyBackup.Avalonia\bin\Release\net10.0\win-x64\publish\libSkiaSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\src\EasyBackup.Avalonia\bin\Release\net10.0\win-x64\publish\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\src\YasashiiBackup.Avalonia\bin\Release\net10.0\win-x64\publish\{#MyAppExeBuildName}"; DestDir: "{app}"; Flags: ignoreversion; DestName: "{#MyAppExeName}"
+Source: "..\src\YasashiiBackup.Avalonia\bin\Release\net10.0\win-x64\publish\av_libglesv2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\YasashiiBackup.Avalonia\bin\Release\net10.0\win-x64\publish\libHarfBuzzSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\YasashiiBackup.Avalonia\bin\Release\net10.0\win-x64\publish\libSkiaSharp.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\src\YasashiiBackup.Avalonia\bin\Release\net10.0\win-x64\publish\Assets\*"; DestDir: "{app}\Assets"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [InstallDelete]

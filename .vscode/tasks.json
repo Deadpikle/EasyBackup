@@ -5,7 +5,7 @@
     "tasks": [
         {
             "label": "build",
-            "command": "dotnet build EasyBackupAvalonia/EasyBackupAvalonia.csproj",
+            "command": "dotnet build YasashiiBackupAvalonia/YasashiiBackupAvalonia.csproj",
             "type": "shell",
             "group": "build",
             "presentation": {

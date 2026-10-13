@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="YasashiiBackup.Views.BackupInProgress"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:YasashiiBackup.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Label Grid.Column="0" Grid.ColumnSpan="2" Content="YasashiiBackup" HorizontalAlignment="Center"  Grid.Row="0"
+               FontSize="24" FontWeight="Bold" Margin="0,0,0,0"/>
+        <DataGrid Grid.Row="1" ItemsSource="{Binding ItemProgressData}"
+                  ColumnHeaderStyle="{StaticResource NoCapsColumnHeader}"
+                  Name="PathsDataGrid"
+                  CanUserAddRows="False"
+                  AutoGenerateColumns="False" CanUserDeleteRows="False"
+                  SelectionUnit="FullRow"
+                  SelectionMode="Single"
+                  GridLinesVisibility="All" 
+                  RowHeaderWidth="0" Background="LightGray" BorderBrush="Gray" BorderThickness="1">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Path" SortDirection="{x:Null}" IsReadOnly="True" Width="*"
+                                    CanUserReorder="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Size" Binding="{Binding UserReadableBytesToCopy}" IsReadOnly="True"
+                                    CanUserReorder="False"/>
+                <DataGridTextColumn Header="Bytes Copied" Binding="{Binding UserReadableBytesCopied}" IsReadOnly="True"
+                                    CanUserReorder="False"/>
+                <DataGridTemplateColumn Header="Progress" IsReadOnly="True" CanUserSort="False">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <ProgressBar Value="{Binding Progress, Mode=OneWay}" />
+                                <TextBlock Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold">
+                                    <Run Text="{Binding ProgressString, Mode=OneWay}"/>%
+                                </TextBlock>
+                            </Grid>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridCheckBoxColumn Header="Finished?" Binding="{Binding IsFinishedCopying}" IsReadOnly="True" Width="100"
+                                    CanUserReorder="False"/>
+            </DataGrid.Columns>
+            <DataGrid.Style>
+                <Style BasedOn="{StaticResource MetroDataGrid}" TargetType="{x:Type DataGrid}">
+                    <Setter Property="AlternatingRowBackground" Value="{DynamicResource GrayBrush10}" />
+                </Style>
+            </DataGrid.Style>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow" BasedOn="{StaticResource MetroDataGridRow}">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+        <TextBlock Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2" Text="{Binding Status}" HorizontalAlignment="Center" 
+               FontSize="18" FontWeight="Bold" Margin="0,5,0,5" TextWrapping="Wrap" Foreground="{Binding StatusColor}"/>
+        <TextBlock Grid.Row="3" HorizontalAlignment="Center" FontWeight="Bold"
+               FontSize="24" Margin="0,0,0,0">
+            Backup Progress: <Run Text="{Binding CurrentProgressString, Mode=OneWay}"/>% 
+            (<Run Text="{Binding RunningLabel, Mode=OneWay}"/> for <Run Text="{Binding CurrentTimeString, Mode=OneWay}"/>)
+        </TextBlock>
+        <Button Grid.Row="4" Content="{Binding FinishButtonTitle}" Width="150" Command="{Binding CancelBackup}"
+                Margin="0,10,0,10"/>
+    </Grid>
+</UserControl>

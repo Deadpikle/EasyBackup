@@ -1,0 +1,12 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="src/YasashiiBackup.Legacy/YasashiiBackup.Legacy.csproj" />
+  <Folder Name="/YasashiiBackup.Avalonia/">
+    <Project Path="YasashiiBackup.Avalonia/YasashiiBackup.Legacy.csproj" />
+  </Folder>
+  <Project Path="src/YasashiiBackup.Avalonia/YasashiiBackup.Avalonia.csproj" />
+</Solution>

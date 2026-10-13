@@ -1,4 +1,4 @@
 {
     "cmake.configureOnOpen": false,
-    "dotnet.defaultSolution": "src/EasyBackup.slnx"
+    "dotnet.defaultSolution": "src/YasashiiBackup.slnx"
 }

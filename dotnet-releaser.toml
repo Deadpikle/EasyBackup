@@ -1,6 +1,6 @@
 # configuration file for dotnet-releaser
 [msbuild]
-project = "src/EasyBackup.Avalonia/EasyBackup.Avalonia.csproj"
+project = "src/YasashiiBackup.Avalonia/YasashiiBackup.Avalonia.csproj"
 configuration = "Release"
 [msbuild.properties]
 PublishReadyToRun = false # Disable PublishReadyToRun
@@ -10,7 +10,7 @@ SelfContained = true
 UseAppHost = true
 [github]
 user = "Deadpikle"
-repo = "EasyBackup"
+repo = "YasashiiBackup"
 branches = ["main"]
 [changelog]
 owners = "Deadpikle"

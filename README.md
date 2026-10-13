@@ -1,6 +1,6 @@
-# Easy Backup
+# YasashiiBackup
 
-Easy Backup is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. It's basically a fancy copy+paste utility.
+YasashiiBackup is a small cross-platform utility that allows you to copy files from one location to another or store them in an archive for the purposes of a backup. It's basically a fancy copy+paste utility.
 
 Features include:
 
@@ -16,7 +16,7 @@ Features include:
 * Incremental backups (only backups up latest files that have been changed; old files that are now gone are not deleted from the backup location)
 * Files for backup can be compressed with or without a password (uses 7-zip LZMA compression). By default, files are simply copied from their source directory to the backup location. (Not compatible with incremental backups)
 
-EasyBackup isn't the most fancy backup software out there, but it works well enough for simple backups. 
+YasashiiBackup isn't the most fancy backup software out there, but it works well enough for simple backups. 
 
 **USE AT YOUR OWN RISK. YOU MAY WANT TO VERIFY YOUR BACKUP MANUALLY AFTER COMPLETION. THE AUTHORS OF THIS SOFTWARE TAKE NO RESPONSBILITY IF SOMETHING FAILS.**
 
@@ -43,6 +43,6 @@ Contributions made using AI tools will not be merged.
 
 ## License
 
-The core EasyBackup code is under the MIT License. Thanks for using this software!
+The core YasashiiBackup code is under the MIT License. Thanks for using this software!
 
 Compressed files are created using [7-Zip](https://www.7-zip.org) (7za.exe). 7-Zip is licensed under the GNU LGPL license. You can find the source code for 7-Zip at [www.7-zip.org](https://www.7-zip.org).
