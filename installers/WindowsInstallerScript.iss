@@ -6,12 +6,12 @@
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "Quickity Quack Productions"
 #define MyAppExeName "YasashiiBackup.exe"              
-#define MyAppExeBuildName "YasashiiBackup.Avalonia.exe"
+#define MyAppExeBuildName "YasashiiBackup.exe"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{6020C924-3B49-4EE5-A99E-54D7714FB855}
+AppId={{2BD5A815-F091-4499-AE01-6F831B7D37B3}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
