@@ -18,7 +18,7 @@
     <IsAotCompatible>true</IsAotCompatible>
     <Copyright>Deadpikle</Copyright>
     <Authors>Deadpikle</Authors>
-    <AssemblyName>YasashiiBackupAvalonia</AssemblyName>
+    <AssemblyName>YasashiiBackup</AssemblyName>
     <RootNamespace>YasashiiBackupAvalonia</RootNamespace>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/Deadpikle/YasashiiBackup</PackageProjectUrl>
